@@ -28,6 +28,9 @@ const wallets = [
         },
         {
             everestPrivateKey_1: process.env.EVEREST_PRIVATE_KEY
+        },
+        {
+            uniSwapPrivateKey_1: process.env.UNISWAP_PRIVATE_KEY
         }
 ]
     

@@ -254,4 +254,20 @@ export default ({ logger }) => {
       logger.error(`Error Object: %o`, err);
     }
   });
+
+  // 1.8 Main Wallet Monitoring Service
+  schedule.scheduleJob({ start: startTime, rule: oneHourRule }, async function () {
+    logger.info('-- 🛵 Scheduling Showrunner - UniSwap Governance Channel [every Hour]' + new Date(Date.now()));
+    const uniSwap = Container.get(UniSwap);
+    const taskName = 'UniSwap proposal event checks and sendMessageToContract()';
+
+    try {
+      await uniSwap.sendMessageToContract(false);
+      logger.info(`🐣 Cron Task Completed -- ${taskName}`);
+    }
+    catch (err) {
+      logger.error(`❌ Cron Task Failed -- ${taskName}`);
+      logger.error(`Error Object: %o`, err);
+    }
+  });
 };

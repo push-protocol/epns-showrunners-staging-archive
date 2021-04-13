@@ -1,0 +1,257 @@
+// @name: UniSwap Channel
+// @version: 1.0
+// @recent_changes: Changed Logic to be modular
+
+import { Service, Inject } from 'typedi';
+import config from '../config';
+import channelWalletsInfo from '../config/channelWalletsInfo';
+import { EventDispatcher, EventDispatcherInterface } from '../decorators/eventDispatcher';
+import events from '../subscribers/events';
+
+import { ethers } from 'ethers';
+import epnsNotify from '../helpers/epnsNotifyHelper';
+
+// SET CONSTANTS
+const BLOCK_NUMBER = 'block_number';
+
+@Service()
+export default class uniSwapChannel {
+    constructor(
+        @Inject('logger') private logger,
+        @Inject('cached') private cached,
+        @EventDispatcher() private eventDispatcher: EventDispatcherInterface,
+    ) {
+        //initializing cache
+        this.cached.setCache(BLOCK_NUMBER, 0);
+    }
+
+    public getEPNSInteractableContract(web3network) {
+        // Get Contract
+        return epnsNotify.getInteractableContracts(
+            web3network,                                                                // Network for which the interactable contract is req
+            {                                                                       // API Keys
+                etherscanAPI: config.etherscanAPI,
+                infuraAPI: config.infuraAPI,
+                alchemyAPI: config.alchemyAPI
+            },
+            channelWalletsInfo.walletsKV['uniSwapPrivateKey_1'],                   // Private Key of the Wallet sending Notification
+            config.deployedContract,                                                // The contract address which is going to be used
+            config.deployedContractABI                                              // The contract abi which is going to be useds
+        );
+    }
+
+    public getUniSwapInteractableContract(web3network) {
+        // Get Contract
+        return epnsNotify.getInteractableContracts(
+            web3network,                                                                // Network for which the interactable contract is req
+            {                                                                       // API Keys
+                etherscanAPI: config.etherscanAPI,
+                infuraAPI: config.infuraAPI,
+                alchemyAPI: config.alchemyAPI
+            },
+            null,                                                                     // Private Key of the Wallet sending Notification
+            config.uniSwapDeployedContract,                                          // The contract address which is going to be used
+            config.uniSwapDeployedContractABI                                        // The contract abi which is going to be useds
+        );
+    }
+
+    // To form and write to smart contract
+    public async sendMessageToContract(simulate) {
+        const logger = this.logger;
+        const cache = this.cached;
+        //logger.debug('Getting btc price, forming and uploading payload and interacting with smart contract...');
+
+        return await new Promise(async (resolve, reject) => {
+
+            // Overide logic if need be
+            const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride") ? simulate.hasOwnProperty("logicOverride") : false) : false;
+
+            const epnsNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("epnsNetwork") ? simulate.logicOverride.epnsNetwork : config.web3RopstenNetwork;
+            const uniSwapNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("uniSwapNetwork") ? simulate.logicOverride.everestNetwork : config.web3RopstenNetwork;
+            // -- End Override logic
+
+            // Call Helper function to get interactableContracts
+            const epns = this.getEPNSInteractableContract(epnsNetwork);
+            const uniSwap = this.getUniSwapInteractableContract(uniSwapNetwork);
+
+            // Initialize block if that is missing
+            let cachedBlock = await cache.getCache(BLOCK_NUMBER);
+            if (cachedBlock == 0) {
+                cachedBlock = 0;
+
+                logger.debug("Initialized flag was not set, first time initalzing, saving latest block of blockchain where uniSwap contract is...");
+
+                uniSwap.provider.getBlockNumber()
+                .then((blockNumber) => {
+                    logger.debug("Current block number is... %s", blockNumber);
+                    cache.setCache(BLOCK_NUMBER, blockNumber);
+
+                    resolve("Initialized Block Number: %s", blockNumber);
+                })
+                .catch(err => {
+                    logger.error("Error occurred while getting Block Number: %o", err);
+                    reject(err);
+                })
+
+                return;
+            }
+
+            // Overide logic if need be
+            const fromBlock = logicOverride && simulate.logicOverride.hasOwnProperty("fromBlock") ? Number(simulate.logicOverride.fromBlock) : Number(cachedBlock);
+            const toBlock = logicOverride && simulate.logicOverride.hasOwnProperty("toBlock") ? Number(simulate.logicOverride.toBlock) : "latest";
+            // -- End Override logic
+
+            // Check Member Challenge Event
+            this.checkForNewProposal( uniSwapNetwork, uniSwap, fromBlock, toBlock, simulate ).then((info) => {
+                // First save the block number
+                cache.setCache(BLOCK_NUMBER, info.lastBlock);
+
+                // Check if there are events else return
+                if (info.eventCount == 0) {
+                    logger.info("No New Proposal has been proposed...");
+                    resolve("No New Proposal has been proposed...");
+                    return;
+                }
+                else{
+                    this.getProposalPayload(info.log)
+                    .then(async (payload) => {
+                        epnsNotify.uploadToIPFS(payload, logger, simulate)
+                        .then(async (ipfshash) => {
+                            logger.info("Success --> uploadToIPFS(): %o", ipfshash);
+
+                            const storageType = 1; // IPFS Storage Type
+                            const txConfirmWait = 0; // Wait for 0 tx confirmation
+
+                            // Send Notification
+                            await epnsNotify.sendNotification(
+                                epns.signingContract,                                           // Contract connected to signing wallet
+                                ethers.utils.computeAddress(channelWalletsInfo.walletsKV['uniSwapPrivateKey_1']),        // Recipient to which the payload should be sent
+                                parseInt(payload.data.type),                                    // Notification Type
+                                storageType,                                                    // Notificattion Storage Type
+                                ipfshash,                                                       // Notification Storage Pointer
+                                txConfirmWait,                                                  // Should wait for transaction confirmation
+                                logger,                                                         // Logger instance (or console.log) to pass
+                                simulate                                                        // Passing true will not allow sending actual notification
+                            ).then ((tx) => {
+                                logger.info("Transaction mined: %o | Notification Sent", tx.hash);
+                                logger.info("🙌 UNISWAP Ticker Channel Logic Completed!");
+                                resolve(tx);
+                            })
+                            .catch (err => {
+                                logger.error("🔥Error --> sendNotification(): %o", err);
+                                reject(err);
+                            });
+                        })
+                        .catch (err => {
+                            logger.error("🔥Error --> Unable to obtain ipfshash, error: %o", err);
+                            reject(err);
+                        });
+                    })
+                    .catch(err => {
+                        logger.error(err);
+                        reject("🔥Error --> Unable to obtain payload, error: %o", err);
+                    });
+                }
+            })
+        });
+    }
+
+    public async checkForNewProposal( uniSwapNetwork, uniSwap, fromBlock, toBlock, simulate ) {
+        const logger = this.logger;
+        const cache = this.cached;
+        logger.debug('Getting recent proposal... ');
+
+        // Check if everest is initialized, if not initialize it
+        if (!uniSwap) {
+            // check and recreate provider mostly for routes
+            logger.info("Mostly coming from routes...");
+            uniSwap = this.getUniSwapInteractableContract(uniSwapNetwork);
+            logger.info("Rebuilt uniSwap --> %o", uniSwap);
+        }
+    
+        if (!toBlock) {
+            logger.info("Mostly coming from routes... resetting toBlock to latest");
+            toBlock = "latest";
+        }
+
+        return await new Promise((resolve, reject) => {
+            const filter = uniSwap.contract.filters.ProposalCreated();
+            logger.debug("Looking for ProposalCreated() from %d to %s", fromBlock, toBlock);
+
+            uniSwap.contract.queryFilter(filter, fromBlock, toBlock)
+            .then(async (eventLog) => {
+                logger.debug("ProposalCreated() --> %o", eventLog);
+
+                // Need to fetch latest block
+                try {
+                    toBlock = await uniSwap.provider.getBlockNumber();
+                    logger.debug("Latest block updated to --> %s", toBlock);
+                }
+                catch (err) {
+                    logger.error("!Errored out while fetching Block Number --> %o", err);
+                }
+
+                const info = {
+                    change: true,
+                    log: eventLog,
+                    lastBlock: toBlock,
+                    eventCount: eventLog.length
+                }
+                resolve(info);
+
+                logger.debug('Events retreived for ProposalCreated() call of uniSwap Governance Contract --> %d Events', eventLog.length);
+            })
+            .catch (err => {
+                logger.error("Unable to obtain query filter, error: %o", err)
+                resolve({
+                    success: false,
+                    err: "Unable to obtain query filter, error: %o" + err
+                });
+            });
+        })
+    }
+
+    public async getProposalPayload(eventLog) {
+        const logger = this.logger;
+        logger.debug('Getting payload... ');
+
+        return await new Promise(async (resolve, reject) => {
+
+            let message = [];
+            let payloadMsg = [];
+            if(eventLog.length > 1){
+                for(let i = 0; i < eventLog.length; i++) {
+                    let msg = "A proposal has been proposed with description :" + eventLog[i].args.description 
+                    let pMsg = "dear user a proposal has been proposed with description :" + eventLog[i].args.description
+                    message.push(msg);
+                    payloadMsg.push(pMsg);
+                }
+            }
+            else{
+                let msg = "A proposal has been proposed with description :" + eventLog[0].args.description 
+                let pMsg = "dear user a proposal has been proposed with description :" + eventLog[0].args.description
+                message.push(msg);
+                payloadMsg.push(pMsg);
+            }
+        
+            const title = 'A new proposal has been proposed';
+
+            const payloadTitle = `A new proposal has been proposed`;
+
+            const payload = await epnsNotify.preparePayload(
+                null,                                                               // Recipient Address | Useful for encryption
+                1,                                                                  // Type of Notification
+                title,                                                              // Title of Notification
+                message.join('\n'),                                                            // Message of Notification
+                payloadTitle,                                                       // Internal Title
+                payloadMsg.join('\n'),                                                         // Internal Message
+                'https://app.uniswap.org/#/vote',                                                               // Internal Call to Action Link
+                null,                                                               // internal img of youtube link
+            );
+            
+            logger.debug('Payload Prepared: %o', payload);
+
+            resolve(payload);
+        })
+    }
+}
