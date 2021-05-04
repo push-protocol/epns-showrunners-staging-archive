@@ -13,6 +13,7 @@ import epnsNotify from '../helpers/epnsNotifyHelper';
 
 // SET CONSTANTS
 const BLOCK_NUMBER = 'block_number';
+const NETWORK_TO_MONITOR = config.web3RopstenNetwork;
 
 @Service()
 export default class uniSwapChannel {
@@ -62,17 +63,18 @@ export default class uniSwapChannel {
         //logger.debug('Getting btc price, forming and uploading payload and interacting with smart contract...');
 
         return await new Promise(async (resolve, reject) => {
+            // let networkToMonitor = NETWORK_TO_MONITOR;
 
             // Overide logic if need be
             const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride") ? simulate.hasOwnProperty("logicOverride") : false) : false;
-
-            const epnsNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("epnsNetwork") ? simulate.logicOverride.epnsNetwork : config.web3RopstenNetwork;
-            const uniSwapNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("uniSwapNetwork") ? simulate.logicOverride.everestNetwork : config.web3RopstenNetwork;
+            const epnsNetwork = logicOverride && simulate.logicOverride.mode && simulate.logicOverride.hasOwnProperty("epnsNetwork") ? simulate.logicOverride.epnsNetwork : config.web3RopstenNetwork;
+            // const uniSwapNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("uniswapNetwork") ? simulate.logicOverride.uniswapNetwork : config.web3RopstenNetwork;
+            const uniswapNetwork = logicOverride && simulate.logicOverride.mode && simulate.logicOverride.hasOwnProperty("uniswapNetwork") ? simulate.logicOverride.uniswapNetwork : NETWORK_TO_MONITOR;
             // -- End Override logic
 
             // Call Helper function to get interactableContracts
             const epns = this.getEPNSInteractableContract(epnsNetwork);
-            const uniSwap = this.getUniSwapInteractableContract(uniSwapNetwork);
+            const uniSwap = this.getUniSwapInteractableContract(uniswapNetwork);
 
             // Initialize block if that is missing
             let cachedBlock = await cache.getCache(BLOCK_NUMBER);
@@ -83,7 +85,7 @@ export default class uniSwapChannel {
 
                 uniSwap.provider.getBlockNumber()
                 .then((blockNumber) => {
-                    logger.debug("Current block number is... %s", blockNumber);
+                    logger.debug("Current block number is %s", blockNumber);
                     cache.setCache(BLOCK_NUMBER, blockNumber);
 
                     resolve("Initialized Block Number: %s", blockNumber);
@@ -97,12 +99,12 @@ export default class uniSwapChannel {
             }
 
             // Overide logic if need be
-            const fromBlock = logicOverride && simulate.logicOverride.hasOwnProperty("fromBlock") ? Number(simulate.logicOverride.fromBlock) : Number(cachedBlock);
-            const toBlock = logicOverride && simulate.logicOverride.hasOwnProperty("toBlock") ? Number(simulate.logicOverride.toBlock) : "latest";
+            const fromBlock = logicOverride && simulate.logicOverride.mode && simulate.logicOverride.hasOwnProperty("fromBlock") ? Number(simulate.logicOverride.fromBlock) : Number(cachedBlock);
+            const toBlock = logicOverride && simulate.logicOverride.mode && simulate.logicOverride.hasOwnProperty("toBlock") ? Number(simulate.logicOverride.toBlock) : "latest";
             // -- End Override logic
 
             // Check Member Challenge Event
-            this.checkForNewProposal( uniSwapNetwork, uniSwap, fromBlock, toBlock, simulate ).then((info) => {
+            this.checkForNewProposal( uniswapNetwork, uniSwap, fromBlock, toBlock, simulate ).then((info) => {
                 // First save the block number
                 cache.setCache(BLOCK_NUMBER, info.lastBlock);
 
@@ -113,7 +115,7 @@ export default class uniSwapChannel {
                     return;
                 }
                 else{
-                    this.getProposalPayload(info.log)
+                    this.getProposalPayload(info.log, simulate)
                     .then(async (payload) => {
                         epnsNotify.uploadToIPFS(payload, logger, simulate)
                         .then(async (ipfshash) => {
@@ -134,7 +136,7 @@ export default class uniSwapChannel {
                                 simulate                                                        // Passing true will not allow sending actual notification
                             ).then ((tx) => {
                                 logger.info("Transaction mined: %o | Notification Sent", tx.hash);
-                                logger.info("🙌 UNISWAP Ticker Channel Logic Completed!");
+                                logger.info("🙌 UNISWAP Channel Logic Completed!");
                                 resolve(tx);
                             })
                             .catch (err => {
@@ -156,23 +158,39 @@ export default class uniSwapChannel {
         });
     }
 
-    public async checkForNewProposal( uniSwapNetwork, uniSwap, fromBlock, toBlock, simulate ) {
+    public async checkForNewProposal( uniswapNetwork, uniSwap, fromBlock, toBlock, simulate ) {
         const logger = this.logger;
         const cache = this.cached;
         logger.debug('Getting recent proposal... ');
 
-        // Check if everest is initialized, if not initialize it
+        // Overide logic if need be
+        const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride") ? simulate.hasOwnProperty("logicOverride") : false) : false;
+        const mode = logicOverride && simulate.logicOverride.mode ? simulate.logicOverride.mode : false;
+        const simulateUniswapNetwork = logicOverride && mode && simulate.logicOverride.hasOwnProperty("uniswapNetwork") ? simulate.logicOverride.uniswapNetwork : false;
+        const simulateFromBlock = logicOverride && mode && simulate.logicOverride.hasOwnProperty("fromBlock") ? simulate.logicOverride.fromBlock : false;
+        const simulateToBlock = logicOverride && mode && simulate.logicOverride.hasOwnProperty("toBlock") ? simulate.logicOverride.toBlock : false;
+        if(!uniswapNetwork && simulateUniswapNetwork){
+            uniswapNetwork = simulateUniswapNetwork
+        }
+        if (!fromBlock) {
+            logger.info("Simulated fromBlock..");
+            fromBlock = simulateFromBlock;
+        }
+        if (!toBlock) {
+            logger.info("Simulated toBlock..");
+            toBlock = simulateToBlock;
+        }
+        // -- End Override logic
+
+        // Check if uniswap is initialized, if not initialize it
         if (!uniSwap) {
             // check and recreate provider mostly for routes
             logger.info("Mostly coming from routes...");
-            uniSwap = this.getUniSwapInteractableContract(uniSwapNetwork);
+            uniSwap = this.getUniSwapInteractableContract(uniswapNetwork);
             logger.info("Rebuilt uniSwap --> %o", uniSwap);
         }
     
-        if (!toBlock) {
-            logger.info("Mostly coming from routes... resetting toBlock to latest");
-            toBlock = "latest";
-        }
+        
 
         return await new Promise((resolve, reject) => {
             const filter = uniSwap.contract.filters.ProposalCreated();
@@ -211,7 +229,7 @@ export default class uniSwapChannel {
         })
     }
 
-    public async getProposalPayload(eventLog) {
+    public async getProposalPayload(eventLog, simulate) {
         const logger = this.logger;
         logger.debug('Getting payload... ');
 
@@ -219,25 +237,44 @@ export default class uniSwapChannel {
 
             let message = [];
             let payloadMsg = [];
-            if(eventLog.length > 1){
-                for(let i = 0; i < eventLog.length; i++) {
-                    let msg = "A proposal has been proposed with description :" + eventLog[i].args.description 
-                    let pMsg = "dear user a proposal has been proposed with description :" + eventLog[i].args.description
+
+            // Overide logic if need be
+            const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride") ? simulate.hasOwnProperty("logicOverride") : false) : false;
+            const mode = logicOverride && simulate.logicOverride.mode ? simulate.logicOverride.mode : false;
+            const simulateMessage = logicOverride && mode && simulate.logicOverride.hasOwnProperty("message") ? simulate.logicOverride.message : false;
+            const simulatePayloadMessage = logicOverride && mode && simulate.logicOverride.hasOwnProperty("payloadMessage") ? simulate.logicOverride.payloadMessage : false;
+            if(!eventLog){
+                message.push(simulateMessage);
+                payloadMsg.push(simulatePayloadMessage);
+            }
+            // -- End Override logic
+
+            if(eventLog){
+                if(eventLog.length > 1){
+                
+                    for(let i = 0; i < eventLog.length; i++) {
+                        let msg = "A proposal has been proposed with description :" + eventLog[i].args.description 
+                        let pMsg = "Dear user a proposal has been proposed with description :" + eventLog[i].args.description
+                        message.push(msg);
+                        payloadMsg.push(pMsg);
+                    }
+                }
+                else{
+                    let msg = "A proposal has been proposed with description :" + eventLog[0].args.description 
+                    let pMsg = "dear user a proposal has been proposed with description :" + eventLog[0].args.description
                     message.push(msg);
                     payloadMsg.push(pMsg);
                 }
-            }
-            else{
-                let msg = "A proposal has been proposed with description :" + eventLog[0].args.description 
-                let pMsg = "dear user a proposal has been proposed with description :" + eventLog[0].args.description
-                message.push(msg);
-                payloadMsg.push(pMsg);
+
             }
         
             const title = 'A new proposal has been proposed';
 
             const payloadTitle = `A new proposal has been proposed`;
 
+            console.log("🚀 ~ file: uniSwapChannel.ts ~ line 254 ~ uniSwapChannel ~ returnawaitnewPromise ~ payloadMsg", payloadMsg)
+                console.log("🚀 ~ file: uniSwapChannel.ts ~ line 254 ~ uniSwapChannel ~ returnawaitnewPromise ~ message", message)
+                
             const payload = await epnsNotify.preparePayload(
                 null,                                                               // Recipient Address | Useful for encryption
                 1,                                                                  // Type of Notification

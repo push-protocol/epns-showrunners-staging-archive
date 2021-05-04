@@ -20,10 +20,10 @@ export default (app: Router) => {
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners/everest ticker endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/uniswap/send_message ticker endpoint with body: %o', req.body )
       try {
-        const everest = Container.get(UniSwap);
-        const { success,  data } = await everest.sendMessageToContract(req.body.simulate);
+        const uniswap = Container.get(UniSwap);
+        const { success,  data } = await uniswap.sendMessageToContract(req.body.simulate);
 
         return res.status(201).json({ success,  data });
       } catch (e) {
@@ -37,20 +37,41 @@ export default (app: Router) => {
     '/check_for_new_proposal',
     celebrate({
       body: Joi.object({
-        uniSwapNetwork: Joi.string().required(),
-        fromBlock: Joi.number().required(),
         simulate: [Joi.bool(), Joi.object()],
       }),
     }),
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners/everest ticker endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/uniswap/check_for_new_proposal ticker endpoint with body: %o', req.body )
       try {
-        const everest = Container.get(UniSwap);
-        const response = await everest.checkForNewProposal(req.body.uniSwapNetwork, null, req.body.fromBlock, null, req.body.simulate);
+        const uniswap = Container.get(UniSwap);
+        const response = await uniswap.checkForNewProposal(null, null, null, null, req.body.simulate);
 
         return res.status(201).json(response);
+      } catch (e) {
+        Logger.error('🔥 error: %o', e);
+        return next(e);
+      }
+    },
+  );
+
+  route.post(
+    '/get_proposal_payload',
+    celebrate({
+      body: Joi.object({
+        simulate: [Joi.bool(), Joi.object()],
+      }),
+    }),
+    middlewares.onlyLocalhost,
+    async (req: Request, res: Response, next: NextFunction) => {
+      const Logger = Container.get('logger');
+      Logger.debug('Calling /showrunners/uniswap/get_proposal_payload ticker endpoint with body: %o', req.body )
+      try {
+        const uniswap = Container.get(UniSwap);
+        const { success,  data } = await uniswap.getProposalPayload(null, req.body.simulate);
+
+        return res.status(201).json({ success,  data });
       } catch (e) {
         Logger.error('🔥 error: %o', e);
         return next(e);
