@@ -42,6 +42,13 @@ export default class uniSwapChannel {
     }
 
     public getUniSwapInteractableContract(web3network) {
+        let uniswapDeployedContract
+        if(web3network == config.web3RopstenNetwork){
+        uniswapDeployedContract = config.uniswapDeployedContractRopsten
+        }
+        else if(web3network == config.web3MainnetNetwork){
+        uniswapDeployedContract = config.uniswapDeployedContractMainnet
+    }
         // Get Contract
         return epnsNotify.getInteractableContracts(
             web3network,                                                                // Network for which the interactable contract is req
@@ -51,8 +58,8 @@ export default class uniSwapChannel {
                 alchemyAPI: config.alchemyAPI
             },
             null,                                                                     // Private Key of the Wallet sending Notification
-            config.uniSwapDeployedContract,                                          // The contract address which is going to be used
-            config.uniSwapDeployedContractABI                                        // The contract abi which is going to be useds
+            uniswapDeployedContract,                                          // The contract address which is going to be used
+            config.uniswapDeployedContractABI                                        // The contract abi which is going to be useds
         );
     }
 
@@ -63,12 +70,10 @@ export default class uniSwapChannel {
         //logger.debug('Getting btc price, forming and uploading payload and interacting with smart contract...');
 
         return await new Promise(async (resolve, reject) => {
-            // let networkToMonitor = NETWORK_TO_MONITOR;
 
             // Overide logic if need be
             const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride") ? simulate.hasOwnProperty("logicOverride") : false) : false;
             const epnsNetwork = logicOverride && simulate.logicOverride.mode && simulate.logicOverride.hasOwnProperty("epnsNetwork") ? simulate.logicOverride.epnsNetwork : config.web3RopstenNetwork;
-            // const uniSwapNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("uniswapNetwork") ? simulate.logicOverride.uniswapNetwork : config.web3RopstenNetwork;
             const uniswapNetwork = logicOverride && simulate.logicOverride.mode && simulate.logicOverride.hasOwnProperty("uniswapNetwork") ? simulate.logicOverride.uniswapNetwork : NETWORK_TO_MONITOR;
             // -- End Override logic
 
@@ -172,12 +177,12 @@ export default class uniSwapChannel {
         if(!uniswapNetwork && simulateUniswapNetwork){
             uniswapNetwork = simulateUniswapNetwork
         }
-        if (!fromBlock) {
-            logger.info("Simulated fromBlock..");
+        if (!fromBlock && simulateFromBlock) {
+            logger.info("Simulated fromBlock : %o", simulateFromBlock);
             fromBlock = simulateFromBlock;
         }
-        if (!toBlock) {
-            logger.info("Simulated toBlock..");
+        if (!toBlock && simulateToBlock) {
+            logger.info("Simulated toBlock: %o", simulateToBlock);
             toBlock = simulateToBlock;
         }
         // -- End Override logic
@@ -187,7 +192,6 @@ export default class uniSwapChannel {
             // check and recreate provider mostly for routes
             logger.info("Mostly coming from routes...");
             uniSwap = this.getUniSwapInteractableContract(uniswapNetwork);
-            logger.info("Rebuilt uniSwap --> %o", uniSwap);
         }
     
         
@@ -198,7 +202,6 @@ export default class uniSwapChannel {
 
             uniSwap.contract.queryFilter(filter, fromBlock, toBlock)
             .then(async (eventLog) => {
-                logger.debug("ProposalCreated() --> %o", eventLog);
 
                 // Need to fetch latest block
                 try {
@@ -243,7 +246,8 @@ export default class uniSwapChannel {
             const mode = logicOverride && simulate.logicOverride.mode ? simulate.logicOverride.mode : false;
             const simulateMessage = logicOverride && mode && simulate.logicOverride.hasOwnProperty("message") ? simulate.logicOverride.message : false;
             const simulatePayloadMessage = logicOverride && mode && simulate.logicOverride.hasOwnProperty("payloadMessage") ? simulate.logicOverride.payloadMessage : false;
-            if(!eventLog){
+            
+            if(!eventLog && simulateMessage && simulatePayloadMessage){
                 message.push(simulateMessage);
                 payloadMsg.push(simulatePayloadMessage);
             }
@@ -271,9 +275,6 @@ export default class uniSwapChannel {
             const title = 'A new proposal has been proposed';
 
             const payloadTitle = `A new proposal has been proposed`;
-
-            console.log("🚀 ~ file: uniSwapChannel.ts ~ line 254 ~ uniSwapChannel ~ returnawaitnewPromise ~ payloadMsg", payloadMsg)
-                console.log("🚀 ~ file: uniSwapChannel.ts ~ line 254 ~ uniSwapChannel ~ returnawaitnewPromise ~ message", message)
                 
             const payload = await epnsNotify.preparePayload(
                 null,                                                               // Recipient Address | Useful for encryption

@@ -100,8 +100,9 @@ export default {
   /**
    * UNISWAP Related
    */
-  uniSwapDeployedContract: process.env.UNI_GOVERNANCE_DEPLOYED_CONTRACT,
-  uniSwapDeployedContractABI: require('./uni_contract.json'),
+  uniswapDeployedContractRopsten: process.env.UNI_GOVERNANCE_DEPLOYED_CONTRACT_ROPSTEN,
+  uniswapDeployedContractMainnet: process.env.UNI_GOVERNANCE_DEPLOYED_CONTRACT_MAINNET,
+  uniswapDeployedContractABI: require('./uni_contract.json'),
   
     /**
    * COMPOUND Related

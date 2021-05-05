@@ -27,6 +27,7 @@ import Everest from '../showrunners/everestChannel';
 import WalletTrackerChannel from '../showrunners/walletTrackerChannel';
 import WalletMonitoring from '../services/walletMonitoring';
 import HelloWorld from '../showrunners/helloWorldChannel';
+import Uniswap from '../showrunners/uniSwapChannel';
 
 export default ({ logger }) => {
   // 1. SHOWRUNNERS SERVICE
@@ -202,6 +203,22 @@ export default ({ logger }) => {
     }
   });
 
+  // 1.9 UNISWAP CHANNEL
+  schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
+    logger.info('-- 🛵 Scheduling Showrunner - UniSwap Governance Channel [on 24 Hours]');
+    const uniswap = Container.get(Uniswap);
+    const taskName = 'UniSwap proposal event checks and sendMessageToContract()';
+
+    try {
+      await uniswap.sendMessageToContract(false);
+      logger.info(`🐣 Cron Task Completed -- ${taskName}`);
+    }
+    catch (err) {
+      logger.error(`❌ Cron Task Failed -- ${taskName}`);
+      logger.error(`Error Object: %o`, err);
+    }
+  });
+
   // 2. EVENT DISPATHER SERVICE
   const eventDispatcher = Container.get(EventDispatcherInterface);
   eventDispatcher.on("newBlockMined", async function (data) {
@@ -247,22 +264,6 @@ export default ({ logger }) => {
 
     try {
       await walletMonitoring.processMainWallet(false);
-      logger.info(`🐣 Cron Task Completed -- ${taskName}`);
-    }
-    catch (err) {
-      logger.error(`❌ Cron Task Failed -- ${taskName}`);
-      logger.error(`Error Object: %o`, err);
-    }
-  });
-
-  // 1.8 Main Wallet Monitoring Service
-  schedule.scheduleJob({ start: startTime, rule: oneHourRule }, async function () {
-    logger.info('-- 🛵 Scheduling Showrunner - UniSwap Governance Channel [every Hour]' + new Date(Date.now()));
-    const uniSwap = Container.get(UniSwap);
-    const taskName = 'UniSwap proposal event checks and sendMessageToContract()';
-
-    try {
-      await uniSwap.sendMessageToContract(false);
       logger.info(`🐣 Cron Task Completed -- ${taskName}`);
     }
     catch (err) {
