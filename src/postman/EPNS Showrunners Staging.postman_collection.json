@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "8c2a2aaa-db31-4979-8379-5c7f19d0fa9e",
+		"_postman_id": "4114cb48-0a6b-43aa-80b8-ea53ec5224db",
 		"name": "EPNS Showrunners Staging",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1188,13 +1188,13 @@
 			"name": "UniSwap",
 			"item": [
 				{
-					"name": "uniswap/send_message",
+					"name": "/send_message",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"simulate\": true\n}",
+							"raw": "{\n\t\"simulate\": {\n\t\t\"payloadMode\": \"Real\",\n\t\t\"txMode\": \"Real\",\n\t\t\"logicOverride\": {\n            \"mode\": false,\n\t\t\t\"uniswapNetwork\": \"ropsten\",\n            \"fromBlock\": 0,\n            \"toBlock\": \"latest\"\n\t\t},\n\t\t\"txOverride\": {\n            \"mode\": false,\n\t\t\t\"recipientAddr\": \"0x276B820E8382f17ECB9FA77B0952ca4E67287601\",\n\t\t\t\"notificationType\": 3\n\t\t}\n\t}\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1218,13 +1218,13 @@
 					"response": []
 				},
 				{
-					"name": "check_for_new_proposal",
+					"name": "/check_for_new_proposal",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"uniSwapNetwork\": \"ropsten\",\n    \"fromBlock\": 0,\n    \"simulate\": \"true\"\n}",
+							"raw": "{\n\t\"simulate\": {\n\t\t\"payloadMode\": \"Simulated\",\n\t\t\"txMode\": \"Simulated\",\n\t\t\"logicOverride\": {\n            \"mode\": true,\n\t\t\t\"uniswapNetwork\": \"ropsten\",\n            \"fromBlock\": 0,\n            \"toBlock\": \"latest\"\n\t\t},\n\t\t\"txOverride\": {\n            \"mode\": false,\n\t\t\t\"recipientAddr\": \"0x276B820E8382f17ECB9FA77B0952ca4E67287601\",\n\t\t\t\"notificationType\": 3\n\t\t}\n\t}\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1242,6 +1242,36 @@
 								"showrunners",
 								"uniswap",
 								"check_for_new_proposal"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/get_proposal_payload",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"simulate\": {\n\t\t\"payloadMode\": \"Simulated\",\n\t\t\"txMode\": \"Simulated\",\n\t\t\"logicOverride\": {\n            \"mode\": true,\n\t\t\t\"message\": \"New Proposal\",\n            \"payloadMessage\": \"New proposal is made\"\n\t\t}\n\t}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:5432/apis/showrunners/uniswap/get_proposal_payload",
+							"host": [
+								"localhost"
+							],
+							"port": "5432",
+							"path": [
+								"apis",
+								"showrunners",
+								"uniswap",
+								"get_proposal_payload"
 							]
 						}
 					},
