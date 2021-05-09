@@ -257,24 +257,25 @@ export default class uniSwapChannel {
                 if(eventLog.length > 1){
                 
                     for(let i = 0; i < eventLog.length; i++) {
-                        let msg = "A proposal has been proposed with description :" + eventLog[i].args.description 
-                        let pMsg = "Dear user a proposal has been proposed with description :" + eventLog[i].args.description
+                        let msg = "A proposal has been made with description :" + eventLog[i].args.description 
+                        let pMsg = "Dear user a proposal has been made with description :" + eventLog[i].args.description
                         message.push(msg);
                         payloadMsg.push(pMsg);
                     }
                 }
                 else{
-                    let msg = "A proposal has been proposed with description :" + eventLog[0].args.description 
-                    let pMsg = "dear user a proposal has been proposed with description :" + eventLog[0].args.description
+                    let msg = "A proposal has been made with description :" + eventLog[0].args.description 
+                    let pMsg = "Dear user a proposal has been made with description :" + eventLog[0].args.description
                     message.push(msg);
                     payloadMsg.push(pMsg);
                 }
 
             }
+            payloadMsg.push(`[timestamp: ${Math.floor(new Date() / 1000)}]`);
         
-            const title = 'A new proposal has been proposed';
+            const title = 'A new proposal is available';
 
-            const payloadTitle = `A new proposal has been proposed`;
+            const payloadTitle = `A new proposal is available`;
                 
             const payload = await epnsNotify.preparePayload(
                 null,                                                               // Recipient Address | Useful for encryption
