@@ -70,13 +70,11 @@ export default class Debug {
 
         // Call Helper function to get interactableContracts
         const epns = this.getEPNSInteractableContract(config.web3RopstenNetwork);
-        // const ens = this.getENSInteractableContract(NETWORK_TO_MONITOR);
 
         const filter = epns.contract.filters.SendNotification(channel, null, null)
         epns.contract.queryFilter(filter, 0, 'latest')
         .then(eventLog => {
         eventLog.forEach((log) => {
-            // console.log("🚀 ~ file: debug.ts ~ line 80 ~ Debug ~ eventLog.forEach ~ log", log)
             // Get user address
             const channelAddress = log.args.channel;
             const recipientAddress = log.args.recipient;
@@ -85,20 +83,6 @@ export default class Debug {
             const getBlock = log.getBlock();
             getBlock
             .then(block => {
-              // let unix_timestamp = block.timestamp
-              // // Create a new JavaScript Date object based on the timestamp
-              // // multiplied by 1000 so that the argument is in milliseconds, not seconds.
-              // var date = new Date(unix_timestamp * 1000);
-              // // Hours part from the timestamp
-              // var hours = date.getHours();
-              // // Minutes part from the timestamp
-              // var minutes = "0" + date.getMinutes();
-              // // Seconds part from the timestamp
-              // var seconds = "0" + date.getSeconds();
-
-              // // Will display time in 10:30:23 format
-              // var formattedTime = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
-
 
               var a = new Date(block.timestamp * 1000);
               var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -111,40 +95,12 @@ export default class Debug {
               var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
 
               logger.info('Transaction Hash: %o | Time: %o', log.transactionHash, time);
-              // logger.info("TransactionReceipt: %o", res.timestamp)
               logger.info("channelAddress: %o | recipientAddress: %o | timestamp: %o", channelAddress, recipientAddress, block.timestamp);
 
             })
-            // logger.info("TransactionReceipt: %o", getTransactionReceipt);
            
           });
         })
-
-
-    //   epns.contract.channels(ensChannelAddress)
-    //     .then(async (channelInfo) => {
-
-    //       // Get Filter
-    //       const filter = epns.contract.filters.Subscribe(ensChannelAddress)
-    //       const startBlock = channelInfo.channelStartBlock.toNumber();
-
-    //       // Function to get all the addresses in the channel
-    //       epns.contract.queryFilter(filter, startBlock)
-    //         .then(eventLog => {
-    //           // Log the event
-    //           logger.debug("Subscribed Address Found: %o", eventLog.length);
-
-    //           resolve("Processing Debug Helper logic completed!");
-    //         })
-    //         .catch(err => {
-    //           logger.error("Error occurred while looking at event log: %o", err);
-    //           reject(err);
-    //         });
-    //     })
-    //     .catch(err => {
-    //       logger.error("Error retreiving channel start block: %o", err);
-    //       reject(err);
-    //     });
 
     });
   }
