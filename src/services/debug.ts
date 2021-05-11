@@ -63,44 +63,74 @@ export default class Debug {
     const logger = this.logger;
     logger.debug('Tracking SendNotification events... ');
 
-    return await new Promise((resolve, reject) => {
+    return await new Promise(async(resolve, reject) => {
 
-        // Preparing to get all subscribers of the channel
-        const channel = ethers.utils.computeAddress(channelWalletsInfo.walletsKV['everestPrivateKey_1']);
-
-        // Call Helper function to get interactableContracts
+      // Call Helper function to get interactableContracts
         const epns = this.getEPNSInteractableContract(config.web3RopstenNetwork);
 
-        const filter = epns.contract.filters.SendNotification(channel, null, null)
-        epns.contract.queryFilter(filter, 0, 'latest')
-        .then(eventLog => {
-        eventLog.forEach((log) => {
-            // Get user address
-            const channelAddress = log.args.channel;
-            const recipientAddress = log.args.recipient;
-            const identity = log.args.identity;
-            const getTransactionReceipt = log.getTransactionReceipt();
-            const getBlock = log.getBlock();
-            getBlock
-            .then(block => {
-
-              var a = new Date(block.timestamp * 1000);
-              var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-              var year = a.getFullYear();
-              var month = months[a.getMonth()];
-              var date = a.getDate();
-              var hour = a.getHours();
-              var min = a.getMinutes();
-              var sec = a.getSeconds();
-              var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
-
-              logger.info('Transaction Hash: %o | Time: %o', log.transactionHash, time);
-              logger.info("channelAddress: %o | recipientAddress: %o | timestamp: %o", channelAddress, recipientAddress, block.timestamp);
-
-            })
-           
-          });
+        // Preparing to get all subscribers of the channel
+        const channel = await ethers.utils.computeAddress(channelWalletsInfo.walletsKV['everestPrivateKey_1']);
+        const startBlock = await epns.contract.channels(channel)
+        .then(channelInfo =>{
+          const start = channelInfo.channelStartBlock.toNumber();
+          logger.info('start: %o', start)
+          resolve(start)
         })
+        .catch(err => {
+          logger.error("🔥 Error : startBlock")
+          reject(err)
+        })
+
+        logger.info('startBlock: %o', startBlock)
+
+        const filter = epns.contract.filters.SendNotification(channel, null, null)
+
+
+        // const bal = await epns.provider.getBalance(channel)
+        // logger.info('bal: %o ', bal);
+        // const balance = ethers.utils.formatEther(bal)
+        // logger.info('balance: %o ', balance);
+
+        // epns.contract.queryFilter(filter, 0, 'latest')
+        // .then(eventLog => {
+        // eventLog.forEach((log) => {
+        //   if(log.blockNumber){
+        //     // Get user address
+        //     const channelAddress = log.args.channel;
+        //     const recipientAddress = log.args.recipient;
+        //     const identity = log.args.identity;
+        //     // const getTransactionReceipt = log.getTransactionReceipt();
+        //     const getBlock = log.getBlock();
+        //     getBlock
+        //     .then(block => {
+
+        //       var a = new Date(block.timestamp * 1000);
+        //       var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        //       var year = a.getFullYear();
+        //       var month = months[a.getMonth()];
+        //       var date = a.getDate();
+        //       var hour = a.getHours();
+        //       var min = a.getMinutes();
+        //       var sec = a.getSeconds();
+        //       var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+
+        //       logger.info('Transaction Hash: %o | Time: %o', log.transactionHash, time);
+        //       logger.info("channelAddress: %o | recipientAddress: %o | timestamp: %o", channelAddress, recipientAddress, block.timestamp);
+
+        //     })
+        //     .catch(err => {
+        //       logger.error("🔥 Error : getBlock()");
+        //       reject(err);
+        //     })
+        //   }
+        //   else{
+        //     logger.error('Error getting blockNumber')
+        //     reject('Error!')
+        //   }
+            
+
+        //   });
+        // })
 
     });
   }
