@@ -10,6 +10,7 @@ import wallet_monitoring from './routes/showrunners_wallet_monitoring';
 import everest from './routes/showrunners_everest';
 import socketWeb3 from './routes/sockets/socketWeb3';
 import helloWorld from './routes/showrunners_helloWorld';
+import debug from './routes/services_debug';
 
 import mailing from './routes/mailing';
 
@@ -32,8 +33,12 @@ export default () => {
 	socketWeb3(app);
 
 	// -- HELPERS
+
 	// For mailing route
 	mailing(app);
+	
+	//For debugging routes
+	debug(app);
 
 	// Finally return app
 	return app;
