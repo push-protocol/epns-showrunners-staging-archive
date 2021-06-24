@@ -30,7 +30,7 @@ const wallets = [
             everestPrivateKey_1: process.env.EVEREST_PRIVATE_KEY
         },
         {
-            helloWorldPrivateKey_1: process.env.HELLO_WORLD_PRIVATE_KEY
+            uniSwapPrivateKey_1: process.env.UNISWAP_PRIVATE_KEY
         },
         {
             aavePrivateKey_1: process.env.AAVE_PRIVATE_KEY            
