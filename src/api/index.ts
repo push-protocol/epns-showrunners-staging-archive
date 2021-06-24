@@ -26,6 +26,7 @@ import truefi_sdk from './routes/showrunners_sdk/showrunners_truefi';
 import alphahomora_sdk from './routes/showrunners_sdk/showrunners_alphaHomora';
 import helloWorld_sdk from './routes/showrunners_sdk/showrunners_helloWorld';
 import aave_sdk from './routes/showrunners_sdk/showrunners_aave';
+import uniswap_sdk from './routes/showrunners_sdk/showrunners_uniSwap';
 
 import mailing from './routes/mailing';
 
@@ -34,19 +35,10 @@ export default () => {
 	const app = Router();
 
 	// -- SHOWRUNNERS ROUTES
-	//btcTicker(app);
-	//ethTicker(app);
 	ensDomain(app);
 	compoundTicker(app);
-	//gasPrice(app);
-	//wallet_tracker(app);
 	everest(app);
-	//truefi(app);
-	wallet_monitoring(app);
-	helloWorld(app);
-	uniSwap(app);
-	//alphahomora(app);
-	//aave(app);
+	// wallet_monitoring(app);
 
 	btcTicker_sdk(app);
 	ethTicker_sdk(app);	
@@ -56,6 +48,8 @@ export default () => {
 	helloWorld_sdk(app);
 	alphahomora_sdk(app);
 	aave_sdk(app);
+	uniswap_sdk(app);
+	// ensDomain_sdk(app);
   
 	// SOCKETS
 	socketWeb3(app);
