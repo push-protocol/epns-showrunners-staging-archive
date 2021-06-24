@@ -1,45 +1,39 @@
+// @name: Wallet Tracker Cnannel
+// @version: 1.0
+
 import { Service, Inject, Container } from 'typedi';
 import config from '../config';
 import channelWalletsInfo from '../config/channelWalletsInfo';
-import mongoose from 'mongoose';
-import { EventDispatcher, EventDispatcherInterface } from '../decorators/eventDispatcher';
-import events from '../subscribers/events';
 import PQueue from 'p-queue';
 import { ethers, logger } from 'ethers';
-import { truncateSync } from 'fs';
-import { reject } from 'lodash';
+import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk'
 const queue = new PQueue();
 let retries = 0
-// await queue.onIdle();
+const channelKey = channelWalletsInfo.walletsKV['walletTrackerPrivateKey_1']
+const NETWORK_TO_MONITOR = config.web3RopstenNetwork;
 
-const bent = require('bent'); // Download library
-const moment = require('moment'); // time library
-
-const db = require('../helpers/dbHelper');
-const utils = require('../helpers/utilsHelper');
-import epnsNotify from '../helpers/epnsNotifyHelper';
+const infuraSettings: InfuraSettings = {
+  projectID: config.infuraAPI.projectID,
+  projectSecret: config.infuraAPI.projectSecret
+}
+const settings: NetWorkSettings = {
+  alchemy: config.alchemyAPI,
+  infura: infuraSettings,
+  etherscan: config.etherscanAPI
+}
+const epnsSettings: EPNSSettings = {
+  network: config.web3RopstenNetwork,
+  contractAddress: config.deployedContract,
+  contractABI: config.deployedContractABI
+}
+const sdk = new epnsHelper(NETWORK_TO_MONITOR, channelKey, settings, epnsSettings)
 
 const SUPPORTED_TOKENS = {
   'ETH':{
       address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
       ticker: 'ETH',
       decimals: 18
-  },
-  // 'DAI':{
-  //     address: '0xf80A32A835F79D7787E8a8ee5721D0fEaFd78108',
-  //     ticker: 'DAI',
-  //     decimals: 18
-  // },
-  // 'cUSDT':{
-  //   address: '0x135669c2dcbd63f639582b313883f101a4497f76',
-  //   ticker: 'cUSDT',
-  //   decimals: 8
-  // },
-  // 'UNI':{
-  //   address: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
-  //   ticker: 'UNI',
-  //   decimals: 18
-  // },
+  }
 }
 
 const CUSTOMIZABLE_SETTINGS = {
@@ -47,100 +41,53 @@ const CUSTOMIZABLE_SETTINGS = {
   'ticker': 5,
 }
 
-const NETWORK_TO_MONITOR = config.web3RopstenNetwork;
-
 @Service()
 export default class WalletTrackerChannel {
   running: any;
   UserTokenModel: any;
-  constructor(
-    @Inject('logger') private logger,
-    @Inject('cached') private cached,
-    @EventDispatcher() private eventDispatcher: EventDispatcherInterface,
-  ) {
+  constructor() {
     let running = false;
     // this.running =  false;
   }
 
-  public getEPNSInteractableContract(web3network) {
-    // Get Contract
-    return epnsNotify.getInteractableContracts(
-      web3network,                                                             // Network for which the interactable contract is req
-      {                                                                       // API Keys
-          etherscanAPI: config.etherscanAPI,
-          infuraAPI: config.infuraAPI,
-          alchemyAPI: config.alchemyAPI
-      },
-      channelWalletsInfo.walletsKV['walletTrackerPrivateKey_1'],                                          // Private Key of the Wallet sending Notification
-      config.deployedContract,                                                // The contract address which is going to be used
-      config.deployedContractABI                                              // The contract abi which is going to be useds
-    );
-  }
-
-  public getERC20InteractableContract(web3network, tokenAddress) {
-    // Get Contract
-    return epnsNotify.getInteractableContracts(
-      web3network,                                                             // Network for which the interactable contract is req
-      {                                                                       // API Keys
-          etherscanAPI: config.etherscanAPI,
-          infuraAPI: config.infuraAPI,
-          alchemyAPI: config.alchemyAPI
-      },
-      null,                                                                   // No need to write on contract
-      tokenAddress,                                                           // The contract address which is going to be used
-      config.erc20DeployedContractABI                                        // The contract abi which is going to be useds
-    );
-  }
-
-  public getSupportedERC20sArray(web3network) {
-    const logger = this.logger;
+  public async getSupportedERC20sArray(web3network) {
     let erc20s = [];
 
     for (const ticker in SUPPORTED_TOKENS) {
-      erc20s[`${ticker}`] = this.getERC20InteractableContract(web3network, SUPPORTED_TOKENS[ticker].address);
+      await sdk.getContract(SUPPORTED_TOKENS[ticker].address, config.erc20DeployedContractABI )
+      .then(res => {
+        erc20s[`${ticker}`] = res
+
+      })
+      // erc20s[`${ticker}`] = await sdk.getContract(SUPPORTED_TOKENS[ticker].address, config.erc20DeployedContractABI )
     }
 
     return erc20s;
   }
 
   public async sendMessageToContract(simulate) {
-    const cache = this.cached;
-    const logger = this.logger;
 
     // Ignore call if this is already running
     if (this.running) {
-      logger.debug(`[${new Date(Date.now())}]-[Wallet Tracker]- Wallet Tracker instance is already running! Skipping...`);
+      logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Wallet Tracker instance is already running! Skipping...`);
       return;
     }
     this.running = true;
 
-    const walletTrackerChannel = ethers.utils.computeAddress(channelWalletsInfo.walletsKV['walletTrackerPrivateKey_1']);
+    const users = await sdk.getSubscribedUsers()
 
-    // Call Helper function to get interactableContracts
-    const epns = this.getEPNSInteractableContract(config.web3RopstenNetwork);
-    const interactableERC20s = this.getSupportedERC20sArray(NETWORK_TO_MONITOR);
+    // const epns = this.getEPNSInteractableContract(config.web3RopstenNetwork);
+    const interactableERC20s = await this.getSupportedERC20sArray(NETWORK_TO_MONITOR);
+    const epns = sdk.advanced.getInteractableContracts(config.web3RopstenNetwork, settings, channelKey, config.deployedContract, config.deployedContractABI);
 
-    const channelInfo = await epns.contract.channels(walletTrackerChannel);
-    // Get Filter
-    const filter = epns.contract.filters.Subscribe(walletTrackerChannel);
-    const startBlock = channelInfo.channelStartBlock.toNumber();
-
-    const eventLog = await epns.contract.queryFilter(filter, startBlock);
-    // Log the event
-    logger.debug(`[${new Date(Date.now())}]-[Wallet Tracker]- Subscribed Address Found: %o`, eventLog.length);
-
-    let allPayloads = []
-
-    for (let index = 0; index < eventLog.length; index++) {
-      const log = eventLog[index];
-      const user = log.args.user;
-      // logger.info("user: %o", user)
+    users.forEach(async user => {
       await queue.add(() => this.processAndSendNotification(epns, user, NETWORK_TO_MONITOR, simulate, interactableERC20s));
       logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Added processAndSendNotification for user:%o `, user)
-    }
+    });
+    
     await queue.onIdle();
     this.running = false;
-    logger.debug(`[${new Date(Date.now())}]-[Wallet Tracker]- Done for all`);
+    logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Done for all`);
   }
 
   public async processAndSendNotification(epns, user, NETWORK_TO_MONITOR, simulate, interactableERC20s) {
@@ -148,31 +95,12 @@ export default class WalletTrackerChannel {
       const object = await this.checkWalletMovement(user, NETWORK_TO_MONITOR, simulate, interactableERC20s);
       if (object.success) {
         const user = object.user
-        let res = await this.getPayloadHash(user, object.changedTokens, simulate)
-        logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- IPFS Hash: %o`, res)
-        logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Object: %o`, object)
-
-        // Send notification
-        const ipfshash = res.ipfshash;
-        const payloadType = res.payloadType;
-
-
-        logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Wallet: %o | Hash: :%o | Sending Data...`, user, ipfshash);
-
-        const storageType = 1; // IPFS Storage Type
-        const txConfirmWait = 1; // Wait for 0 tx confirmation
-
-        
-        const tx = await epnsNotify.sendNotification(
-          epns.signingContract,                                           // Contract connected to signing wallet
-          user,                                           // Recipient to which the payload should be sent
-          payloadType,                                                    // Notification Type
-          storageType,                                                    // Notificattion Storage Type
-          ipfshash,                                                       // Notification Storage Pointer
-          txConfirmWait,                                                  // Should wait for transaction confirmation
-          logger,
-          simulate                                                         // Logger instance (or console.log) to pass
-        )
+        const title = "Wallet Tracker Alert!";
+        const message = "Crypto Movement from your wallet detected!";
+        const payloadTitle = "Crypto Movement Alert!";
+        const payloadMsg = this.prettyTokenBalances(object.changedTokens);
+        const tx = await sdk.sendNotification(user, title, message, payloadTitle, payloadMsg, simulate)
+        logger.info(tx);
         logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Transaction successful: %o | Notification Sent`, tx.hash);
         logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- 🙌 Wallet Tracker Channel Logic Completed for user : %o`, user);
       }
@@ -180,7 +108,7 @@ export default class WalletTrackerChannel {
         logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- No wallet movement: %o`, object)
       }
     } catch (error) {
-      logger.debug(`[${new Date(Date.now())}]-[Wallet Tracker]- Sending notifications failed to user: %o | error: %o`, user, error)
+      logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Sending notifications failed to user: %o | error: %o`, user, error)
       if (retries <=5 ) {
         retries++
         await queue.add(() => this.processAndSendNotification(epns, user, NETWORK_TO_MONITOR, simulate, interactableERC20s));
@@ -191,7 +119,6 @@ export default class WalletTrackerChannel {
   }
 
   public async checkWalletMovement(user, networkToMonitor, simulate, interactableERC20s) {
-    const logger = this.logger;
 
     // check and return if the wallet is the channel owner
     if (this.isChannelOwner(user)) {
@@ -244,7 +171,6 @@ export default class WalletTrackerChannel {
   }
 
   public async checkTokenMovement(user, networkToMonitor, ticker, interactableERC20s, simulate) {
-    const logger = this.logger;
 
     // check and recreate provider mostly for routes
     if (!interactableERC20s) {
@@ -257,11 +183,11 @@ export default class WalletTrackerChannel {
     return new Promise((resolve) => {
 
     this.getTokenBalance(user, networkToMonitor, ticker, interactableERC20s[ticker], simulate)
-    .then(userToken => {
+    .then((userToken: any) => {
 
       // logger.info('userToken: %o', userToken)
       this.getTokenBalanceFromDB(user, ticker)
-      .then(userTokenArrayFromDB =>{
+      .then((userTokenArrayFromDB: any) =>{
         // logger.info('userTokenArrayFromDB: %o', userTokenArrayFromDB)
         // logger.info('userTokenArrayFromDB.length: %o', userTokenArrayFromDB.length)
         if(userTokenArrayFromDB.length == 0){
@@ -275,10 +201,6 @@ export default class WalletTrackerChannel {
               addedToken,
             })
           })
-          .catch (err => {
-            logger.error(`[${new Date(Date.now())}]-[Wallet Tracker]-🔥Error --> addUserTokenToDB(): %o`, err);
-            reject(err);
-          });
         }
         else{
           let userTokenFromDB
@@ -303,68 +225,30 @@ export default class WalletTrackerChannel {
               resultToken
             })
           })
-          .catch (err => {
-            logger.error(`[${new Date(Date.now())}]-[Wallet Tracker]-🔥Error --> compareTokenBalance(): %o`, err);
-            reject(err);
-          });
         }
       })
     })
-    .catch (err => {
-      logger.error(`[${new Date(Date.now())}]-[Wallet Tracker]-🔥Error --> getTokenBalance(): %o`, err);
-      reject(err);
-    });
   })
   }
 
-  public async getPayloadHash(user, changedTokens, simulate) {
-    const logger = this.logger;
-
-    return new Promise((resolve) => {
-
-      this.getWalletTrackerPayload(changedTokens)
-      .then(payload =>{
-        epnsNotify.uploadToIPFS(payload, logger, simulate)
-        .then(async (ipfshash) => {
-          // Sign the transaction and send it to chain
-          logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- ipfs hash generated: %o for Wallet: %s, sending it back...`, ipfshash, user);
-
-          resolve({
-            success: true,
-            user,
-            ipfshash,
-            payloadType: parseInt(payload.data.type)
-          });
-        })
-        .catch (err => {
-          logger.error(`[${new Date(Date.now())}]-[Wallet Tracker]- Unable to obtain ipfshash for wallet: %s, error: %o`, user, err)
-          resolve({
-            success: false,
-            data: "Unable to obtain ipfshash for wallet: " + user + " | error: " + err
-          });
-        });
-      })
-    })
-  }
+ 
 
   public async getTokenBalance(user, networkToMonitor, ticker, tokenContract, simulate){
-    const logger = this.logger;
 
     if(!tokenContract){
-      tokenContract = this.getERC20InteractableContract(networkToMonitor, SUPPORTED_TOKENS[ticker].address)
+      tokenContract = sdk.getContract(SUPPORTED_TOKENS[ticker].address, config.erc20DeployedContractABI )
     }
 
     // Check simulate object
-    const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride") ? simulate.hasOwnProperty("logicOverride") : false) : false;
+    const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride" && simulate.logicOverride.mode) ? simulate.logicOverride.mode : false) : false;
     const simulateApplyToAddr = logicOverride && simulate.logicOverride.hasOwnProperty("applyToAddr") ? simulate.logicOverride.applyToAddr : false;
     const simulateRandomEthBal = logicOverride && (simulateApplyToAddr == user || !simulateApplyToAddr) && simulate.logicOverride.hasOwnProperty("randomEthBalance") ? simulate.logicOverride.randomEthBalance : false;
     const simulateRandomTokenBal = logicOverride && (simulateApplyToAddr == user || !simulateApplyToAddr) && simulate.logicOverride.hasOwnProperty("randomTokenBalance") ? simulate.logicOverride.randomTokenBalance : false;
 
-    return await new Promise(async(resolve, reject) => {
+    return await new Promise((resolve, reject) => {
 
       if (ticker === 'ETH' ){
-        tokenContract.contract.provider.getBalance(user)
-        .then(balance => {
+        tokenContract.provider.getBalance(user).then(balance => {
           // logger.info("wei balance" + balance);
           let etherBalance;
 
@@ -383,10 +267,6 @@ export default class WalletTrackerChannel {
             balance: etherBalance
           }
           resolve (tokenInfo)
-        })
-        .catch (err => {
-          logger.error(`[${new Date(Date.now())}]-[Wallet Tracker]-🔥Error --> provider.getBalance(): %o`, err);
-          reject(err);
         });
       }
 
@@ -415,10 +295,6 @@ export default class WalletTrackerChannel {
           }
           resolve (tokenInfo)
         })
-        .catch (err => {
-          logger.error(`[${new Date(Date.now())}]-[Wallet Tracker]-🔥Error --> contract.balanceOf(): %o`, err);
-          reject(err);
-        });
       }
     })
   }
@@ -453,34 +329,6 @@ export default class WalletTrackerChannel {
       }
       return resultToken
     }
-  }
-
-  public async getWalletTrackerPayload(changedTokens) {
-    const logger = this.logger;
-
-    logger.debug(`[${new Date(Date.now())}]-[Wallet Tracker]- Preparing payload...`);
-
-    return await new Promise(async (resolve) => {
-      const title = "Wallet Tracker Alert!";
-      const message = "Crypto Movement from your wallet detected!";
-
-      const payloadTitle = "Crypto Movement Alert!";
-      const payloadMsg = this.prettyTokenBalances(changedTokens);
-
-      const payload = await epnsNotify.preparePayload(
-        null,                                                               // Recipient Address | Useful for encryption
-        3,                                                                  // Type of Notification
-        title,                                                              // Title of Notification
-        message,                                                            // Message of Notification
-        payloadTitle,                                                       // Internal Title
-        payloadMsg,                                                         // Internal Message
-        null,                                                               // Internal Call to Action Link
-        null,                                                               // internal img of youtube link
-      );
-      logger.debug(`[${new Date(Date.now())}]-[Wallet Tracker]- Payload Prepared: %o`, payload);
-
-      resolve(payload);
-    });
   }
 
   // Pretty format token balances
@@ -521,7 +369,6 @@ export default class WalletTrackerChannel {
 
   //MONGODB
   public async getTokenBalanceFromDB(userAddress: string, ticker: string): Promise<{}> {
-    const logger = this.logger;
     this.UserTokenModel = Container.get('UserTokenModel');
     try {
       let userTokenData
@@ -534,13 +381,12 @@ export default class WalletTrackerChannel {
       // logger.info('userTokenDataDB: %o', userTokenData)
       return userTokenData
     } catch (error) {
-      logger.debug(`[${new Date(Date.now())}]-[Wallet Tracker]- getTokenBalanceFromDB Error: %o`, error);
+      logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- getTokenBalanceFromDB Error: %o`, error);
     }
   }
 
   //MONGODB
   public async addUserTokenToDB(user: string, ticker: string, balance: String): Promise<{}> {
-    const logger = this.logger;
     this.UserTokenModel = Container.get('UserTokenModel');
     try {
       const userToken = await this.UserTokenModel.create({
@@ -551,13 +397,12 @@ export default class WalletTrackerChannel {
       // logger.info('addUserTokenToDB: %o', userToken)
       return userToken;
     } catch (error) {
-      logger.debug(`[${new Date(Date.now())}]-[Wallet Tracker]- addUserTokenToDB Error: %o`, error);
+      logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- addUserTokenToDB Error: %o`, error);
     }
   }
 
   //MONGODB
   public async updateUserTokenBalance(user: string, ticker: string, balance: string): Promise<{}> {
-    const logger = this.logger;
     this.UserTokenModel = Container.get('UserTokenModel');
     try {
       const userToken = await this.UserTokenModel.findOneAndUpdate(
@@ -568,19 +413,21 @@ export default class WalletTrackerChannel {
       logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- updatedUserToken: %o`, userToken)
       return userToken;
     } catch (error) {
-      logger.debug(`[${new Date(Date.now())}]-[Wallet Tracker]- updateUserTokenBalance Error: %o`, error);
+      logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- updateUserTokenBalance Error: %o`, error);
     }
   }
 
   //MONGODB
   public async clearUserTokenDB(): Promise<boolean> {
-    const logger = this.logger;
     this.UserTokenModel = Container.get('UserTokenModel');
     try {
       await this.UserTokenModel.deleteMany({})
       return true;
     } catch (error) {
-      logger.debug(`[${new Date(Date.now())}]-[Wallet Tracker]- clearUserTokenDB Error: %o`, error);
+      logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- clearUserTokenDB Error: %o`, error);
     }
   }
 }
+
+
+

@@ -38,7 +38,7 @@ export default class WalletTrackerChannel {
 
     for (const [name, value] of Object.entries(WALLETS)) {
       logger.info(`checking balance for ${name} wallet..`); 
-      const balance = ethers.utils.formatEther(await value.wallet.getBalance())
+      const balance = ethers.utils.formatEther(await provider.getBalance(value.wallet.address))
       logger.info(`balance for ${name} wallet is ${balance.toString()}: threshold is ${ETH_THRESHOLD}..`); 
       if (Number(balance.toString()) < ETH_THRESHOLD) {
         TransferPromise.push(this.transfertoWallet(simulate, name, value.wallet))
@@ -72,13 +72,13 @@ export default class WalletTrackerChannel {
     const cache = this.cached;
     const logger = this.logger;
     logger.info(`checking balance for main ETH wallet..`); 
-    const balance = ethers.utils.formatEther(await MAIN.getBalance())
+    const balance = ethers.utils.formatEther(await provider.getBalance(MAIN.address))
     let result = null;
     if (Number(balance.toString()) < ETH_MAIN_THRESHOLD) {
       const email = Container.get(EmailService);
-      logger.info(`You've got mail: Main ETH Wallet balance is below threshold at ${balance}`); 
+      logger.info(`You've got mail: Main ETH Wallet: ${MAIN.address} balance is below threshold at ${balance}`); 
       if(simulate) return result
-      result = await email.sendMailSES(config.supportMailAddress, "Wallet Monitoring Bot", "Wallet Expiry", "Low Wallet Balance", `Main ETH Wallet balance is below threshold at ${balance}`);
+      result = await email.sendMailSES(config.supportMailAddress, "Wallet Monitoring Bot", "Wallet Expiry", "Low Wallet Balance", `Main ETH Wallet: ${MAIN.address} balance is below threshold at ${balance}`);
     } 
     return result
   }

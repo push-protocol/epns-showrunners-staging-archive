@@ -4,6 +4,7 @@
 
 import { Service, Inject } from 'typedi';
 import config from '../config';
+import channelWalletsInfo from '../config/channelWalletsInfo';
 import { EventDispatcher, EventDispatcherInterface } from '../decorators/eventDispatcher';
 import events from '../subscribers/events';
 
@@ -35,7 +36,7 @@ export default class HelloWorldChannel {
         infuraAPI: config.infuraAPI,
         alchemyAPI: config.alchemyAPI
       },
-      config.helloWorldPrivateKey,                                               // Private Key of the Wallet sending Notification
+      channelWalletsInfo.walletsKV['helloWorldPrivateKey_1'],                                               // Private Key of the Wallet sending Notification
       config.deployedContract,                                                // The contract address which is going to be used
       config.deployedContractABI                                              // The contract abi which is going to be useds
     );
@@ -46,14 +47,15 @@ export default class HelloWorldChannel {
     const logger = this.logger;
     const cache = this.cached;
 
-    logger.debug('uploading payload and interacting with smart contract...');
+    logger.debug(`[${new Date(Date.now())}]-[Hello World]- uploading payload and interacting with smart contract...`);
 
     return await new Promise(async (resolve, reject) => {
         this.messagePayload(simulate)
         .then(async (payload) => {
           epnsNotify.uploadToIPFS(payload, logger, simulate)
             .then(async (ipfshash) => {
-              logger.info("Success --> uploadToIPFS(): %o", ipfshash);
+              logger.info(`[${new Date(Date.now())}]-[Hello World]- Success --> uploadToIPFS(): %o`, ipfshash);
+              const walletAddress = ethers.utils.computeAddress(channelWalletsInfo.walletsKV['helloWorldPrivateKey_1']);
 
                  // Call Helper function to get interactableContracts
               const epns = this.getEPNSInteractableContract(config.web3RopstenNetwork);
@@ -64,7 +66,7 @@ export default class HelloWorldChannel {
               // Send Notification
               await epnsNotify.sendNotification(
                 epns.signingContract,                                           // Contract connected to signing wallet
-                ethers.utils.computeAddress(config.helloWorldPrivateKey),       // Recipient to which the payload should be sent
+                walletAddress,                                                  // Recipient to which the payload should be sent
                 parseInt(payload.data.type),                                    // Notification Type
                 storageType,                                                    // Notificattion Storage Type
                 ipfshash,                                                       // Notification Storage Pointer
@@ -72,34 +74,34 @@ export default class HelloWorldChannel {
                 logger,                                                         // Logger instance (or console.log) to pass
                 simulate                                                        // Passing true will not allow sending actual notification
               ).then ((tx) => {
-                logger.info("Transaction mined: %o | Notification Sent", tx.hash);
-                logger.info("🙌 Channel Logic Completed!");
+                logger.info(`[${new Date(Date.now())}]-[Hello World]- Transaction mined: %o | Notification Sent`, tx.hash);
+                logger.info(`[${new Date(Date.now())}]-[Hello World]- 🙌 Channel Logic Completed!`);
                 resolve({
                   success:true,
                   data:tx
                 });
               })
               .catch (err => {
-                logger.error("🔥Error --> sendNotification(): %o", err);
+                logger.error(`[${new Date(Date.now())}]-[Hello World]- 🔥Error --> sendNotification(): %o`, err);
                 reject(err);
               });
 
             })
             .catch (err => {
-              logger.error("🔥Error --> uploadToIPFS(): %o", err);
+              logger.error(`[${new Date(Date.now())}]-[Hello World]- 🔥Error --> uploadToIPFS(): %o`, err);
               reject(err);
             });
         })
         .catch(err => {
-          logger.error(err);
-          reject("🔥Error --> Unable to obtain ipfshash, error: %o", err);
+          logger.error(`[${new Date(Date.now())}]-[Hello World]- 🔥Error --> Unable to obtain ipfshash, error: %o`, err);
+          reject(err);
         });
     });
   }
 
   public async messagePayload(simulate) {
     const logger = this.logger;
-    logger.debug('Getting payload message... ');
+    logger.debug(`[${new Date(Date.now())}]-[Hello World]- Getting payload message... `);
 
     return await new Promise(async(resolve, reject) => {
       const title = 'Demo Channel';
@@ -119,7 +121,7 @@ export default class HelloWorldChannel {
         null,                                                               // internal img of youtube link
       );
 
-      logger.debug('Payload Prepared: %o', payload);
+      logger.debug(`[${new Date(Date.now())}]-[Hello World]- Payload Prepared: %o`, payload);
 
       resolve(payload);
     })
