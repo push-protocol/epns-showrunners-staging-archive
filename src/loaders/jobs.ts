@@ -16,6 +16,7 @@ import config from '../config';
 import { Container } from 'typedi';
 import schedule from 'node-schedule';
 import { EventDispatcher, EventDispatcherInterface } from '../decorators/eventDispatcher';
+import fs from 'fs';
 
 
 import BtcTickerChannel from '../showrunners-sdk/btcTickerChannel';
@@ -32,6 +33,32 @@ import AaveChannel from '../showrunners-sdk/aaveChannel';
 import TruefiChannel from '../showrunners-sdk/truefiChannel';
 
 export default ({ logger }) => {
+
+  let EPNSChannels = [
+		{
+		  name: "aave",
+		 
+		}
+	]
+	for (const channel of EPNSChannels) {
+		let channelFolderPath = `${__dirname}/../showrunners-sdk/${channel.name}`;
+		let jobsFilePath = `${channelFolderPath}/${channel.name}Jobs.ts`;
+		
+		if (fs.existsSync(channelFolderPath)) {
+			logger.info(`-- Checking for ${channel.name} Folder... Found`);
+			if (fs.existsSync(jobsFilePath)) {
+			logger.info(`-- Checking for ${channel.name} jobs file... Found`);
+      let jobs = require(`../showrunners-sdk/${channel.name}/${channel.name}Jobs.ts`)
+			jobs.default({ logger })
+			}
+			else {
+			logger.info(`    -- Checking for ${channel.name} jobs file... Not Found`);
+			}
+		}
+		else {
+			logger.info(`    -- Checking for ${channel.name} Folder... Not Found`);
+		}
+	}
   // 1. SHOWRUNNERS SERVICE
   const startTime = new Date(new Date().setHours(0, 0, 0, 0));
   // const startTime = new Date(Date.now());

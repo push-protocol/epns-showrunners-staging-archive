@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import LoggerInstance from '../loaders/logger';
 
 import btcTicker from './routes/showrunners_btcticker';
 import ethTicker from './routes/showrunners_ethticker';
@@ -25,14 +26,43 @@ import everest_sdk from './routes/showrunners_sdk/showrunners_everest';
 import truefi_sdk from './routes/showrunners_sdk/showrunners_truefi';
 import alphahomora_sdk from './routes/showrunners_sdk/showrunners_alphaHomora';
 import helloWorld_sdk from './routes/showrunners_sdk/showrunners_helloWorld';
-import aave_sdk from './routes/showrunners_sdk/showrunners_aave';
+// import aave_sdk from './routes/showrunners_sdk/showrunners_aave';
 import uniswap_sdk from './routes/showrunners_sdk/showrunners_uniSwap';
 
 import mailing from './routes/mailing';
 
+import fs from 'fs';
+const Path = require('path') 
+ 
 // guaranteed to get dependencies
 export default () => {
 	const app = Router();
+	let EPNSChannels = [
+		{
+		  name: "aave",
+		 
+		}
+	]
+	for (const channel of EPNSChannels) {
+		let channelFolderPath = `${__dirname}/../showrunners-sdk/${channel.name}`;
+		let routesFilePath = `${channelFolderPath}/${channel.name}Routes.ts`;
+		
+		if (fs.existsSync(channelFolderPath)) {
+			LoggerInstance.info(`-- Checking for ${channel.name} Folder... Found`);
+			if (fs.existsSync(routesFilePath)) {
+			LoggerInstance.info(`-- Checking for ${channel.name} routes file... Found`);
+			let routes = require(`../showrunners-sdk/${channel.name}/${channel.name}Routes.ts`)
+			routes.default(app)
+			}
+			else {
+			LoggerInstance.info(`    -- Checking for ${channel.name} routes file... Not Found`);
+			}
+		}
+		else {
+			LoggerInstance.info(`    -- Checking for ${channel.name} Folder... Not Found`);
+		}
+	}
+	
 
 	// -- SHOWRUNNERS ROUTES
 	ensDomain(app);
@@ -47,7 +77,7 @@ export default () => {
 	truefi_sdk(app);
 	helloWorld_sdk(app);
 	alphahomora_sdk(app);
-	aave_sdk(app);
+	// aave_sdk(app);
 	uniswap_sdk(app);
 	// ensDomain_sdk(app);
   
