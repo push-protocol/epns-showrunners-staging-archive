@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
-import EnsExiprationChannel from '../../../showrunners/ensExpirationChannel';
+import EnsExiprationChannel from '../../../showrunners-sdk/ensExpirationChannel';
 import middlewares from '../../middlewares';
 import { celebrate, Joi } from 'celebrate';
 import { handleResponse } from '../../../helpers/utilsHelper';
@@ -8,7 +8,7 @@ import { handleResponse } from '../../../helpers/utilsHelper';
 const route = Router();
 
 export default (app: Router) => {
-  app.use('/showrunners/ensdomain', route);
+  app.use('/showrunners-sdk/ensdomain', route);
 
   /**
    * Send Message
@@ -25,7 +25,7 @@ export default (app: Router) => {
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners/ensdomain/send_message endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners-sdk/ensdomain/send_message endpoint with body: %o', req.body )
       try {
         const ensDomain = Container.get(EnsExiprationChannel);
         const data = await ensDomain.sendMessageToContract(req.body.simulate);
@@ -59,7 +59,7 @@ export default (app: Router) => {
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners/ensdomain/check_expiry endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners-sdk/ensdomain/check_expiry endpoint with body: %o', req.body )
       try {
         const { address, network, triggerThresholdInSecs, simulate } = req.body;
 
@@ -98,7 +98,7 @@ export default (app: Router) => {
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners/ensdomain/domain_info endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners-sdk/ensdomain/domain_info endpoint with body: %o', req.body )
       try {
         const { address, ensUrl, triggerThresholdInSecs, network, simulate } = req.body;
 
