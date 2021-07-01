@@ -38,6 +38,10 @@ export default () => {
 	ensDomain(app);
 	compoundTicker(app);
 	everest(app);
+	truefi(app);
+	helloWorld(app);
+	//alphahomora(app);
+	//aave(app);
 	// wallet_monitoring(app);
 
 	btcTicker_sdk(app);
