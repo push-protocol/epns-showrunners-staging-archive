@@ -25,7 +25,8 @@ const epnsSettings: EPNSSettings = {
   contractAddress: config.deployedContract,
   contractABI: config.deployedContractABI
 }
-const sdk = new epnsHelper(config.web3MainnetNetwork, channelKey, settings, epnsSettings)
+const NETWORK_TO_MONIOR = config.web3MainnetNetwork
+const sdk = new epnsHelper(NETWORK_TO_MONIOR, channelKey, settings, epnsSettings)
 
 // SET CONSTANTS
 const BLOCK_NUMBER = 'block_number';
@@ -47,9 +48,7 @@ export default class EverestChannel {
 
     // Overide logic if need be
     const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride") && simulate.logicOverride.mode ? simulate.logicOverride.mode : false) : false;
-
-    const epnsNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("epnsNetwork") ? simulate.logicOverride.epnsNetwork : config.web3RopstenNetwork;
-    const everestNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("everestNetwork") ? simulate.logicOverride.everestNetwork : config.web3MainnetNetwork;
+    const everestNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("everestNetwork") ? simulate.logicOverride.everestNetwork : NETWORK_TO_MONIOR;
     // -- End Override logic
 
     const everest = await sdk.getContract(config.everestDeployedContract, config.everestDeployedContractABI)
