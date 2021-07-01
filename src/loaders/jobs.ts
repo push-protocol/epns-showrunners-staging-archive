@@ -26,6 +26,7 @@ import CompoundLiquidationChannel from '../showrunners/compoundLiquidationChanne
 import Everest from '../showrunners/everestChannel';
 import WalletTrackerChannel from '../showrunners-sdk/walletTrackerChannel';
 import WalletMonitoring from '../services/walletMonitoring';
+import Uniswap from '../showrunners/uniSwapChannel';
 import HelloWorld from '../showrunners-sdk/helloWorldChannel';
 import AaveChannel from '../showrunners-sdk/aaveChannel';
 import TruefiChannel from '../showrunners-sdk/truefiChannel';
@@ -231,6 +232,22 @@ export default ({ logger }) => {
 
     try {
       await truefiTicker.sendMessageToContract(false);
+      logger.info(`🐣 Cron Task Completed -- ${taskName}`);
+    }
+    catch (err) {
+      logger.error(`❌ Cron Task Failed -- ${taskName}`);
+      logger.error(`Error Object: %o`, err);
+    }
+  });
+
+  // 1.9 UNISWAP CHANNEL
+  schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
+    logger.info('-- 🛵 Scheduling Showrunner - UniSwap Governance Channel [on 24 Hours]');
+    const uniswap = Container.get(Uniswap);
+    const taskName = 'UniSwap proposal event checks and sendMessageToContract()';
+
+    try {
+      await uniswap.sendMessageToContract(false);
       logger.info(`🐣 Cron Task Completed -- ${taskName}`);
     }
     catch (err) {
