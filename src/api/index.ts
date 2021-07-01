@@ -79,7 +79,10 @@ export default () => {
 	alphahomora_sdk(app);
 	// aave_sdk(app);
 	uniswap_sdk(app);
-	// ensDomain_sdk(app);
+	ensDomain_sdk(app);
+	everest_sdk(app);
+	compoundTicker_sdk(app);
+
   
 	// SOCKETS
 	socketWeb3(app);
