@@ -6,7 +6,7 @@ import config from '../config';
 import channelWalletsInfo from '../config/channelWalletsInfo';
 import { ethers, logger } from 'ethers';
 import PQueue from 'p-queue';
-import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk'
+import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging'
 const queue = new PQueue();
 const NETWORK_TO_MONITOR = config.web3MainnetNetwork;
 const channelKey = channelWalletsInfo.walletsKV['truefiPrivateKey_1'];
