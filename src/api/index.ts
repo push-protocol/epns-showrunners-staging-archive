@@ -1,68 +1,63 @@
 import { Router } from 'express';
 import LoggerInstance from '../loaders/logger';
 
-import btcTicker from './routes/showrunners_btcticker';
-import ethTicker from './routes/showrunners_ethticker';
-import ensDomain from './routes/showrunners_ensdomain';
-import compoundTicker from './routes/showrunners_compoundLiquidation';
-import gasPrice from './routes/showrunners_gasprice';
-import wallet_tracker from './routes/showrunners_wallet_tracker';
-import wallet_monitoring from './routes/showrunners_wallet_monitoring';
-import everest from './routes/showrunners_everest';
-import truefi from './routes/showrunners_truefi';
-import alphahomora from './routes/showrunners_alphaHomora';
-import socketWeb3 from './routes/sockets/socketWeb3';
-import helloWorld from './routes/showrunners_helloWorld';
-import uniSwap from './routes/showrunners_uniSwap';
-import aave from './routes/showrunners_aave';
+import fs from 'fs';
+const utils = require('../helpers/utilsHelper');
 
-import btcTicker_sdk from './routes/showrunners_sdk/showrunners_btcticker';
-import ethTicker_sdk from './routes/showrunners_sdk/showrunners_ethticker';
-import ensDomain_sdk from './routes/showrunners_sdk/showrunners_ensdomain';
-import compoundTicker_sdk from './routes/showrunners_sdk/showrunners_compoundLiquidation';
-import gasPrice_sdk from './routes/showrunners_sdk/showrunners_gasprice';
-import wallet_tracker_sdk from './routes/showrunners_sdk/showrunners_wallet_tracker';
-import everest_sdk from './routes/showrunners_sdk/showrunners_everest';
-import truefi_sdk from './routes/showrunners_sdk/showrunners_truefi';
-import alphahomora_sdk from './routes/showrunners_sdk/showrunners_alphaHomora';
-import helloWorld_sdk from './routes/showrunners_sdk/showrunners_helloWorld';
-// import aave_sdk from './routes/showrunners_sdk/showrunners_aave';
-import uniswap_sdk from './routes/showrunners_sdk/showrunners_uniSwap';
+import socketWeb3 from './routes/sockets/socketWeb3';
+//
+// import btcTicker from './routes/showrunners_btcticker';
+// import ethTicker from './routes/showrunners_ethticker';
+// import ensDomain from './routes/showrunners_ensdomain';
+// import compoundTicker from './routes/showrunners_compoundLiquidation';
+// import gasPrice from './routes/showrunners_gasprice';
+// import wallet_tracker from './routes/showrunners_wallet_tracker';
+// import wallet_monitoring from './routes/showrunners_wallet_monitoring';
+// import everest from './routes/showrunners_everest';
+// import truefi from './routes/showrunners_truefi';
+// import alphahomora from './routes/showrunners_alphaHomora';
+// import helloWorld from './routes/showrunners_helloWorld';
+// import uniSwap from './routes/showrunners_uniSwap';
+// import aave from './routes/showrunners_aave';
+//
+// import btcTicker_sdk from './routes/showrunners_sdk/showrunners_btcticker';
+// import ethTicker_sdk from './routes/showrunners_sdk/showrunners_ethticker';
+// import ensDomain_sdk from './routes/showrunners_sdk/showrunners_ensdomain';
+// import compoundTicker_sdk from './routes/showrunners_sdk/showrunners_compoundLiquidation';
+// import gasPrice_sdk from './routes/showrunners_sdk/showrunners_gasprice';
+// import wallet_tracker_sdk from './routes/showrunners_sdk/showrunners_wallet_tracker';
+// import everest_sdk from './routes/showrunners_sdk/showrunners_everest';
+// import truefi_sdk from './routes/showrunners_sdk/showrunners_truefi';
+// import alphahomora_sdk from './routes/showrunners_sdk/showrunners_alphaHomora';
+// import helloWorld_sdk from './routes/showrunners_sdk/showrunners_helloWorld';
+// // import aave_sdk from './routes/showrunners_sdk/showrunners_aave';
+// import uniswap_sdk from './routes/showrunners_sdk/showrunners_uniSwap';
 
 //import mailing from './routes/mailing';
-
-import fs from 'fs';
-const Path = require('path')
 
 // guaranteed to get dependencies
 export default () => {
 	const app = Router();
-	// let EPNSChannels = [
-	// 	{
-	// 	  name: "aave",
-  //
-	// 	}
-	// ]
-	// for (const channel of EPNSChannels) {
-	// 	let channelFolderPath = `${__dirname}/../showrunners-sdk/${channel.name}`;
-	// 	let routesFilePath = `${channelFolderPath}/${channel.name}Routes.ts`;
-  //
-	// 	if (fs.existsSync(channelFolderPath)) {
-	// 		LoggerInstance.info(`-- Checking for ${channel.name} Folder... Found`);
-	// 		if (fs.existsSync(routesFilePath)) {
-	// 		LoggerInstance.info(`-- Checking for ${channel.name} routes file... Found`);
-	// 		let routes = require(`../showrunners-sdk/${channel.name}/${channel.name}Routes.ts`)
-	// 		routes.default(app)
-	// 		}
-	// 		else {
-	// 		LoggerInstance.info(`    -- Checking for ${channel.name} routes file... Not Found`);
-	// 		}
-	// 	}
-	// 	else {
-	// 		LoggerInstance.info(`    -- Checking for ${channel.name} Folder... Not Found`);
-	// 	}
-	// }
 
+	// -- SHOWRUNNERS ROUTES
+	LoggerInstance.info(`    -- Checking and Loading Dynamic Routes...`);
+  const channelFolderPath = `${__dirname}/../showrunners-sdk/`
+  const directories = utils.getDirectories(channelFolderPath)
+
+  for (const channel of directories) {
+    const absPath = `${channelFolderPath}${channel}/${channel}Routes.ts`
+    const relativePath = `../showrunners-sdk/${channel}/${channel}Routes.ts`
+
+    if (fs.existsSync(absPath)) {
+      const cronning = require(absPath)
+      cronning.default(app);
+
+      LoggerInstance.info(`     ✔️  ${relativePath} Loaded!`)
+    }
+    else {
+      LoggerInstance.info(`     ❌  ${relativePath} Not Found... skipped`)
+    }
+  }
 
 	// -- SHOWRUNNERS ROUTES
 	// ensDomain(app);

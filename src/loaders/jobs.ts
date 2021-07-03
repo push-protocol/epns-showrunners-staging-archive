@@ -21,7 +21,7 @@ import fs from 'fs';
 const utils = require('../helpers/utilsHelper');
 
 // import BtcTickerChannel from '../showrunners/btcTickerChannel';
-import EthTickerChannel from '../showrunners-sdk/ethTickerChannel';
+// import EthTickerChannel from '../showrunners-sdk/ethTickerChannel';
 // import EnsExpirationChannel from '../showrunners/ensExpirationChannel';
 // import EthGasStationChannel from '../showrunners-sdk/ethGasChannel';
 // import CompoundLiquidationChannel from '../showrunners/compoundLiquidationChannel';
@@ -35,45 +35,24 @@ import EthTickerChannel from '../showrunners-sdk/ethTickerChannel';
 
 export default async ({ logger }) => {
 
-  // logger.info(`    -- Checking and Loading Dynamic Jobs from showrunners channels`);
-  // const channelFolderPath = `${__dirname}/../showrunners-sdk/`
-  // const directories = utils.getDirectories(channelFolderPath)
-  //
-  // for (const channel of directories) {
-  //   const absPath = `${channelFolderPath}${channel}/${channel}Jobs.ts`
-  //   const relativePath = `${channel}/${channel}Jobs.ts`
-  //
-  //   if (fs.existsSync(absPath)) {
-  //     const cronning = await import('../showrunners-sdk/aave/aaveJobs.ts');
-  //     cronning.default();
-  //
-  //     logger.info(`     ✔️  ${relativePath} Loaded!`)
-  //   }
-  //   else {
-  //     logger.info(`     ❌  ${relativePath} Not Found... skipped`)
-  //   }
-  // }
+  logger.info(`    -- Checking and Loading Dynamic Jobs...`);
+  const channelFolderPath = `${__dirname}/../showrunners-sdk/`
+  const directories = utils.getDirectories(channelFolderPath)
 
-	// for (const channel of EPNSChannels) {
-	// 	let channelFolderPath = `${__dirname}/../showrunners-sdk/${channel.name}`;
-	// 	let jobsFilePath = `${channelFolderPath}/${channel.name}Jobs.ts`;
-  //
-	// 	if (fs.existsSync(channelFolderPath)) {
-	// 		logger.info(`-- Checking for ${channel.name} Folder... Found`);
-  //
-	// 		if (fs.existsSync(jobsFilePath)) {
-  //       logger.info(`-- Checking for ${channel.name} jobs file... Found`);
-  //       let jobs = require(`../showrunners-sdk/${channel.name}/${channel.name}Jobs.ts`)
-  //       jobs.default({ logger })
-	// 		}
-	// 		else {
-  //       logger.info(`    -- Checking for ${channel.name} jobs file... Not Found`);
-	// 		}
-	// 	}
-	// 	else {
-	// 		logger.info(`    -- Checking for ${channel.name} Folder... Not Found`);
-	// 	}
-	// }
+  for (const channel of directories) {
+    const absPath = `${channelFolderPath}${channel}/${channel}Jobs.ts`
+    const relativePath = `../showrunners-sdk/${channel}/${channel}Jobs.ts`
+
+    if (fs.existsSync(absPath)) {
+      const cronning = await import(absPath)
+      cronning.default();
+
+      logger.info(`     ✔️  ${relativePath} Loaded!`)
+    }
+    else {
+      logger.info(`     ❌  ${relativePath} Not Found... skipped`)
+    }
+  }
 
   // 1. SHOWRUNNERS SERVICE
   const startTime = new Date(new Date().setHours(0, 0, 0, 0));
@@ -125,21 +104,21 @@ export default async ({ logger }) => {
   //   }
   // });
 
-  // 1.2 ETH TICKER CHANNEL
-  schedule.scheduleJob({ start: startTime, rule: fiveSecRule }, async function () {
-    logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - ETH Ticker Channel [on 6 Hours]`);
-    const ethTicker = Container.get(EthTickerChannel);
-    const taskName = 'ETH Ticker Fetch and sendMessageToContract()';
-
-    try {
-      await ethTicker.sendMessageToContract(true);
-      logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
-    }
-    catch (err) {
-      logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
-      logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
-    }
-  });
+  // // 1.2 ETH TICKER CHANNEL
+  // schedule.scheduleJob({ start: startTime, rule: fiveSecRule }, async function () {
+  //   logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - ETH Ticker Channel [on 6 Hours]`);
+  //   const ethTicker = Container.get(EthTickerChannel);
+  //   const taskName = 'ETH Ticker Fetch and sendMessageToContract()';
+  //
+  //   try {
+  //     await ethTicker.sendMessageToContract(true);
+  //     logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
+  //   }
+  //   catch (err) {
+  //     logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
+  //     logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
+  //   }
+  // });
   //
   //
   // //1.3 ENS TICKER CHANNEL

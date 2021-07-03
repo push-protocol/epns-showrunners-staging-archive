@@ -18,9 +18,11 @@ import logger from '../../loaders/logger';
 import { Container } from 'typedi';
 import schedule from 'node-schedule';
 
-import AaveChannel from './aaceChannel';
+import AaveChannel from './aaveChannel';
 
 export default () => {
+  return;
+
   const startTime = new Date(new Date().setHours(0, 0, 0, 0));
 
   const dailyRule = new schedule.RecurrenceRule();
@@ -29,24 +31,19 @@ export default () => {
   dailyRule.second = 0;
   dailyRule.dayOfWeek = new schedule.Range(0, 6);
 
-  const thirtyMinuteRule = new schedule.RecurrenceRule();
-  thirtyMinuteRule.second = new schedule.Range(0, 0, 0, 5);
-
   // AAVE CHANNEL RUNS EVERY 24 Hours
   logger.info('     🛵 Scheduling Showrunner - Aave Channel [on 24 Hours]');
-  schedule.scheduleJob({ start: startTime, rule: thirtyMinuteRule }, async function () {
+  schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
     const aaveTicker = Container.get(AaveChannel);
-    console.log(aaveTicker)
-    // console.log("here")
-    // const taskName = 'Aave users address checks and sendMessageToContract()';
-    //
-    // try {
-    //   await aaveTicker.sendMessageToContract(false);
-    //   logger.info(`🐣 Cron Task Completed -- ${taskName}`);
-    // }
-    // catch (err) {
-    //   logger.error(`❌ Cron Task Failed -- ${taskName}`);
-    //   logger.error(`Error Object: %o`, err);
-    // }
+    const taskName = 'Aave users address checks and sendMessageToContract()';
+
+    try {
+      await aaveTicker.sendMessageToContract(false);
+      logger.info(`🐣 Cron Task Completed -- ${taskName}`);
+    }
+    catch (err) {
+      logger.error(`❌ Cron Task Failed -- ${taskName}`);
+      logger.error(`Error Object: %o`, err);
+    }
   });
 };

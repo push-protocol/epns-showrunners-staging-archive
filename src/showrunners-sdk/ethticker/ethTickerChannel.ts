@@ -3,8 +3,9 @@
 // @recent_changes: ETH Price Tracker
 
 import { Service, Inject } from 'typedi';
-import config from '../config';
-import channelWalletsInfo from '../config/channelWalletsInfo';
+import config from '../../config';
+import channelWalletsInfo from '../../config/channelWalletsInfo';
+
 // import PQueue from 'p-queue';
 import { ethers, logger } from 'ethers';
 import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk'

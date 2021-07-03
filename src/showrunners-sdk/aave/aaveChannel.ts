@@ -4,6 +4,7 @@
 import { Service, Inject } from 'typedi';
 import config from '../../config';
 import channelConfig from './aaveChannelConfig';
+
 // import channelWalletsInfo from '../../config/channelWalletsInfo';
 import { ethers, logger} from 'ethers';
 import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk'
@@ -74,7 +75,7 @@ export default class AaveChannel {
       }
     }
     //simulate object settings END
-      
+
     const userData = await aave.contract.getUserAccountData(userAddress)
     let  healthFactor = ethers.utils.formatEther(userData.healthFactor)
     logger.info("For wallet: %s, Health Factor: %o", userAddress, healthFactor);
@@ -102,4 +103,3 @@ export default class AaveChannel {
     }
   }
 }
-
