@@ -16,53 +16,72 @@ import config from '../config';
 import { Container } from 'typedi';
 import schedule from 'node-schedule';
 import { EventDispatcher, EventDispatcherInterface } from '../decorators/eventDispatcher';
+
 import fs from 'fs';
+const utils = require('../helpers/utilsHelper');
 
-
-import BtcTickerChannel from '../showrunners-sdk/btcTickerChannel';
+// import BtcTickerChannel from '../showrunners/btcTickerChannel';
 import EthTickerChannel from '../showrunners-sdk/ethTickerChannel';
-import EnsExpirationChannel from '../showrunners/ensExpirationChannel';
-import EthGasStationChannel from '../showrunners-sdk/ethGasChannel';
-import CompoundLiquidationChannel from '../showrunners/compoundLiquidationChannel';
-import Everest from '../showrunners/everestChannel';
-import WalletTrackerChannel from '../showrunners-sdk/walletTrackerChannel';
-import WalletMonitoring from '../services/walletMonitoring';
-import Uniswap from '../showrunners/uniSwapChannel';
-import HelloWorld from '../showrunners-sdk/helloWorldChannel';
-import AaveChannel from '../showrunners-sdk/aaveChannel';
-import TruefiChannel from '../showrunners-sdk/truefiChannel';
+// import EnsExpirationChannel from '../showrunners/ensExpirationChannel';
+// import EthGasStationChannel from '../showrunners-sdk/ethGasChannel';
+// import CompoundLiquidationChannel from '../showrunners/compoundLiquidationChannel';
+// import Everest from '../showrunners/everestChannel';
+// import WalletTrackerChannel from '../showrunners-sdk/walletTrackerChannel';
+// import WalletMonitoring from '../services/walletMonitoring';
+// import Uniswap from '../showrunners/uniSwapChannel';
+// import HelloWorld from '../showrunners-sdk/helloWorldChannel';
+// import AaveChannel from '../showrunners-sdk/aaveChannel';
+// import TruefiChannel from '../showrunners-sdk/truefiChannel';
 
-export default ({ logger }) => {
+export default async ({ logger }) => {
 
-  let EPNSChannels = [
-		{
-		  name: "aave",
-		 
-		}
-	]
-	for (const channel of EPNSChannels) {
-		let channelFolderPath = `${__dirname}/../showrunners-sdk/${channel.name}`;
-		let jobsFilePath = `${channelFolderPath}/${channel.name}Jobs.ts`;
-		
-		if (fs.existsSync(channelFolderPath)) {
-			logger.info(`-- Checking for ${channel.name} Folder... Found`);
-			if (fs.existsSync(jobsFilePath)) {
-			logger.info(`-- Checking for ${channel.name} jobs file... Found`);
-      let jobs = require(`../showrunners-sdk/${channel.name}/${channel.name}Jobs.ts`)
-			jobs.default({ logger })
-			}
-			else {
-			logger.info(`    -- Checking for ${channel.name} jobs file... Not Found`);
-			}
-		}
-		else {
-			logger.info(`    -- Checking for ${channel.name} Folder... Not Found`);
-		}
-	}
+  // logger.info(`    -- Checking and Loading Dynamic Jobs from showrunners channels`);
+  // const channelFolderPath = `${__dirname}/../showrunners-sdk/`
+  // const directories = utils.getDirectories(channelFolderPath)
+  //
+  // for (const channel of directories) {
+  //   const absPath = `${channelFolderPath}${channel}/${channel}Jobs.ts`
+  //   const relativePath = `${channel}/${channel}Jobs.ts`
+  //
+  //   if (fs.existsSync(absPath)) {
+  //     const cronning = await import('../showrunners-sdk/aave/aaveJobs.ts');
+  //     cronning.default();
+  //
+  //     logger.info(`     ✔️  ${relativePath} Loaded!`)
+  //   }
+  //   else {
+  //     logger.info(`     ❌  ${relativePath} Not Found... skipped`)
+  //   }
+  // }
+
+	// for (const channel of EPNSChannels) {
+	// 	let channelFolderPath = `${__dirname}/../showrunners-sdk/${channel.name}`;
+	// 	let jobsFilePath = `${channelFolderPath}/${channel.name}Jobs.ts`;
+  //
+	// 	if (fs.existsSync(channelFolderPath)) {
+	// 		logger.info(`-- Checking for ${channel.name} Folder... Found`);
+  //
+	// 		if (fs.existsSync(jobsFilePath)) {
+  //       logger.info(`-- Checking for ${channel.name} jobs file... Found`);
+  //       let jobs = require(`../showrunners-sdk/${channel.name}/${channel.name}Jobs.ts`)
+  //       jobs.default({ logger })
+	// 		}
+	// 		else {
+  //       logger.info(`    -- Checking for ${channel.name} jobs file... Not Found`);
+	// 		}
+	// 	}
+	// 	else {
+	// 		logger.info(`    -- Checking for ${channel.name} Folder... Not Found`);
+	// 	}
+	// }
+
   // 1. SHOWRUNNERS SERVICE
   const startTime = new Date(new Date().setHours(0, 0, 0, 0));
   // const startTime = new Date(Date.now());
   // console.log(startTime, Date.now())
+
+  const fiveSecRule = new schedule.RecurrenceRule();
+  fiveSecRule.second = new schedule.Range(0, 0, 0, 5);
 
   const twoAndHalfMinRule = new schedule.RecurrenceRule();
   twoAndHalfMinRule.minute = new schedule.Range(0, 59, 2);
@@ -91,29 +110,29 @@ export default ({ logger }) => {
   dailyRule.dayOfWeek = new schedule.Range(0, 6);
 
   // 1.1 BTC TICKER CHANNEL
-  schedule.scheduleJob({ start: startTime, rule: sixHourRule }, async function () {
-    logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - BTC Ticker Channel [on 6 Hours]`);
-    const btcTicker = Container.get(BtcTickerChannel);
-    const taskName = 'BTC Ticker Fetch and sendMessageToContract()';
-
-    try {
-      await btcTicker.sendMessageToContract(false);
-      logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
-    }
-    catch (err) {
-      logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
-      logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
-    }
-  });
+  // schedule.scheduleJob({ start: startTime, rule: sixHourRule }, async function () {
+  //   logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - BTC Ticker Channel [on 6 Hours]`);
+  //   const btcTicker = Container.get(BtcTickerChannel);
+  //   const taskName = 'BTC Ticker Fetch and sendMessageToContract()';
+  //
+  //   try {
+  //     await btcTicker.sendMessageToContract(false);
+  //     logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
+  //   }
+  //   catch (err) {
+  //     logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
+  //     logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
+  //   }
+  // });
 
   // 1.2 ETH TICKER CHANNEL
-  schedule.scheduleJob({ start: startTime, rule: sixHourRule }, async function () {
+  schedule.scheduleJob({ start: startTime, rule: fiveSecRule }, async function () {
     logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - ETH Ticker Channel [on 6 Hours]`);
     const ethTicker = Container.get(EthTickerChannel);
     const taskName = 'ETH Ticker Fetch and sendMessageToContract()';
 
     try {
-      await ethTicker.sendMessageToContract(false);
+      await ethTicker.sendMessageToContract(true);
       logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
     }
     catch (err) {
@@ -121,188 +140,188 @@ export default ({ logger }) => {
       logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
     }
   });
-
-
-  //1.3 ENS TICKER CHANNEL
-  schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
-    logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - ENS Domain Expiry Channel [on 24 Hours]`);
-    const ensTicker = Container.get(EnsExpirationChannel);
-    const taskName = 'ENS Domain Expiry and sendMessageToContract()';
-
-    try {
-      await ensTicker.sendMessageToContract(false);
-      logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
-    }
-    catch (err) {
-      logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
-      logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
-    }
-  });
-
-  // 1.4.1 GAS CHANNEL
-  schedule.scheduleJob({ start: startTime, rule: tenMinuteRule }, async function () {
-    logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - Gas Price Checker [on 10 minutes]`);
-    const gasTicker = Container.get(EthGasStationChannel);
-    const taskName = 'Gas result and sendMessageToContract()';
-
-    try {
-      await gasTicker.sendMessageToContract(false);
-      logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
-    }
-    catch (err) {
-      logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
-      logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
-    }
-  });
-
-  // 1.4.2 GAS CHANNEL
-  schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
-    logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - Gas Average Update [on 24 hours]`);
-    const gasDbTicker = Container.get(EthGasStationChannel);
-    const taskName = 'updated mongoDb';
-
-    try {
-      await gasDbTicker.updateGasPriceAverage();
-      logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
-    }
-    catch (err) {
-      logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
-      logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
-    }
-  });
-
-  // 1.5 COMPOUND LIQUIDATION CHANNEL
-  schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
-    logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - Compound Liquidation Channel [on 24 Hours]`);
-    const compoundTicker = Container.get(CompoundLiquidationChannel);
-    const taskName = 'Compound Liquidation address checks and sendMessageToContract()';
-
-    try {
-      await compoundTicker.sendMessageToContract(false);
-      logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
-    }
-    catch (err) {
-      logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
-      logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
-    }
-  });
-
-  // 1.6 EVEREST CHANNEL
-  schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
-    logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - Everest Channel [on 24 Hours]`);
-    const everestTicker = Container.get(Everest);
-    const taskName = 'Everest event checks and sendMessageToContract()';
-
-    try {
-      await everestTicker.sendMessageToContract(false);
-      logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
-    }
-    catch (err) {
-      logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
-      logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
-    }
-  });
-
-  // 1.7 WALLET TRACKER CHANNEL
-  schedule.scheduleJob({ start: startTime, rule: thirtyMinuteRule }, async function () {
-    logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - Wallet Tracker Channel [on 2.5 Minutes]`);
-    const walletTracker = Container.get(WalletTrackerChannel);
-    const taskName = 'Track wallets on every new block mined';
-
-    try {
-      await walletTracker.sendMessageToContract(false);
-      logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
-    }
-    catch (err) {
-      logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
-      logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
-    }
-  });
-
-  // 1.8 HELLO WORLD CHANNEL
-  schedule.scheduleJob({ start: startTime, rule: oneHourRule }, async function () {
-    logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - HelloWorld Channel [on 1 hour]`  + new Date(Date.now()));
-    const helloTicker = Container.get(HelloWorld);
-    const taskName = 'Hello world demo message and sendMessageToContract()';
-
-    try {
-      await helloTicker.sendMessageToContract(false);
-      logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
-    }
-    catch (err) {
-      logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
-      logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
-    }
-  });
+  //
+  //
+  // //1.3 ENS TICKER CHANNEL
+  // schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
+  //   logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - ENS Domain Expiry Channel [on 24 Hours]`);
+  //   const ensTicker = Container.get(EnsExpirationChannel);
+  //   const taskName = 'ENS Domain Expiry and sendMessageToContract()';
+  //
+  //   try {
+  //     await ensTicker.sendMessageToContract(false);
+  //     logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
+  //   }
+  //   catch (err) {
+  //     logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
+  //     logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
+  //   }
+  // });
+  //
+  // // 1.4.1 GAS CHANNEL
+  // schedule.scheduleJob({ start: startTime, rule: tenMinuteRule }, async function () {
+  //   logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - Gas Price Checker [on 10 minutes]`);
+  //   const gasTicker = Container.get(EthGasStationChannel);
+  //   const taskName = 'Gas result and sendMessageToContract()';
+  //
+  //   try {
+  //     await gasTicker.sendMessageToContract(false);
+  //     logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
+  //   }
+  //   catch (err) {
+  //     logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
+  //     logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
+  //   }
+  // });
+  //
+  // // 1.4.2 GAS CHANNEL
+  // schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
+  //   logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - Gas Average Update [on 24 hours]`);
+  //   const gasDbTicker = Container.get(EthGasStationChannel);
+  //   const taskName = 'updated mongoDb';
+  //
+  //   try {
+  //     await gasDbTicker.updateGasPriceAverage();
+  //     logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
+  //   }
+  //   catch (err) {
+  //     logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
+  //     logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
+  //   }
+  // });
+  //
+  // // 1.5 COMPOUND LIQUIDATION CHANNEL
+  // schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
+  //   logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - Compound Liquidation Channel [on 24 Hours]`);
+  //   const compoundTicker = Container.get(CompoundLiquidationChannel);
+  //   const taskName = 'Compound Liquidation address checks and sendMessageToContract()';
+  //
+  //   try {
+  //     await compoundTicker.sendMessageToContract(false);
+  //     logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
+  //   }
+  //   catch (err) {
+  //     logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
+  //     logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
+  //   }
+  // });
+  //
+  // // 1.6 EVEREST CHANNEL
+  // schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
+  //   logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - Everest Channel [on 24 Hours]`);
+  //   const everestTicker = Container.get(Everest);
+  //   const taskName = 'Everest event checks and sendMessageToContract()';
+  //
+  //   try {
+  //     await everestTicker.sendMessageToContract(false);
+  //     logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
+  //   }
+  //   catch (err) {
+  //     logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
+  //     logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
+  //   }
+  // });
+  //
+  // // 1.7 WALLET TRACKER CHANNEL
+  // schedule.scheduleJob({ start: startTime, rule: thirtyMinuteRule }, async function () {
+  //   logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - Wallet Tracker Channel [on 2.5 Minutes]`);
+  //   const walletTracker = Container.get(WalletTrackerChannel);
+  //   const taskName = 'Track wallets on every new block mined';
+  //
+  //   try {
+  //     await walletTracker.sendMessageToContract(false);
+  //     logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
+  //   }
+  //   catch (err) {
+  //     logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
+  //     logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
+  //   }
+  // });
+  //
+  // // 1.8 HELLO WORLD CHANNEL
+  // schedule.scheduleJob({ start: startTime, rule: oneHourRule }, async function () {
+  //   logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - HelloWorld Channel [on 1 hour]`  + new Date(Date.now()));
+  //   const helloTicker = Container.get(HelloWorld);
+  //   const taskName = 'Hello world demo message and sendMessageToContract()';
+  //
+  //   try {
+  //     await helloTicker.sendMessageToContract(false);
+  //     logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
+  //   }
+  //   catch (err) {
+  //     logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
+  //     logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
+  //   }
+  // });
 
   // 1.9 AAVE CHANNEL
-  schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
-    logger.info('-- 🛵 Scheduling Showrunner - Aave Channel [on 24 Hours]');
-    const aaveTicker = Container.get(AaveChannel);
-    const taskName = 'Aave users address checks and sendMessageToContract()';
+  // schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
+  //   logger.info('-- 🛵 Scheduling Showrunner - Aave Channel [on 24 Hours]');
+  //   const aaveTicker = Container.get(AaveChannel);
+  //   const taskName = 'Aave users address checks and sendMessageToContract()';
+  //
+  //   try {
+  //     await aaveTicker.sendMessageToContract(false);
+  //     logger.info(`🐣 Cron Task Completed -- ${taskName}`);
+  //   }
+  //   catch (err) {
+  //     logger.error(`❌ Cron Task Failed -- ${taskName}`);
+  //     logger.error(`Error Object: %o`, err);
+  //   }
+  // });
 
-    try {
-      await aaveTicker.sendMessageToContract(false);
-      logger.info(`🐣 Cron Task Completed -- ${taskName}`);
-    }
-    catch (err) {
-      logger.error(`❌ Cron Task Failed -- ${taskName}`);
-      logger.error(`Error Object: %o`, err);
-    }
-  });
+  // // 1.10 TrueFI CHANNEL
+  // schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
+  //   logger.info('-- 🛵 Scheduling Showrunner - Everest Channel [on 24 Hours]');
+  //   const truefiTicker = Container.get(TruefiChannel);
+  //   const taskName = 'Truefi event checks and sendMessageToContract()';
+  //
+  //   try {
+  //     await truefiTicker.sendMessageToContract(false);
+  //     logger.info(`🐣 Cron Task Completed -- ${taskName}`);
+  //   }
+  //   catch (err) {
+  //     logger.error(`❌ Cron Task Failed -- ${taskName}`);
+  //     logger.error(`Error Object: %o`, err);
+  //   }
+  // });
+  //
+  // // 1.9 UNISWAP CHANNEL
+  // schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
+  //   logger.info('-- 🛵 Scheduling Showrunner - UniSwap Governance Channel [on 24 Hours]');
+  //   const uniswap = Container.get(Uniswap);
+  //   const taskName = 'UniSwap proposal event checks and sendMessageToContract()';
+  //
+  //   try {
+  //     await uniswap.sendMessageToContract(false);
+  //     logger.info(`🐣 Cron Task Completed -- ${taskName}`);
+  //   }
+  //   catch (err) {
+  //     logger.error(`❌ Cron Task Failed -- ${taskName}`);
+  //     logger.error(`Error Object: %o`, err);
+  //   }
+  // });
 
-  // 1.10 TrueFI CHANNEL
-  schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
-    logger.info('-- 🛵 Scheduling Showrunner - Everest Channel [on 24 Hours]');
-    const truefiTicker = Container.get(TruefiChannel);
-    const taskName = 'Truefi event checks and sendMessageToContract()';
-
-    try {
-      await truefiTicker.sendMessageToContract(false);
-      logger.info(`🐣 Cron Task Completed -- ${taskName}`);
-    }
-    catch (err) {
-      logger.error(`❌ Cron Task Failed -- ${taskName}`);
-      logger.error(`Error Object: %o`, err);
-    }
-  });
-
-  // 1.9 UNISWAP CHANNEL
-  schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
-    logger.info('-- 🛵 Scheduling Showrunner - UniSwap Governance Channel [on 24 Hours]');
-    const uniswap = Container.get(Uniswap);
-    const taskName = 'UniSwap proposal event checks and sendMessageToContract()';
-
-    try {
-      await uniswap.sendMessageToContract(false);
-      logger.info(`🐣 Cron Task Completed -- ${taskName}`);
-    }
-    catch (err) {
-      logger.error(`❌ Cron Task Failed -- ${taskName}`);
-      logger.error(`Error Object: %o`, err);
-    }
-  });
-
-  // 2. EVENT DISPATHER SERVICE
-  const eventDispatcher = Container.get(EventDispatcherInterface);
-  eventDispatcher.on("newBlockMined", async function (data) {
-    // Disabled for now
-    // // 2.1 Wallet Tracker Service
-    // // Added condition to approx it at 10 blocks (150 secs approx)
-    // if (data % 10 == 0) {
-    //   const walletTracker = Container.get(WalletTrackerChannel);
-    //   const taskName = 'Track wallets on every new block mined';
-    //
-    //   try {
-    //     await walletTracker.sendMessageToContract(false);
-    //     logger.info(`🐣 Cron Task Completed -- ${taskName}`);
-    //   }
-    //   catch (err) {
-    //     logger.error(`❌ Cron Task Failed -- ${taskName}`);
-    //     logger.error(`Error Object: %o`, err);
-    //   }
-    // }
-  })
+  // // 2. EVENT DISPATHER SERVICE
+  // const eventDispatcher = Container.get(EventDispatcherInterface);
+  // eventDispatcher.on("newBlockMined", async function (data) {
+  //   // Disabled for now
+  //   // // 2.1 Wallet Tracker Service
+  //   // // Added condition to approx it at 10 blocks (150 secs approx)
+  //   // if (data % 10 == 0) {
+  //   //   const walletTracker = Container.get(WalletTrackerChannel);
+  //   //   const taskName = 'Track wallets on every new block mined';
+  //   //
+  //   //   try {
+  //   //     await walletTracker.sendMessageToContract(false);
+  //   //     logger.info(`🐣 Cron Task Completed -- ${taskName}`);
+  //   //   }
+  //   //   catch (err) {
+  //   //     logger.error(`❌ Cron Task Failed -- ${taskName}`);
+  //   //     logger.error(`Error Object: %o`, err);
+  //   //   }
+  //   // }
+  // })
 
   // // 3.1 Wallets Monitoring Service
   // schedule.scheduleJob({ start: startTime, rule: oneHourRule }, async function () {

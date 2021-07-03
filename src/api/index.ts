@@ -29,64 +29,64 @@ import helloWorld_sdk from './routes/showrunners_sdk/showrunners_helloWorld';
 // import aave_sdk from './routes/showrunners_sdk/showrunners_aave';
 import uniswap_sdk from './routes/showrunners_sdk/showrunners_uniSwap';
 
-import mailing from './routes/mailing';
+//import mailing from './routes/mailing';
 
 import fs from 'fs';
-const Path = require('path') 
- 
+const Path = require('path')
+
 // guaranteed to get dependencies
 export default () => {
 	const app = Router();
-	let EPNSChannels = [
-		{
-		  name: "aave",
-		 
-		}
-	]
-	for (const channel of EPNSChannels) {
-		let channelFolderPath = `${__dirname}/../showrunners-sdk/${channel.name}`;
-		let routesFilePath = `${channelFolderPath}/${channel.name}Routes.ts`;
-		
-		if (fs.existsSync(channelFolderPath)) {
-			LoggerInstance.info(`-- Checking for ${channel.name} Folder... Found`);
-			if (fs.existsSync(routesFilePath)) {
-			LoggerInstance.info(`-- Checking for ${channel.name} routes file... Found`);
-			let routes = require(`../showrunners-sdk/${channel.name}/${channel.name}Routes.ts`)
-			routes.default(app)
-			}
-			else {
-			LoggerInstance.info(`    -- Checking for ${channel.name} routes file... Not Found`);
-			}
-		}
-		else {
-			LoggerInstance.info(`    -- Checking for ${channel.name} Folder... Not Found`);
-		}
-	}
-	
+	// let EPNSChannels = [
+	// 	{
+	// 	  name: "aave",
+  //
+	// 	}
+	// ]
+	// for (const channel of EPNSChannels) {
+	// 	let channelFolderPath = `${__dirname}/../showrunners-sdk/${channel.name}`;
+	// 	let routesFilePath = `${channelFolderPath}/${channel.name}Routes.ts`;
+  //
+	// 	if (fs.existsSync(channelFolderPath)) {
+	// 		LoggerInstance.info(`-- Checking for ${channel.name} Folder... Found`);
+	// 		if (fs.existsSync(routesFilePath)) {
+	// 		LoggerInstance.info(`-- Checking for ${channel.name} routes file... Found`);
+	// 		let routes = require(`../showrunners-sdk/${channel.name}/${channel.name}Routes.ts`)
+	// 		routes.default(app)
+	// 		}
+	// 		else {
+	// 		LoggerInstance.info(`    -- Checking for ${channel.name} routes file... Not Found`);
+	// 		}
+	// 	}
+	// 	else {
+	// 		LoggerInstance.info(`    -- Checking for ${channel.name} Folder... Not Found`);
+	// 	}
+	// }
+
 
 	// -- SHOWRUNNERS ROUTES
-	ensDomain(app);
-	compoundTicker(app);
-	everest(app);
+	// ensDomain(app);
+	// compoundTicker(app);
+	// everest(app);
 	// wallet_monitoring(app);
 
-	btcTicker_sdk(app);
-	ethTicker_sdk(app);	
-	gasPrice_sdk(app);
-	wallet_tracker_sdk(app);
-	truefi_sdk(app);
-	helloWorld_sdk(app);
-	alphahomora_sdk(app);
+	// btcTicker_sdk(app);
+	// ethTicker_sdk(app);
+	// gasPrice_sdk(app);
+	// wallet_tracker_sdk(app);
+	// truefi_sdk(app);
+	// helloWorld_sdk(app);
+	// alphahomora_sdk(app);
 	// aave_sdk(app);
-	uniswap_sdk(app);
+	// uniswap_sdk(app);
 	// ensDomain_sdk(app);
-  
+
 	// SOCKETS
 	socketWeb3(app);
 
 	// -- HELPERS
 	// For mailing route
-	mailing(app);
+	//mailing(app);
 
 	// Finally return app
 	return app;

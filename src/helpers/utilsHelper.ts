@@ -2,6 +2,8 @@ import { Container } from 'typedi';
 import config from '../config';
 
 import { Response } from 'express';
+import fs from 'fs';
+
 export = {
   handleResponse: (res: Response, code: number, success: Boolean, message: String, data: Object) => {
     return res.status(code).json({ status: success == true ? "success" : "failed", message,  data });
@@ -33,6 +35,12 @@ export = {
         }
       });
     });
+  },
+  // To get subdirectories of a file
+  getDirectories: (source) => {
+    return fs.readdirSync(source, { withFileTypes: true })
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => dirent.name)
   },
   // To Handle Base 64 file writing
   writeBase64File: async (base64, filename) => {
