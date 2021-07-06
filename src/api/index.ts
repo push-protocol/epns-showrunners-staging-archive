@@ -25,6 +25,7 @@ import truefi_sdk from './routes/showrunners_sdk/showrunners_truefi';
 import alphahomora_sdk from './routes/showrunners_sdk/showrunners_alphaHomora';
 import helloWorld_sdk from './routes/showrunners_sdk/showrunners_helloWorld';
 import aave_sdk from './routes/showrunners_sdk/showrunners_aave';
+import yamGovernance_sdk from './routes/showrunners_sdk/showrunners_yamgovernance';
 
 import mailing from './routes/mailing';
 
@@ -41,7 +42,7 @@ export default () => {
 	//wallet_tracker(app);
 	everest(app);
 	//truefi(app);
-	wallet_monitoring(app);
+	//wallet_monitoring(app);
 	helloWorld(app);
 	//alphahomora(app);
 	//aave(app);
@@ -49,11 +50,15 @@ export default () => {
 	btcTicker_sdk(app);
 	ethTicker_sdk(app);	
 	gasPrice_sdk(app);
-	wallet_tracker_sdk(app);
+	//wallet_tracker_sdk(app);
 	truefi_sdk(app);
 	helloWorld_sdk(app);
 	alphahomora_sdk(app);
 	aave_sdk(app);
+	everest_sdk(app);
+	compoundTicker_sdk(app);
+	//console.log(yamGovernance_sdk);
+	yamGovernance_sdk(app);
   
 	// SOCKETS
 	socketWeb3(app);

@@ -180,6 +180,12 @@ export default {
   aaveLendingPoolDeployedContractABI: require('./aave_LendingPool.json'),
 
   /**
+   * Yam Governance Related
+   */
+  yamGovernanceDeployedContract: process.env.YAM_GOVERNANCE_DEPLOYED_CONTRACT_ROPSTEN,
+  yamGovernanceDeployedContractABI: require('./yamGovernance.json'),
+
+  /**
    * WALLET TRACKER related
    */
   erc20DeployedContractABI: require('./erc20.json'),
