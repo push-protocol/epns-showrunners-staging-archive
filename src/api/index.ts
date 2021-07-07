@@ -41,8 +41,8 @@ export default () => {
 
 	// -- SHOWRUNNERS ROUTES
 	LoggerInstance.info(`    -- Checking and Loading Dynamic Routes...`);
-  const channelFolderPath = `${__dirname}/../showrunners-sdk/`
-  const directories = utils.getDirectories(channelFolderPath)
+	const channelFolderPath = `${__dirname}/../showrunners/`
+	const directories = utils.getDirectories(channelFolderPath)
 
   for (const channel of directories) {
     const absPath = `${channelFolderPath}${channel}/${channel}Routes.ts`

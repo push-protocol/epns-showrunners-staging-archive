@@ -36,7 +36,7 @@ const utils = require('../helpers/utilsHelper');
 export default async ({ logger }) => {
 
   logger.info(`    -- Checking and Loading Dynamic Jobs...`);
-  const channelFolderPath = `${__dirname}/../showrunners-sdk/`
+  const channelFolderPath = `${__dirname}/../showrunners/`
   const directories = utils.getDirectories(channelFolderPath)
 
   for (const channel of directories) {
@@ -93,7 +93,7 @@ export default async ({ logger }) => {
   //   logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - BTC Ticker Channel [on 6 Hours]`);
   //   const btcTicker = Container.get(BtcTickerChannel);
   //   const taskName = 'BTC Ticker Fetch and sendMessageToContract()';
-  //
+  
   //   try {
   //     await btcTicker.sendMessageToContract(false);
   //     logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
@@ -142,7 +142,7 @@ export default async ({ logger }) => {
   //   logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - Gas Price Checker [on 10 minutes]`);
   //   const gasTicker = Container.get(EthGasStationChannel);
   //   const taskName = 'Gas result and sendMessageToContract()';
-  //
+  
   //   try {
   //     await gasTicker.sendMessageToContract(false);
   //     logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
@@ -158,7 +158,7 @@ export default async ({ logger }) => {
   //   logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - Gas Average Update [on 24 hours]`);
   //   const gasDbTicker = Container.get(EthGasStationChannel);
   //   const taskName = 'updated mongoDb';
-  //
+  
   //   try {
   //     await gasDbTicker.updateGasPriceAverage();
   //     logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
@@ -190,7 +190,7 @@ export default async ({ logger }) => {
   //   logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - Everest Channel [on 24 Hours]`);
   //   const everestTicker = Container.get(Everest);
   //   const taskName = 'Everest event checks and sendMessageToContract()';
-  //
+  
   //   try {
   //     await everestTicker.sendMessageToContract(false);
   //     logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
@@ -206,7 +206,7 @@ export default async ({ logger }) => {
   //   logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - Wallet Tracker Channel [on 2.5 Minutes]`);
   //   const walletTracker = Container.get(WalletTrackerChannel);
   //   const taskName = 'Track wallets on every new block mined';
-  //
+  
   //   try {
   //     await walletTracker.sendMessageToContract(false);
   //     logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
@@ -254,7 +254,7 @@ export default async ({ logger }) => {
   //   logger.info('-- 🛵 Scheduling Showrunner - Everest Channel [on 24 Hours]');
   //   const truefiTicker = Container.get(TruefiChannel);
   //   const taskName = 'Truefi event checks and sendMessageToContract()';
-  //
+  
   //   try {
   //     await truefiTicker.sendMessageToContract(false);
   //     logger.info(`🐣 Cron Task Completed -- ${taskName}`);
@@ -270,7 +270,7 @@ export default async ({ logger }) => {
   //   logger.info('-- 🛵 Scheduling Showrunner - UniSwap Governance Channel [on 24 Hours]');
   //   const uniswap = Container.get(Uniswap);
   //   const taskName = 'UniSwap proposal event checks and sendMessageToContract()';
-  //
+  
   //   try {
   //     await uniswap.sendMessageToContract(false);
   //     logger.info(`🐣 Cron Task Completed -- ${taskName}`);
