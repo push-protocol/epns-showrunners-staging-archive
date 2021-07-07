@@ -2,8 +2,8 @@
 // @version: 1.0
 
 import { Service, Inject } from 'typedi';
-import config from '../config';
-import channelWalletsInfo from '../config/channelWalletsInfo';
+import config from '../../config';
+import channelWalletsInfo from '../../config/channelWalletsInfo';
 // import PQueue from 'p-queue';
 import { ethers, logger } from 'ethers';
 import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk'
@@ -54,7 +54,7 @@ export default class AlphaHomoraChannel {
         'Position Liquidation',
         `Your position of id: ${id} is at ${config.homoraDebtRatioThreshold}% debt ratio and is at risk of liquidation`,
         'Position Liquidation',
-        `Your position of id: ${id} is at ${config.homoraDebtRatioThreshold}% debt ratio and is at risk of liquidation`,
+        `Your position of id: ${id} is at ${config.homoraDebtRatioThreshold}% debt ratio and is at risk of liquidation. [timestamp: ${Math.floor(new Date() / 1000)}]`,
         notificationType,
         simulate
       )

@@ -18,25 +18,28 @@ import logger from '../../loaders/logger';
 import { Container } from 'typedi';
 import schedule from 'node-schedule';
 
-import EthTickerChannel from './ethTickerChannel';
+import WalletTrackerChannel from './walletTrackerChannel';
 
 export default () => {
-  const startTime = new Date(new Date().setHours(0, 0, 0, 0));
+    const startTime = new Date(new Date().setHours(0, 0, 0, 0));
 
-  const dailyRule = new schedule.RecurrenceRule();
-  dailyRule.hour = 0;
-  dailyRule.minute = 0;
-  dailyRule.second = 0;
-  dailyRule.dayOfWeek = new schedule.Range(0, 6);
+    const dailyRule = new schedule.RecurrenceRule();
+    dailyRule.hour = 0;
+    dailyRule.minute = 0;
+    dailyRule.second = 0;
+    dailyRule.dayOfWeek = new schedule.Range(0, 6);
 
-  // 1 ETH TICKER CHANNEL
-  logger.info(`     🛵 Scheduling Showrunner - ETH Ticker Channel [on 6 Hours] [${new Date(Date.now())}]`);
-  schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
-    const ethTicker = Container.get(EthTickerChannel);
-    const taskName = 'ETH Ticker Fetch and sendMessageToContract()';
+    const thirtyMinuteRule = new schedule.RecurrenceRule();
+    thirtyMinuteRule.minute = new schedule.Range(0, 59, 30);
 
+   // 1.7 WALLET TRACKER CHANNEL
+   logger.info(`[${new Date(Date.now())}]     🛵 Scheduling Showrunner - Wallet Tracker Channel [on 30 Minutes]`);
+   schedule.scheduleJob({ start: startTime, rule: thirtyMinuteRule }, async function () {
+    const walletTracker = Container.get(WalletTrackerChannel);
+    const taskName = 'Track wallets on every new block mined';
+  
     try {
-      await ethTicker.sendMessageToContract(true);
+      await walletTracker.sendMessageToContract(false);
       logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
     }
     catch (err) {

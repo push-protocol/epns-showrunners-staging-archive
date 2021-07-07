@@ -33,25 +33,4 @@ export default (app: Router) => {
       }
     },
   );
-
-  // to get new price
-  route.post(
-    '/get_new_price',
-    middlewares.onlyLocalhost,
-    async (req: Request, res: Response, next: NextFunction) => {
-      const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/ethticker endpoint with body: %o', req.body )
-
-      try {
-        const ethTicker = Container.get(EthTickerChannel);
-        const { data } = await ethTicker.getNewPrice();
-
-        return res.status(201).json({ data });
-      } catch (e) {
-        Logger.error('🔥 error: %o', e);
-        return next(e);
-      }
-    },
-  );
-
 };

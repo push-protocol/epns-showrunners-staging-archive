@@ -18,32 +18,30 @@ import logger from '../../loaders/logger';
 import { Container } from 'typedi';
 import schedule from 'node-schedule';
 
-import AaveChannel from './aaveChannel';
+import TruefiChannel from './truefiChannel';
 
 export default () => {
-  return;
+    const startTime = new Date(new Date().setHours(0, 0, 0, 0));
 
-  const startTime = new Date(new Date().setHours(0, 0, 0, 0));
+    const dailyRule = new schedule.RecurrenceRule();
+    dailyRule.hour = 0;
+    dailyRule.minute = 0;
+    dailyRule.second = 0;
+    dailyRule.dayOfWeek = new schedule.Range(0, 6);
 
-  const dailyRule = new schedule.RecurrenceRule();
-  dailyRule.hour = 0;
-  dailyRule.minute = 0;
-  dailyRule.second = 0;
-  dailyRule.dayOfWeek = new schedule.Range(0, 6);
-
-  // AAVE CHANNEL RUNS EVERY 24 Hours
-  logger.info('     🛵 Scheduling Showrunner - Aave Channel [on 24 Hours]');
-  schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
-    const aaveTicker = Container.get(AaveChannel);
-    const taskName = 'Aave users address checks and sendMessageToContract()';
+    // 1.10 TrueFI CHANNEL
+    logger.info(`[${new Date(Date.now())}]     🛵 Scheduling Showrunner - Truefi Channel [on 24 Hours]`);
+    schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
+    const truefiTicker = Container.get(TruefiChannel);
+    const taskName = 'Truefi event checks and sendMessageToContract()';
 
     try {
-      await aaveTicker.sendMessageToContract(false);
-      logger.info(`🐣 Cron Task Completed -- ${taskName}`);
+        await truefiTicker.sendMessageToContract(false);
+        logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
     }
     catch (err) {
-      logger.error(`❌ Cron Task Failed -- ${taskName}`);
-      logger.error(`Error Object: %o`, err);
+        logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
+        logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
     }
-  });
+    });
 };

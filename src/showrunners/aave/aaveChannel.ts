@@ -3,12 +3,12 @@
 
 import { Service, Inject } from 'typedi';
 import config from '../../config';
-import channelConfig from './aaveChannelConfig';
+import channelWalletsInfo from '../../config/channelWalletsInfo';
 
 // import channelWalletsInfo from '../../config/channelWalletsInfo';
 import { ethers, logger} from 'ethers';
 import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk'
-const channelKey = channelConfig.aavePrivateKey_1
+const channelKey = channelWalletsInfo.walletsKV['aavePrivateKey_1']
 
 const infuraSettings: InfuraSettings = {
   projectID: config.infuraAPI.projectID,
@@ -42,10 +42,10 @@ export default class AaveChannel {
     const simulateAaveNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("aaveNetwork") ? simulate.logicOverride.aaveNetwork : false;
     let aave: any;
     if(simulateAaveNetwork){
-      aave = sdk.advanced.getInteractableContracts(simulateAaveNetwork, settings, channelKey, channelConfig.aaveLendingPoolDeployedContractPolygonMainnet, channelConfig.aaveLendingPoolDeployedContractABI);
+      aave = sdk.advanced.getInteractableContracts(simulateAaveNetwork, settings, channelKey, config.aaveLendingPoolDeployedContractPolygonMainnet, config.aaveLendingPoolDeployedContractABI);
     }
     else{
-      aave = await sdk.getContract(channelConfig.aaveLendingPoolDeployedContractPolygonMainnet, channelConfig.aaveLendingPoolDeployedContractABI)
+      aave = await sdk.getContract(config.aaveLendingPoolDeployedContractPolygonMainnet, config.aaveLendingPoolDeployedContractABI)
     }
     //simulate object settings END
 
@@ -60,10 +60,10 @@ export default class AaveChannel {
     const simulateAaveNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("aaveNetwork") ? simulate.logicOverride.aaveNetwork : false;
     if(!aave){
       if(simulateAaveNetwork){
-        aave = sdk.advanced.getInteractableContracts(simulateAaveNetwork, settings, channelKey, channelConfig.aaveLendingPoolDeployedContractPolygonMainnet, channelConfig.aaveLendingPoolDeployedContractABI);
+        aave = sdk.advanced.getInteractableContracts(simulateAaveNetwork, settings, channelKey, config.aaveLendingPoolDeployedContractPolygonMainnet, config.aaveLendingPoolDeployedContractABI);
       }
       else{
-        aave = await sdk.getContract(channelConfig.aaveLendingPoolDeployedContractPolygonMainnet, channelConfig.aaveLendingPoolDeployedContractABI)
+        aave = await sdk.getContract(config.aaveLendingPoolDeployedContractPolygonMainnet, config.aaveLendingPoolDeployedContractABI)
       }
     }
     if(!userAddress){
