@@ -35,7 +35,7 @@ export default () => {
   sixHourRule.second = 0;
 
   // 1 ETH TICKER CHANNEL
-  logger.info(`[${new Date(Date.now())}]    🛵 Scheduling Showrunner - ETH Ticker Channel [on 6 Hours] `);
+  logger.info(`     🛵 Scheduling Showrunner - ETH Ticker Channel [on 6 Hours] [${new Date(Date.now())}]`);
   schedule.scheduleJob({ start: startTime, rule: sixHourRule }, async function () {
     const ethTicker = Container.get(EthTickerChannel);
     const taskName = 'ETH Ticker Fetch and sendMessageToContract()';

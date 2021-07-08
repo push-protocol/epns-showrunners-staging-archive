@@ -30,11 +30,11 @@ export default () => {
     dailyRule.dayOfWeek = new schedule.Range(0, 6);
 
    //1.3 ENS TICKER CHANNEL
-   logger.info(`[${new Date(Date.now())}]     🛵 Scheduling Showrunner - ENS Domain Expiry Channel [on 24 Hours]`);
+   logger.info(`     🛵 Scheduling Showrunner - ENS Domain Expiry Channel [on 24 Hours] [${new Date(Date.now())}]`);
    schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
     const ensTicker = Container.get(EnsExpirationChannel);
     const taskName = 'ENS Domain Expiry and sendMessageToContract()';
-  
+
     try {
       await ensTicker.sendMessageToContract(false);
       logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);

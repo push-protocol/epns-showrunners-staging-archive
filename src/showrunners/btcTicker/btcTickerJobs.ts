@@ -35,7 +35,7 @@ export default () => {
   sixHourRule.second = 0;
 
   //   1 BTC TICKER CHANNEL
-  logger.info(`[${new Date(Date.now())}]     🛵 Scheduling Showrunner - BTC Ticker Channel [on 6 Hours]`);
+  logger.info(`     🛵 Scheduling Showrunner - BTC Ticker Channel [on 6 Hours] [${new Date(Date.now())}]`);
   schedule.scheduleJob({ start: startTime, rule: sixHourRule }, async function () {
     const btcTicker = Container.get(BtcTickerChannel);
     const taskName = 'BTC Ticker Fetch and sendMessageToContract()';

@@ -33,11 +33,11 @@ export default () => {
   tenMinuteRule.minute = new schedule.Range(0, 59, 10);
 
     // GAS CHANNEL
-    logger.info(`[${new Date(Date.now())}]     🛵 Scheduling Showrunner - Eth Gas Channel [on 10 minutes]`);
+    logger.info(`     🛵 Scheduling Showrunner - Eth Gas Channel [on 10 minutes] [${new Date(Date.now())}]`);
     schedule.scheduleJob({ start: startTime, rule: tenMinuteRule }, async function () {
     const gasTicker = Container.get(EthGasStationChannel);
     const taskName = 'Gas result and sendMessageToContract()';
-    
+
     try {
         await gasTicker.sendMessageToContract(false);
         logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
@@ -49,11 +49,11 @@ export default () => {
     });
 
    // GAS CHANNEL
-   logger.info(`[${new Date(Date.now())}]     🛵 Scheduling Showrunner - Gas Average Update [on 24 hours]`);
+   logger.info(`     🛵 Scheduling Showrunner - Gas Average Update [on 24 hours] [${new Date(Date.now())}]`);
    schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
     const gasDbTicker = Container.get(EthGasStationChannel);
     const taskName = 'updated mongoDb';
-  
+
     try {
       await gasDbTicker.updateGasPriceAverage(false);
       logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);

@@ -30,7 +30,7 @@ export default () => {
     dailyRule.dayOfWeek = new schedule.Range(0, 6);
 
     // 1.10 TrueFI CHANNEL
-    logger.info(`[${new Date(Date.now())}]     🛵 Scheduling Showrunner - Truefi Channel [on 24 Hours]`);
+    logger.info(`     🛵 Scheduling Showrunner - Truefi Channel [on 24 Hours] [${new Date(Date.now())}]`);
     schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
     const truefiTicker = Container.get(TruefiChannel);
     const taskName = 'Truefi event checks and sendMessageToContract()';
