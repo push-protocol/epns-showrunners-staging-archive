@@ -46,7 +46,7 @@ export default () => {
 
   for (const channel of directories) {
     const absPath = `${channelFolderPath}${channel}/${channel}Routes.ts`
-    const relativePath = `../showrunners-sdk/${channel}/${channel}Routes.ts`
+    const relativePath = `../showrunners/${channel}/${channel}Routes.ts`
 
     if (fs.existsSync(absPath)) {
       const cronning = require(absPath)
