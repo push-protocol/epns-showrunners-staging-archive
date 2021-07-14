@@ -33,11 +33,11 @@ export default () => {
     thirtyMinuteRule.minute = new schedule.Range(0, 59, 30);
 
    // 1.7 WALLET TRACKER CHANNEL
-   logger.info(`[${new Date(Date.now())}]     🛵 Scheduling Showrunner - Wallet Tracker Channel [on 30 Minutes]`);
+   logger.info(`     🛵 Scheduling Showrunner - Wallet Tracker Channel [on 30 Minutes] [${new Date(Date.now())}]`);
    schedule.scheduleJob({ start: startTime, rule: thirtyMinuteRule }, async function () {
     const walletTracker = Container.get(WalletTrackerChannel);
     const taskName = 'Track wallets on every new block mined';
-  
+
     try {
       await walletTracker.sendMessageToContract(false);
       logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);

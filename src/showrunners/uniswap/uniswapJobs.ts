@@ -30,11 +30,11 @@ export default () => {
     dailyRule.dayOfWeek = new schedule.Range(0, 6);
 
     // 1.9 UNISWAP CHANNEL
-    logger.info(`[${new Date(Date.now())}]     🛵 Scheduling Showrunner - Uniswap Channel [on 24 Hours]`);
+    logger.info(`     🛵 Scheduling Showrunner - Uniswap Channel [on 24 Hours] [${new Date(Date.now())}]`);
     schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
         const uniswap = Container.get(Uniswap);
         const taskName = 'Uniswap proposal event checks and sendMessageToContract()';
-      
+
         try {
           await uniswap.sendMessageToContract(false);
           logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);

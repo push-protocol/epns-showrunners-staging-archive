@@ -30,11 +30,11 @@ export default () => {
   dailyRule.dayOfWeek = new schedule.Range(0, 6);
 
    // 1.6 EVEREST CHANNEL
-   logger.info(`[${new Date(Date.now())}]     🛵 Scheduling Showrunner - Everest Channel [on 24 Hours]`);
+   logger.info(`     🛵 Scheduling Showrunner - Everest Channel [on 24 Hours] [${new Date(Date.now())}]`);
    schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
     const everestTicker = Container.get(Everest);
     const taskName = 'Everest event checks and sendMessageToContract()';
-  
+
     try {
       await everestTicker.sendMessageToContract(false);
       logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);

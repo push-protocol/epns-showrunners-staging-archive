@@ -30,7 +30,7 @@ export default () => {
   dailyRule.dayOfWeek = new schedule.Range(0, 6);
 
   // 1 ETH TICKER CHANNEL
-  logger.info(`[${new Date(Date.now())}]    🛵 Scheduling Showrunner - Alpha Homora Channel [on 24 Hours] `);
+  logger.info(`     🛵 Scheduling Showrunner - Alpha Homora Channel [on 24 Hours] [${new Date(Date.now())}]`);
   schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
     const alphaHomora = Container.get(AlphaHomoraChannel);
     const taskName = 'Alpha Homora channel check and sendMessageToContract()';

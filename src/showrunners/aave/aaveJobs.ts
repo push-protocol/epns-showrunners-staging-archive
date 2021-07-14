@@ -30,7 +30,7 @@ export default () => {
   dailyRule.dayOfWeek = new schedule.Range(0, 6);
 
   // AAVE CHANNEL RUNS EVERY 24 Hours
-  logger.info(`[${new Date(Date.now())}]     🛵 Scheduling Showrunner - Aave Channel [on 24 Hours]`);
+  logger.info(`     🛵 Scheduling Showrunner - Aave Channel [on 6 Hours] [${new Date(Date.now())}]`);
   schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
     const aaveChannel = Container.get(AaveChannel);
     const taskName = 'Aave users address checks and sendMessageToContract()';
