@@ -138,3 +138,6 @@ logs/*
 epns-firebase-adminsdk.json
 external
 dump.rdb*
+
+# ChannelKeys
+src/showrunners/btcTicker/btcTickerKeys.json
