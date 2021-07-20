@@ -43,6 +43,9 @@ const wallets = [
         },
         {
             helloWorldPrivateKey_1: process.env.HELLO_WORLD_PRIVATE_KEY
+        },
+        {
+            yamGovernancePrivateKey_1: process.env.YAM_GOVERNANCE_PRIVATE_KEY
         }
 ]
     

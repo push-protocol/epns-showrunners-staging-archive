@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "0a01a91b-38b5-4fe5-a428-08244ea5b757",
+		"_postman_id": "7c823802-5ef2-4c22-8d02-d88004bf1fae",
 		"name": "EPNS Showrunners Staging SDK",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1309,6 +1309,72 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Yam Governance",
+			"item": [
+				{
+					"name": "yamgovernance/send_message",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"simulate\":  {\r\n\t\t\"payloadMode\": \"Real\",\r\n\t\t\"txMode\": \"Real\",\r\n\t\t\"logicOverride\": {\r\n            \"mode\": true,\r\n\t\t\t\"fromBlock\": 1000,\r\n\t\t\t\"toBlock\": \t25952693\r\n\t\t},\r\n\t\t\"txOverride\": {\r\n            \"mode\": true,\r\n\t\t\t\"recipientAddr\": \"0x6A06014AC6BdE2906D194e63ec3b1B5B4c9C2Abb\",\r\n\t\t\t\"notificationType\": 1\r\n\t\t}\r\n\t}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:5432/apis/showrunners-sdk/yamgovernance/send_message",
+							"host": [
+								"localhost"
+							],
+							"port": "5432",
+							"path": [
+								"apis",
+								"showrunners-sdk",
+								"yamgovernance",
+								"send_message"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "yamgovernance/check_new_proposal",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{   \r\n    \"web3network\": \"kovan\",\r\n    \"fromBlock\": 1000,\r\n    \"toBlock\": \t25952693,\r\n    \"simulate\":  {\r\n\t\t\"payloadMode\": \"Real\",\r\n\t\t\"txMode\": \"Real\",\r\n\t\t\"logicOverride\": {\r\n            \"mode\": true,\r\n\t\t\t\"fromBlock\": 1000,\r\n\t\t\t\"toBlock\": \t25952693\r\n\t\t},\r\n\t\t\"txOverride\": {\r\n            \"mode\": true,\r\n\t\t\t\"recipientAddr\": \"0x6A06014AC6BdE2906D194e63ec3b1B5B4c9C2Abb\",\r\n\t\t\t\"notificationType\": 1\r\n\t\t}\r\n\t}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:5432/apis/showrunners-sdk/yamgovernance/check_new_proposal",
+							"host": [
+								"localhost"
+							],
+							"port": "5432",
+							"path": [
+								"apis",
+								"showrunners-sdk",
+								"yamgovernance",
+								"check_new_proposal"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Notifies people when a new proposal has been made on their governance contract.\n\n2 function - \n`sendMessageToContract`, `getNewProposals`"
 		}
 	]
 }
