@@ -103,6 +103,13 @@ export default {
   ensDeployedContract: process.env.ENS_DEPLOYED_CONTRACT,
   ensDeployedContractABI: require('./ens_contract.json'),
   
+  /**
+   * UNISWAP Related
+   */
+  uniswapDeployedContractRopsten: process.env.UNI_GOVERNANCE_DEPLOYED_CONTRACT_ROPSTEN,
+  uniswapDeployedContractMainnet: process.env.UNI_GOVERNANCE_DEPLOYED_CONTRACT_MAINNET,
+  uniswapDeployedContractABI: require('./uni_contract.json'),
+  
     /**
    * COMPOUND Related
    */
