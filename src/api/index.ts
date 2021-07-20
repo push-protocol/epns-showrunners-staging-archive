@@ -39,7 +39,7 @@ export default () => {
 	ensDomain(app);
 	compoundTicker(app);
 	//gasPrice(app);
-	//wallet_tracker(app);
+	wallet_tracker(app);
 	everest(app);
 	//truefi(app);
 	//wallet_monitoring(app);
@@ -50,7 +50,7 @@ export default () => {
 	btcTicker_sdk(app);
 	ethTicker_sdk(app);	
 	gasPrice_sdk(app);
-	//wallet_tracker_sdk(app);
+	wallet_tracker_sdk(app);
 	truefi_sdk(app);
 	helloWorld_sdk(app);
 	alphahomora_sdk(app);
