@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "0a01a91b-38b5-4fe5-a428-08244ea5b757",
+		"_postman_id": "34c91f33-14dd-449f-9fab-33df34a55068",
 		"name": "EPNS Showrunners Staging SDK",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -350,14 +350,14 @@
 							"raw": "{\n\t\"simulate\": {\n\t\t\"payloadMode\": \"Simulated\",\n\t\t\"txMode\": \"Simulated\",\n\t\t\"logicOverride\": {\n            \"mode\": false\n\t\t},\n\t\t\"txOverride\": {\n            \"mode\": true,\n\t\t\t\"recipientAddr\": \"0x108C2E758BC771AFF2F7B0B006c9deD1101440AE\",\n\t\t\t\"notificationType\": 3\n\t\t}\n\t}\n}"
 						},
 						"url": {
-							"raw": "localhost:5432/apis/showrunners-sdk/ethticker/send_message",
+							"raw": "localhost:5432/apis/showrunners/ethticker/send_message",
 							"host": [
 								"localhost"
 							],
 							"port": "5432",
 							"path": [
 								"apis",
-								"showrunners-sdk",
+								"showrunners",
 								"ethticker",
 								"send_message"
 							]
@@ -604,14 +604,14 @@
 							"raw": "{\n    \"simulate\": true\n}"
 						},
 						"url": {
-							"raw": "localhost:5432/apis/showrunners/gasprice/update_gasprice_average",
+							"raw": "localhost:5432/apis/showrunners-sdk/gasprice/update_gasprice_average",
 							"host": [
 								"localhost"
 							],
 							"port": "5432",
 							"path": [
 								"apis",
-								"showrunners",
+								"showrunners-sdk",
 								"gasprice",
 								"update_gasprice_average"
 							]
@@ -636,14 +636,14 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "localhost:5432/apis/showrunners/gasprice/get_gas_price",
+							"raw": "localhost:5432/apis/showrunners-sdk/gasprice/get_gas_price",
 							"host": [
 								"localhost"
 							],
 							"port": "5432",
 							"path": [
 								"apis",
-								"showrunners",
+								"showrunners-sdk",
 								"gasprice",
 								"get_gas_price"
 							]
@@ -668,14 +668,14 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "localhost:5432/apis/showrunners/gasprice/get_average_gas_price",
+							"raw": "localhost:5432/apis/showrunners-sdk/gasprice/get_average_gas_price",
 							"host": [
 								"localhost"
 							],
 							"port": "5432",
 							"path": [
 								"apis",
-								"showrunners",
+								"showrunners-sdk",
 								"gasprice",
 								"get_average_gas_price"
 							]
@@ -700,14 +700,14 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "localhost:5432/apis/showrunners/gasprice/clear_gas_price",
+							"raw": "localhost:5432/apis/showrunners-sdk/gasprice/clear_gas_price",
 							"host": [
 								"localhost"
 							],
 							"port": "5432",
 							"path": [
 								"apis",
-								"showrunners",
+								"showrunners-sdk",
 								"gasprice",
 								"clear_gas_price"
 							]
@@ -870,7 +870,7 @@
 							"raw": "{\n    \"simulate\": true\n}"
 						},
 						"url": {
-							"raw": "localhost:5432/apis/showrunners/ethticker/get_new_price",
+							"raw": "localhost:5432/apis/showrunners/btcticker/get_new_price",
 							"host": [
 								"localhost"
 							],
@@ -878,7 +878,7 @@
 							"path": [
 								"apis",
 								"showrunners",
-								"ethticker",
+								"btcticker",
 								"get_new_price"
 							]
 						}
@@ -936,10 +936,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"simulate\": true\n}"
+							"raw": "{   \n    \"web3network\": \"mainnet\",\n    \"fromBlock\": 100000,\n    \"toBlock\": 2000000000,\n    \"simulate\":  {\n\t\t\"payloadMode\": \"Real\",\n\t\t\"txMode\": \"Real\",\n\t\t\"logicOverride\": {\n            \"mode\": true,\n\t\t\t\"fromBlock\": 11350301,\n\t\t\t\"toBlock\": 11380301\n\t\t},\n\t\t\"txOverride\": {\n            \"mode\": true,\n\t\t\t\"recipientAddr\": \"0x276B820E8382f17ECB9FA77B0952ca4E67287601\",\n\t\t\t\"notificationType\": 3\n\t\t}\n\t}\n}"
 						},
 						"url": {
-							"raw": "localhost:5432/apis/showrunners/everest/send_message",
+							"raw": "localhost:5432/apis/showrunners/everest-sdk/check_member_challenged_event",
 							"host": [
 								"localhost"
 							],
@@ -947,8 +947,8 @@
 							"path": [
 								"apis",
 								"showrunners",
-								"everest",
-								"send_message"
+								"everest-sdk",
+								"check_member_challenged_event"
 							]
 						}
 					},
@@ -1095,7 +1095,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"simulate\": {\n\t\t\"payloadMode\": \"Real\",\n\t\t\"txMode\": \"Real\",\n\t\t\"logicOverride\": {\n            \"mode\":true,\n\t\t\t\"aaveNetwork\": \"kovan\",\n\t\t\t\"applyToAddr\": \"0x276B820E8382f17ECB9FA77B0952ca4E67287601\"\n\t\t}\n\t}\n}",
+							"raw": "{\n\t\"simulate\": {\n\t\t\"payloadMode\": \"Real\",\n\t\t\"txMode\": \"Real\",\n\t\t\"logicOverride\": {\n            \"mode\":true,\n\t\t\t\"aaveNetwork\": \"https://rpc-mainnet.maticvigil.com\",\n\t\t\t\"applyToAddr\": \"0x0dCFdA8422b9B95c22118DD2b460e55828cb074b\"\n\t\t}\n\t}\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1103,14 +1103,14 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:5432/apis/showrunners/aave/checkHealthFactor",
+							"raw": "localhost:5432/apis/showrunners-sdk/aave/checkHealthFactor",
 							"host": [
 								"localhost"
 							],
 							"port": "5432",
 							"path": [
 								"apis",
-								"showrunners",
+								"showrunners-sdk",
 								"aave",
 								"checkHealthFactor"
 							]
@@ -1203,14 +1203,14 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:5432/apis/showrunners/truefi/check_active_loans",
+							"raw": "localhost:5432/apis/showrunners-sdk/truefi/check_active_loans",
 							"host": [
 								"localhost"
 							],
 							"port": "5432",
 							"path": [
 								"apis",
-								"showrunners",
+								"showrunners-sdk",
 								"truefi",
 								"check_active_loans"
 							]
