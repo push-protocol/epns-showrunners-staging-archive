@@ -76,7 +76,7 @@ export default async ({ logger }) => {
 
   for (const channel of directories) {
     const absPath = `${channelFolderPath}${channel}/${channel}Jobs.ts`
-    const relativePath = `../showrunners-sdk/${channel}/${channel}Jobs.ts`
+    const relativePath = `../showrunners/${channel}/${channel}Jobs.ts`
 
     if (fs.existsSync(absPath)) {
       const cronning = await import(absPath)
