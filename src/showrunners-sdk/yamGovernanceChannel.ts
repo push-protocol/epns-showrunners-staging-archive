@@ -3,7 +3,7 @@ import config from '../config';
 import channelWalletsInfo from '../config/channelWalletsInfo';
 // import PQueue from 'p-queue';
 import { ethers, logger } from 'ethers';
-import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk';
+import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging';
 const channelKey = channelWalletsInfo.walletsKV['yamGovernancePrivateKey_1'];
 
 const infuraSettings: InfuraSettings = {
