@@ -108,6 +108,8 @@ export default {
    */
   uniswapDeployedContractRopsten: process.env.UNI_GOVERNANCE_DEPLOYED_CONTRACT_ROPSTEN,
   uniswapDeployedContractMainnet: process.env.UNI_GOVERNANCE_DEPLOYED_CONTRACT_MAINNET,
+  uniswapV3Deployedcontract: process.env.UNIV3_GOVERNANCE_DEPLOYED_CONTRACT,
+  uniswapV3DeployedcontractABI: require('./univ3_contract.json'),
   uniswapDeployedContractABI: require('./uni_contract.json'),
   
     /**
