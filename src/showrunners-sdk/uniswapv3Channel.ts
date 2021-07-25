@@ -1,6 +1,8 @@
 import { Service, Inject } from "typedi";
 import config from "../config";
 import channelWalletsInfo from "../config/channelWalletsInfo";
+import { computePoolAddress, Pool   } from "@uniswap/v3-sdk";
+import { Token } from '@uniswap/sdk-core'
 import { ethers, logger } from "ethers";
 import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging';
 
@@ -49,5 +51,28 @@ export default class UniswapV3Channel{
         return positions;
     }
 
-    // 
+    // to get the relative price of the tokens in a pool
+    public async getRelativePrice(token0, token1, fees, simulate){
+
+        // Overide logic if need be
+        const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride") ? simulate.hasOwnProperty("logicOverride") : false) : false;
+        const poolToken0 = logicOverride && simulate.logicOverride.mode && simulate.logicOverride.hasOwnProperty("token0") ? simulate.logicOverride.token0 : token0;
+        const poolToken1 = logicOverride && simulate.logicOverride.mode && simulate.logicOverride.hasOwnProperty("token1") ? simulate.logicOverride.token1 : token1;
+        const poolFees = logicOverride && simulate.logicOverride.mode && simulate.logicOverride.hasOwnProperty("fees") ? simulate.logicOverride.fees : fees;
+        //  -- End Override logic
+        
+        // Call Helper function to get interactableContracts
+        const uniContract = await sdk.getContract(config.uniswapDeployedFactoryContract, config.uniswapDeployedFactoryContractABI);
+        const parsedTokenZero = new Token(3, poolToken0 , 18);
+        const parsedTokenOne = new Token(3, poolToken0 , 18);
+        console.log({parsedTokenOne, parsedTokenZero});
+        const poolAddress = await uniContract.contract.functions.getPool(
+            poolToken0, poolToken1, poolFees
+        )
+        // const apoolAddress = await Pool.getAddress(parsedTokenZero, parsedTokenOne, fees);
+
+        console.log({poolAddress});
+
+        return 1000
+    }
 }
