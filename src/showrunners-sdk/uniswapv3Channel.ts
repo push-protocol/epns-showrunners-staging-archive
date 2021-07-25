@@ -4,7 +4,7 @@ import channelWalletsInfo from "../config/channelWalletsInfo";
 import { ethers, logger } from "ethers";
 import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging';
 
-const NETWORK_TO_MONITOR = config.web3MainnetNetwork;
+const NETWORK_TO_MONITOR = config.web3RopstenNetwork;
 const channelKey = channelWalletsInfo.walletsKV['uniSwapPrivateKey_1'];
 
 const infuraSettings: InfuraSettings = {
@@ -27,9 +27,27 @@ const sdk = new epnsHelper(NETWORK_TO_MONITOR, channelKey, settings, epnsSetting
 export default class UniswapV3Channel{
     constructor(){}
 
-    // to send notifications
+    // to send get nft positions of a particular address
     public async getPositions(address:String, simulate){
-        const uniContract = await sdk.getContract(config.uniswapV3Deployedcontract, config.uniswapV3ContractABI);
-        
+        let positions = []
+        //  Overide logic if need be
+        const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride") ? simulate.hasOwnProperty("logicOverride") : false) : false;
+        const userAddress = logicOverride && simulate.logicOverride.mode && simulate.logicOverride.hasOwnProperty("address") ? simulate.logicOverride.address : address;
+        //  -- End Override logic
+
+        // Call Helper function to get interactableContracts
+        const uniContract = await sdk.getContract(config.uniswapV3Deployedcontract, config.uniswapV3DeployedcontractABI);
+
+        // get all the number of nft tokens a user with the adress has
+        const addressCount = ( await uniContract.contract.functions.balanceOf(userAddress) ).toString();
+        // loop through all the nftId's and get their corresponding positions
+        for(let i=0; i < parseInt(addressCount); i++){
+            const nftId = ( await uniContract.contract.functions.tokenOfOwnerByIndex(userAddress, i) ).toString();
+            const position = await uniContract.contract.functions.positions(nftId);
+            positions.push(position);
+        }
+        return positions;
     }
+
+    // 
 }
