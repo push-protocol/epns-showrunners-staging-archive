@@ -113,10 +113,11 @@ export default {
   uniswapV3DeployedcontractABI: require('./univ3_contract.json'),
   uniswapDeployedContractABI: require('./uni_contract.json'),
   uniswapDeployedFactoryContractABI: require('./univ3_factory_contract.json'),
+  uniswapDeployedPoolContractABI: require('./univ3_pool_contract.json'),
   
-    /**
+  /**
    * COMPOUND Related
-   */
+  */
   compComptrollerDeployedContract: process.env.COMPOUND_COMPTROLLER_DEPLOYED_CONTRACT,
   compComptrollerDeployedContractABI: require('./comp_comptroller.json'),
 

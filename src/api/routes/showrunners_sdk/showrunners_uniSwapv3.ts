@@ -10,7 +10,7 @@ export default(app: Router) => {
     app.use('/showrunners/uniswapv3', route);
 
     route.post(
-        '/get_pool_price',
+        '/get_position_details',
         celebrate({
             body: Joi.object({
                 simulate: Joi.object()
@@ -22,7 +22,7 @@ export default(app: Router) => {
             Logger.debug('Calling /showrunners/uniswapv3/get_pool_price ticker endpoint with body: %o', req.body );
             try{
                 const uniswapv3 = Container.get(UniswapV3Channel);
-                const response = await uniswapv3.getRelativePrice(null, null, null, req.body.simulate);
+                const response = await uniswapv3.getPositionDetails(null, null, null, null, null, req.body.simulate);
 
                 return res.status(201).json(response)
             } catch (e) {
