@@ -140,4 +140,5 @@ external
 dump.rdb*
 
 # ChannelKeys
-src/showrunners/btcTicker/btcTickerKeys.json
+src/showrunners/*/*Keys.json
+src/showrunners/*/*Settings.json

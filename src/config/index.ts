@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import loadShowrunnersWallets from './channelsConfig'
 
 // Set the NODE_ENV to 'development' by default
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
@@ -10,7 +11,15 @@ if (envFound.error) {
   throw new Error("⚠️  Couldn't find .env file  ⚠️");
 }
 
+// const wallets = (await require('./channelsConfig.ts'));
+//console.log(wallets)
+
 export default {
+  /**
+   * Load Wallets of Showrunners
+   */
+  showrunnerWallets: loadShowrunnersWallets(),
+
   /**
    * Your favorite port
    */
@@ -87,7 +96,7 @@ export default {
 
   web3PolygonMainnetProvider: process.env.POLYGON_MAINNET_WEB3_PROVIDER,
   web3PolygonMainnetRPC: process.env.POLYGON_MAINNET_RPC,
-  
+
   web3PolygonMumbaiProvider: process.env.POLYGON_MUMBAI_WEB3_PROVIDER,
   web3PolygonMumbaiRPC: process.env.POLYGON_MUMBAI_RPC,
 
@@ -102,14 +111,14 @@ export default {
    */
   ensDeployedContract: process.env.ENS_DEPLOYED_CONTRACT,
   ensDeployedContractABI: require('./ens_contract.json'),
-  
+
   /**
    * UNISWAP Related
    */
   uniswapDeployedContractRopsten: process.env.UNI_GOVERNANCE_DEPLOYED_CONTRACT_ROPSTEN,
   uniswapDeployedContractMainnet: process.env.UNI_GOVERNANCE_DEPLOYED_CONTRACT_MAINNET,
   uniswapDeployedContractABI: require('./uni_contract.json'),
-  
+
     /**
    * COMPOUND Related
    */

@@ -14,7 +14,6 @@ async function startServer() {
 
   // Continue load
   const config = (await require('./config/index')).default;
-  (await require('./config/channelsConfig.ts')).default.channelKeysLoader;
 
   // load app
   const app = express();

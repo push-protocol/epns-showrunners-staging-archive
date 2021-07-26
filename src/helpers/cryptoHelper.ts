@@ -7,9 +7,21 @@ import EthCrypto from 'eth-crypto';
 import {encrypt, decrypt} from 'eccrypto';
 import { publicKeyConvert, publicKeyVerify } from 'secp256k1-v4';
 
+import { ethers } from 'ethers';
+
 const publicKeyToAddress = require('ethereum-public-key-to-address')
 
 module.exports = {
+  // Check if Private Key is valid
+  checkValidityPrivKey: function(pk) {
+    try {
+      const valid = new ethers.Wallet(pk);
+      return true;
+    }
+    catch (e) {
+      return false;
+    }
+  },
   // To Encrypt with AES
   encryptWithAES: function(message, key) {
     return CryptoJS.AES.encrypt(message, key).toString();
