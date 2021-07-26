@@ -96,8 +96,19 @@ export default class UniswapV3Channel{
         // the price would be the higher of the relative prices of the two different assets in the pool
         const firstRatio = Number(liquidityPool.token0Price.toFixed(PRICE_DECIMAL_PLACE))
         const secondRation = Number(liquidityPool.token1Price.toFixed(PRICE_DECIMAL_PLACE))
-        const relativePrice = Math.max(firstRatio, secondRation);
+        const currentPrice = Math.max(firstRatio, secondRation);
 
-        return relativePrice;
+        // Get the translation of the upper and lower tick
+        const upperTickPrice1 = Number(tickToPrice(parsedTokenZero, parsedTokenOne, parseInt(poolUpperTick)).toFixed(PRICE_DECIMAL_PLACE));
+        const upperTickPrice2 = Number(tickToPrice(parsedTokenOne, parsedTokenZero, parseInt(poolUpperTick)).toFixed(PRICE_DECIMAL_PLACE));
+        const upperTickPrice = Math.max(upperTickPrice1, upperTickPrice2);
+    
+        const lowerTickPrice1 = Number(tickToPrice(parsedTokenZero, parsedTokenOne, parseInt(poolLowerTick)).toFixed(PRICE_DECIMAL_PLACE));
+        const lowerTickPrice2 = Number(tickToPrice(parsedTokenOne, parsedTokenZero, parseInt(poolLowerTick)).toFixed(PRICE_DECIMAL_PLACE));
+        const lowerTickPrice = Math.max(lowerTickPrice1, lowerTickPrice2);
+
+        // calculate if the current price is within the ticks
+        const withinTicks = ( currentPrice < lowerTickPrice ) && ( currentPrice > upperTickPrice );
+        return {currentPrice, upperTickPrice, lowerTickPrice, withinTicks};
     }
 }
