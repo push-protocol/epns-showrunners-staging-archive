@@ -3,11 +3,35 @@ import { Container } from 'typedi';
 import UniswapV3Channel from '../../../showrunners-sdk/uniswapv3Channel';
 import middlewares from '../../middlewares';
 import { celebrate, Joi } from 'celebrate';
+import { Logger } from 'ethers/lib/utils';
 
 const route = Router();
 
 export default(app: Router) => {
     app.use('/showrunners/uniswapv3', route);
+
+    route.post(
+        '/send_message',
+        celebrate({
+            body: Joi.object({
+                simulate: [Joi.object(), Joi.bool()]
+            })
+        }),
+        middlewares.onlyLocalhost,
+        async (req: Request, res: Response, next: NextFunction) => {
+            const Logger = Container.get('logger');
+            Logger.debug('Calling /showrunners/uniswapv3/send_messages: %o', req.body);
+            try{
+                const uniswapv3 = Container.get(UniswapV3Channel);
+                const response = await uniswapv3.sendMessageToContracts(req.body.simulate);
+
+                return res.status(201).json(response);
+            } catch (e) {
+                Logger.error('🔥 error: %o', e);
+                return next(e);
+            }
+        }
+    )
 
     route.post(
         '/get_position_details',

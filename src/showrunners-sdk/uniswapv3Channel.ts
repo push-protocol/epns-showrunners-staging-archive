@@ -2,10 +2,12 @@ import { Service, Inject } from "typedi";
 import config from "../config";
 import channelWalletsInfo from "../config/channelWalletsInfo";
 import { Pool, tickToPrice } from "@uniswap/v3-sdk";
-import { Token } from '@uniswap/sdk-core'
+import { Token } from '@uniswap/sdk-core';
+import { ethers, logger} from 'ethers';
 import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging';
 
-const NETWORK_TO_MONITOR = config.web3MainnetNetwork;
+
+// TODO change channel key to that of uniswap v3 channel
 const channelKey = channelWalletsInfo.walletsKV['uniSwapPrivateKey_1'];
 
 const infuraSettings: InfuraSettings = {
@@ -18,15 +20,75 @@ const settings: NetWorkSettings = {
     etherscan: config.etherscanAPI
 }
 const epnsSettings: EPNSSettings = {
-    network: config.web3MainnetNetwork,
+    network: config.web3RopstenNetwork,
     contractAddress: config.deployedContract,
     contractABI: config.deployedContractABI
 }
+
+const NETWORK_TO_MONITOR = config.web3MainnetNetwork;
 const sdk = new epnsHelper(NETWORK_TO_MONITOR, channelKey, settings, epnsSettings);
 
 @Service()
 export default class UniswapV3Channel{
     constructor(){}
+    // to check all the wallet addresses in the channel and send notification to teh interested subset
+    public async sendMessageToContracts(simulate){
+        logger.info(`[${new Date(Date.now())}]-[UNIV3 LP sendMessageToContracts] `);
+        logger.info(`[UNIV3 LP sendMessageToContracts] - getting all the subscribers of a channel...`);
+        
+        //  Overide logic if need be
+        const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride") ? simulate.hasOwnProperty("logicOverride") : false) : false;
+        let subscribers = logicOverride && simulate.logicOverride.mode && simulate.logicOverride.hasOwnProperty("addressesWithPositions") ? simulate.logicOverride.addressesWithPositions : false;
+        //  -- End Override logic
+
+        const txns = [] // to hold all the transactions of the sent notifications
+        if(!subscribers){
+            subscribers = await sdk.getSubscribedUsers()
+        }
+
+        // loop through all users and get their positions
+        for(let subscriber of subscribers){
+            logger.info(`[UNIV3 LP getPositions] - getting all posistions for subscriber ${subscriber}...`);
+
+            const allPositions = await this.getPositions(subscriber, undefined);
+            
+            logger.info(`[UNIV3 LP getPositions] - getting details on all posistions for subscriber ${subscriber}...`);
+            // -- go through all positions to confirm who is in range and who isnt
+            for(let position of allPositions){
+                // -- get all the required parameters
+                const {
+                    token0, token1, fee,
+                    tickUpper, tickLower
+                } = position;
+                const positionDetails = await this.getPositionDetails(
+                    token0, token1, fee,
+                    tickUpper, tickLower, undefined
+                );    
+                logger.info(`[UNIV3 LP sendMessageToContracts] - Gotten details for position. ${positionDetails}.`);           
+                const { withinTicks } = positionDetails;
+                // -- if the current price is not within the set ticks then trigger a notif
+                if(!withinTicks){
+                    const title = "UniswapV3 LP position out of range";
+                    const body = "you have stopped receiving fees for your LP position as it's out of range";
+                    const payloadTitle = "UniswapV3 LP position out of range";
+                    const payloadMsg = "you have stopped receiving fees for your LP position as it's out of range";
+                    const notificationType = 3;
+                    const tx = await sdk.sendNotification(
+                        subscriber, title, body, payloadTitle,
+                        payloadMsg, notificationType, simulate
+                    );
+                    txns.push(tx);
+                    logger.info(`[UNIV3 LP sendMessageToContracts] - sent notification to ${subscriber}`); 
+                }
+
+            }
+        }
+
+        return {
+            success: true,
+            data: txns
+        }
+    }
 
     // to send get nft positions of a particular address
     public async getPositions(address:String, simulate){
@@ -41,12 +103,15 @@ export default class UniswapV3Channel{
 
         // get all the number of nft tokens a user with the adress has
         const addressCount = ( await uniContract.contract.functions.balanceOf(userAddress) ).toString();
+        logger.info(`[UNIV3 LP getPositions] - There are a total of ${addressCount} positions...`);
         // loop through all the nftId's and get their corresponding positions
-        for(let i=0; i < parseInt(addressCount); i++){
+        for(let i = 0; i < parseInt(addressCount); i++){
             const nftId = ( await uniContract.contract.functions.tokenOfOwnerByIndex(userAddress, i) ).toString();
             const position = await uniContract.contract.functions.positions(nftId);
             positions.push(position);
+            logger.info(`[UNIV3 LP getPositions] - Gotten position ${i} of ${addressCount} positions...`);
         }
+        logger.info(`[UNIV3 LP getPositions] - all position for subscriber ${userAddress} gotten...`);
         return positions;
     }
 
@@ -63,6 +128,7 @@ export default class UniswapV3Channel{
         //  -- End Override logic
         
         // -- convert address to Token instance
+        logger.info(`[UNIV3 LP getPositionDetails] - converting token address to Token instance...`);
             // -- Firstly to get the token's contract in order to get the decimal places of each token
         const tokenZeroDecimals = await (await sdk.getContract(poolToken0, config.erc20DeployedContractABI)).contract.functions.decimals();
         const tokenOneDecimals = await (await sdk.getContract(poolToken1, config.erc20DeployedContractABI)).contract.functions.decimals();
@@ -74,12 +140,14 @@ export default class UniswapV3Channel{
         const uniContract = await sdk.getContract(config.uniswapDeployedFactoryContract, config.uniswapDeployedFactoryContractABI);
 
         // get the pool adress and the pool contract
+        logger.info(`[UNIV3 LP getPositionDetails] - Obtaining pool address and contract...`);
         const poolAddress = (await uniContract.contract.functions.getPool(
             poolToken0, poolToken1, poolFees
         ) ).toString();
         const poolContract = await sdk.getContract(poolAddress, config.uniswapDeployedPoolContractABI)
         
         // get the necessary details to fetch the relative price
+        logger.info(`[UNIV3 LP getPositionDetails] - creating SDK liquidity pool instance...`);
         const tslot = await poolContract.contract.functions.slot0();
         const tliquidity = await poolContract.contract.functions.liquidity();
         const tsqrtPriceX96 = tslot.sqrtPriceX96;
@@ -94,6 +162,7 @@ export default class UniswapV3Channel{
             ttick
         );
         // the price would be the higher of the relative prices of the two different assets in the pool
+        logger.info(`[UNIV3 LP getPositionDetails] - calculating required prices from ticks...`);
         const firstRatio = Number(liquidityPool.token0Price.toFixed(PRICE_DECIMAL_PLACE))
         const secondRation = Number(liquidityPool.token1Price.toFixed(PRICE_DECIMAL_PLACE))
         const currentPrice = Math.max(firstRatio, secondRation);
@@ -109,6 +178,6 @@ export default class UniswapV3Channel{
 
         // calculate if the current price is within the ticks
         const withinTicks = ( currentPrice < lowerTickPrice ) && ( currentPrice > upperTickPrice );
-        return {currentPrice, upperTickPrice, lowerTickPrice, withinTicks};
+        return {currentPrice, upperTickPrice, lowerTickPrice, withinTicks, poolAddress};
     }
 }
