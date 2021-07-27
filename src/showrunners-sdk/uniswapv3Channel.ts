@@ -118,6 +118,7 @@ export default class UniswapV3Channel{
     // to get the relative price of the tokens in a pool
     public async getPositionDetails(token0, token1, fees, upperTick, lowerTick, simulate){
         const PRICE_DECIMAL_PLACE = 3;
+        const MAIN_NETWORK_ID = 1;
         // Overide logic if need be
         const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride") ? simulate.hasOwnProperty("logicOverride") : false) : false;
         const poolToken0 = logicOverride && simulate.logicOverride.mode && simulate.logicOverride.hasOwnProperty("token0") ? simulate.logicOverride.token0 : token0;
@@ -133,8 +134,8 @@ export default class UniswapV3Channel{
         const tokenZeroDecimals = await (await sdk.getContract(poolToken0, config.erc20DeployedContractABI)).contract.functions.decimals();
         const tokenOneDecimals = await (await sdk.getContract(poolToken1, config.erc20DeployedContractABI)).contract.functions.decimals();
             // -- Next we use the decimals to obtain the token object
-        const parsedTokenZero = new Token(1, poolToken0 , tokenZeroDecimals[0]);
-        const parsedTokenOne = new Token(1, poolToken1 , tokenOneDecimals[0]);
+        const parsedTokenZero = new Token(MAIN_NETWORK_ID, poolToken0 , tokenZeroDecimals[0]);
+        const parsedTokenOne = new Token(MAIN_NETWORK_ID, poolToken1 , tokenOneDecimals[0]);
 
         // Call Helper function to get pool factory contract
         const uniContract = await sdk.getContract(config.uniswapDeployedFactoryContract, config.uniswapDeployedFactoryContractABI);
