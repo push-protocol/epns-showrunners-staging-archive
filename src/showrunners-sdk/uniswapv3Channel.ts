@@ -8,7 +8,7 @@ import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnspr
 
 
 // TODO change channel key to that of uniswap v3 channel
-const channelKey = channelWalletsInfo.walletsKV['uniSwapPrivateKey_1'];
+const channelKey = channelWalletsInfo.walletsKV['uniSwapv3PrivateKey_1'];
 
 const infuraSettings: InfuraSettings = {
     projectID: config.infuraAPI.projectID,
@@ -26,8 +26,14 @@ const epnsSettings: EPNSSettings = {
 }
 
 const NETWORK_TO_MONITOR = config.web3MainnetNetwork;
-const sdk = new epnsHelper(NETWORK_TO_MONITOR, channelKey, settings, epnsSettings);
 
+const CUSTOMIZABLE_SETTINGS = {
+    'precision': 3,
+    'homestead': 1, // the chain id for mainnet
+    'ropsten': 3, // the chain id for ropsten
+    'kovan': 42 // the chain id for kovan.
+}
+const sdk = new epnsHelper(NETWORK_TO_MONITOR, channelKey, settings, epnsSettings);
 @Service()
 export default class UniswapV3Channel{
     constructor(){}
@@ -44,6 +50,7 @@ export default class UniswapV3Channel{
         const txns = [] // to hold all the transactions of the sent notifications
         if(!subscribers){
             subscribers = await sdk.getSubscribedUsers()
+            logger.info(`[UNIV3 LP getPositions] - gotten ${subscribers} from channel...`);
         }
 
         // loop through all users and get their positions
@@ -117,8 +124,9 @@ export default class UniswapV3Channel{
 
     // to get the relative price of the tokens in a pool
     public async getPositionDetails(token0, token1, fees, upperTick, lowerTick, simulate){
-        const PRICE_DECIMAL_PLACE = 3;
-        const MAIN_NETWORK_ID = 1;
+        const PRICE_DECIMAL_PLACE = CUSTOMIZABLE_SETTINGS.precision;
+        const MAIN_NETWORK_ID = CUSTOMIZABLE_SETTINGS[NETWORK_TO_MONITOR];
+        console.log({PRICE_DECIMAL_PLACE, MAIN_NETWORK_ID})
         // Overide logic if need be
         const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride") ? simulate.hasOwnProperty("logicOverride") : false) : false;
         const poolToken0 = logicOverride && simulate.logicOverride.mode && simulate.logicOverride.hasOwnProperty("token0") ? simulate.logicOverride.token0 : token0;

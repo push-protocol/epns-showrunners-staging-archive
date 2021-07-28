@@ -33,6 +33,9 @@ const wallets = [
             uniSwapPrivateKey_1: process.env.UNISWAP_PRIVATE_KEY
         },
         {
+            uniSwapv3PrivateKey_1: process.env.UNISWAPV3_PRIVATE_KEY
+        },
+        {
             aavePrivateKey_1: process.env.AAVE_PRIVATE_KEY            
         },
         {
