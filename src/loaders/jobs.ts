@@ -276,13 +276,13 @@ export default ({ logger }) => {
   });
 
   // 1.12 UNISWAP-V3 CHANNEL
-  schedule.scheduleJob({ start: startTime, rule: twoAndHalfMinRule}, async function() {
-    logger.info('-- 🛵 Scheduling Showrunner - UniSwap V3 Channel [on 2.5 minutes]');
+  schedule.scheduleJob({ start: startTime, rule: dailyRule}, async function() {
+    logger.info('-- 🛵 Scheduling Showrunner - UniSwap V3 Channel [on 25 hours]');
     const uniswapv3 = Container.get(UniswapV3Channel);
     const taskName = 'Uniswap V3 LP positions check and sendMessageToContract()';
 
     try {
-      await uniswapv3.sendMessageToContract(false);
+      await uniswapv3.sendMessageToContracts(false);
       logger.info(`🐣 Cron Task Completed -- ${taskName}`);
     }
     catch (err) {
