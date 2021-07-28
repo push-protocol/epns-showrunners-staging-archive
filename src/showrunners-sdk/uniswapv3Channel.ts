@@ -71,10 +71,10 @@ export default class UniswapV3Channel{
                     token0, token1, fee,
                     tickUpper, tickLower, undefined
                 );    
-                logger.info(`[UNIV3 LP sendMessageToContracts] - Gotten details for position. ${positionDetails}.`);           
+                logger.info(`[UNIV3 LP sendMessageToContracts] - Gotten details for position`, positionDetails);           
                 const { withinTicks } = positionDetails;
                 // -- if the current price is not within the set ticks then trigger a notif
-                if(!withinTicks){
+                if(withinTicks){
                     const title = "UniswapV3 LP position out of range";
                     const body = "you have stopped receiving fees for your LP position as it's out of range";
                     const payloadTitle = "UniswapV3 LP position out of range";
