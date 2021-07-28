@@ -31,6 +31,7 @@ import HelloWorld from '../showrunners-sdk/helloWorldChannel';
 import AaveChannel from '../showrunners-sdk/aaveChannel';
 import TruefiChannel from '../showrunners-sdk/truefiChannel';
 import YamGovernanceChannel from "../showrunners-sdk/yamGovernanceChannel";
+import UniswapV3Channel from "../showrunners-sdk/uniswapv3Channel";
 
 export default ({ logger }) => {
   // 1. SHOWRUNNERS SERVICE
@@ -266,6 +267,22 @@ export default ({ logger }) => {
 
     try {
       await uniswap.sendMessageToContract(false);
+      logger.info(`🐣 Cron Task Completed -- ${taskName}`);
+    }
+    catch (err) {
+      logger.error(`❌ Cron Task Failed -- ${taskName}`);
+      logger.error(`Error Object: %o`, err);
+    }
+  });
+
+  // 1.12 UNISWAP-V3 CHANNEL
+  schedule.scheduleJob({ start: startTime, rule: dailyRule}, async function() {
+    logger.info('-- 🛵 Scheduling Showrunner - UniSwap V3 Channel [on 25 hours]');
+    const uniswapv3 = Container.get(UniswapV3Channel);
+    const taskName = 'Uniswap V3 LP positions check and sendMessageToContract()';
+
+    try {
+      await uniswapv3.sendMessageToContracts(false);
       logger.info(`🐣 Cron Task Completed -- ${taskName}`);
     }
     catch (err) {
