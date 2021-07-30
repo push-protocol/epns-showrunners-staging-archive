@@ -83,9 +83,11 @@ export default class UniswapV3Channel{
                 // if(!withinTicks){
                 if(true){
                     const title = `UniswapV3 LP position out of range for position ${tokenZeroName}-${tokenOneName}`;
-                    const body = `you have stopped receiving fees for your LP position as the current price:${currentPrice} is out of the set range ${upperTickPrice} - ${lowerTickPrice}`;
+                    // const body = `you have stopped receiving fees for your LP position as the current price:${currentPrice} is out of the set range ${upperTickPrice} - ${lowerTickPrice}. ${new Date(Date.now())}`;
+                    const body = `you have stopped receiving fees for your LP position as the current price:4200.655 is out of the set range ${upperTickPrice} - ${lowerTickPrice}. ${new Date(Date.now())}`;
                     const payloadTitle = `UniswapV3 LP position out of range for position ${tokenZeroName}-${tokenOneName}`;
-                    const payloadMsg = `you have stopped receiving fees for your LP position as the current price:${currentPrice} is out of the set range ${upperTickPrice} - ${lowerTickPrice}`;;
+                    const payloadMsg = `you have stopped receiving fees for your LP position as the current price:4200.655 is out of the set range ${upperTickPrice} - ${lowerTickPrice}. ${new Date(Date.now())}`;
+                    // const payloadMsg = `you have stopped receiving fees for your LP position as the current price:${currentPrice} is out of the set range ${upperTickPrice} - ${lowerTickPrice}. ${new Date(Date.now())}`;
                     // const notificationType = 3;
                     const notificationType = 1;
                     const channelAddress = '0x9601f08b9EcB981D273B72e7f33964Cb98f977fe';
