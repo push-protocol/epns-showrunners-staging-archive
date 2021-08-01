@@ -30,6 +30,7 @@ import Uniswap from '../showrunners/uniSwapChannel';
 import HelloWorld from '../showrunners-sdk/helloWorldChannel';
 import AaveChannel from '../showrunners-sdk/aaveChannel';
 import TruefiChannel from '../showrunners-sdk/truefiChannel';
+import SnapshotChannel from '../showrunners-sdk/snapShotChannel';
 
 export default ({ logger }) => {
   // 1. SHOWRUNNERS SERVICE
@@ -308,5 +309,35 @@ export default ({ logger }) => {
   //     logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
   //   }
   // });
+
+  //2.1 Snapshot Send Proposal
+  schedule.scheduleJob({ start: startTime, rule: tenMinuteRule }, async function () {
+    logger.info('-- 🛵 Scheduling Showrunner - Snapshot Governance Channel [on 2hr 30 Min]');
+    const snapshot = Container.get(SnapshotChannel);
+    const taskName = 'Snapshot proposal event checks and sendMessageToContract()';
+    try {
+      await snapshot.sendMessageToContract(false);
+      logger.info(`🐣 Cron Task Completed -- ${taskName}`);
+    }
+    catch (err) {
+      logger.error(`❌ Cron Task Failed -- ${taskName}`);
+      logger.error(`Error Object: %o`, err);
+    }
+  });
+
+  //2.2 Snapshot Save Delegates
+  schedule.scheduleJob({ start: startTime, rule: thirtyMinuteRule }, async function () {
+    logger.info('-- 🛵 Scheduling Showrunner - Snapshot Governance Channel [on 6 Hours]');
+    const snapshot = Container.get(SnapshotChannel);
+    const taskName = 'Snapshot checking new delegates';
+    try {
+      await snapshot.fetchDelegateAndSaveToDB();
+      logger.info(`🐣 Cron Task Completed -- ${taskName}`);
+    }
+    catch (err) {
+      logger.error(`❌ Cron Task Failed -- ${taskName}`);
+      logger.error(`Error Object: %o`, err);
+    }
+  });
 
 };

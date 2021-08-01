@@ -43,6 +43,9 @@ const wallets = [
         },
         {
             helloWorldPrivateKey_1: process.env.HELLO_WORLD_PRIVATE_KEY
+        },
+        {
+            snapshotPrivateKey_1:process.env.SNAPSHOT_PRIVATE_KEY
         }
 ]
     

@@ -27,7 +27,7 @@ import alphahomora_sdk from './routes/showrunners_sdk/showrunners_alphaHomora';
 import helloWorld_sdk from './routes/showrunners_sdk/showrunners_helloWorld';
 import aave_sdk from './routes/showrunners_sdk/showrunners_aave';
 import uniswap_sdk from './routes/showrunners_sdk/showrunners_uniSwap';
-
+import snapshot_sdk from "./routes/showrunners_sdk/showrunners_snapshot"
 import mailing from './routes/mailing';
 
 // guaranteed to get dependencies
@@ -53,6 +53,7 @@ export default () => {
 	alphahomora_sdk(app);
 	aave_sdk(app);
 	uniswap_sdk(app);
+	snapshot_sdk(app);
 	// ensDomain_sdk(app);
   
 	// SOCKETS
