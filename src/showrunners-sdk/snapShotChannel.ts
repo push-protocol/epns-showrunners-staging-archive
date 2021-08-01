@@ -170,11 +170,13 @@ export default class SnapshotChannel {
     const res = []
     const allDelegates = await this.fetchDelegateHelperFunction(space)
     for (let item in allDelegates) {
-      logger.info(`[${new Date(Date.now())}]-[Snapshot]- Delegates of ${item}`)
+      logger.info(`[${new Date(Date.now())}]-[Snapshot]- Delegates of ${item} of ${Object.values(allDelegates).length}`)
       for (let i = 0; i < allDelegates[item].length; i++) {
         const res = await this.saveSingleDelegateDB(allDelegates[item][i].delegate, allDelegates[item][i].space == "" ? "global" : allDelegates[item][i].space)
+        logger.info(`[${new Date(Date.now())}]-[Snapshot]- Delegates saved ${i} of ${allDelegates[item].length}`)
       }
     }
+    return {status: "success"}
   }
 
   //Helper function to fetch delegates of each space
@@ -222,7 +224,7 @@ export default class SnapshotChannel {
   
   public async saveArrayOfDelegateDB(data): Promise<{}> {
 
-    this.DelegateSnapshot = Container.get('DelegateSnapshot');
+    this.DelegateSnapshot = Container.get('DelegateSnapshotModel');
     try {
       const multipleDelegate = await this.DelegateSnapshot.insertMany(data);
       return multipleDelegate;
@@ -235,7 +237,7 @@ export default class SnapshotChannel {
   //Mongo function to save single delegate
   
   public async saveSingleDelegateDB(delegate, space): Promise<{}> {
-    this.DelegateSnapshot = Container.get('DelegateSnapshot');
+    this.DelegateSnapshot = Container.get('DelegateSnapshotModel');
     let singleDelegate;
     try {
 
@@ -252,7 +254,7 @@ export default class SnapshotChannel {
   //Mongo function to send all delegate details
   
   public async fetchAllDelegateFromDB(): Promise<[]> {
-    this.DelegateSnapshot = Container.get('DelegateSnapshot')
+    this.DelegateSnapshot = Container.get('DelegateSnapshotModel')
     try {
       const allDelegate = await this.DelegateSnapshot.find({});
       return allDelegate;
@@ -265,7 +267,7 @@ export default class SnapshotChannel {
   //Mongo function to fetch specific delegates
   
   public async fecthDelegateFromDB(space): Promise<[]> {
-    this.DelegateSnapshot = Container.get('DelegateSnapshot')
+    this.DelegateSnapshot = Container.get('DelegateSnapshotModel')
     try {
       const delegates = await this.DelegateSnapshot.find({ space: space })
       return delegates

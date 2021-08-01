@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
-import Snapshot from '../../../showrunners-sdk/snapShotChannel';
+import SnapshotChannel from '../../../showrunners-sdk/snapShotChannel';
 import middlewares from '../../middlewares';
 import { celebrate, Joi } from 'celebrate';
 
@@ -21,7 +21,7 @@ export default (app: Router) => {
           const Logger = Container.get('logger');
           Logger.debug('Calling /showrunners-sdk/snapshot ticker endpoint with body: %o', req.body )
           try {
-            const snapshot = Container.get(Snapshot);
+            const snapshot = Container.get(SnapshotChannel);
             const response = await snapshot.sendMessageToContract(req.body.simulate);
     
             return res.status(201).json(response);
@@ -44,7 +44,7 @@ export default (app: Router) => {
           const Logger = Container.get('logger');
           Logger.debug('Calling /showrunners-sdk/snapshot ticker endpoint with body: %o', req.body )
           try {
-            const snapshot = Container.get(Snapshot);
+            const snapshot = Container.get(SnapshotChannel);
             const response = await snapshot.fetchDelegateAndSaveToDB();
     
             return res.status(201).json(response);
