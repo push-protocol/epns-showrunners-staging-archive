@@ -82,11 +82,10 @@ export default class UniswapV3Channel{
                 // -- if the current price is not within the set ticks then trigger a notif
                 // if(!withinTicks){
                 if(true){
-                    const title = `UniswapV3 LP position out of range for position ${tokenZeroName}-${tokenOneName}`;
-                    // const body = `you have stopped receiving fees for your LP position as the current price:${currentPrice} is out of the set range ${upperTickPrice} - ${lowerTickPrice}. ${new Date(Date.now())}`;
-                    const body = `you have stopped receiving fees for your LP position as the current price:4200.655 is out of the set range ${upperTickPrice} - ${lowerTickPrice}. ${new Date(Date.now())}`;
-                    const payloadTitle = `UniswapV3 LP position out of range for position ${tokenZeroName}-${tokenOneName}`;
-                    const payloadMsg = `you have stopped receiving fees for your LP position as the current price:4200.655 is out of the set range ${upperTickPrice} - ${lowerTickPrice}. ${new Date(Date.now())}`;
+                    const title = `UniswapV3 LP position out of range.`;
+                    const body = `you have stopped receiving fees for your LP position ${tokenZeroName}-${tokenOneName}`;
+                    const payloadTitle = `UniswapV3 LP position out of range`;
+                    const payloadMsg = `you have stopped receiving fees for your LP position ${tokenOneName} - ${tokenZeroName}. \n\n [d: Current Price]: 4200.655\n[b: LP Range]: ${upperTickPrice} - ${lowerTickPrice}. [timestamp: ${Math.floor(new Date() / 1000)}]`;
                     // const payloadMsg = `you have stopped receiving fees for your LP position as the current price:${currentPrice} is out of the set range ${upperTickPrice} - ${lowerTickPrice}. ${new Date(Date.now())}`;
                     // const notificationType = 3;
                     const notificationType = 1;
