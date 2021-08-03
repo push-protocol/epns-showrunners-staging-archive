@@ -32,8 +32,8 @@ export default async ({ expressApp }) => {
   await dependencyInjectorLoader({ models: [GasPriceModel, UserTokenModel] });
   logger.info('✔️   Dependency Injector loaded');
 
-  const mongoConnection = await mongooseLoader();
-  logger.info('✔️   Mongoose Loaded and connected!');
+  // const mongoConnection = await mongooseLoader();
+  // logger.info('✔️   Mongoose Loaded and connected!');
 
   const pool = await dbLoader();
   logger.info('✔️   Database connected!');

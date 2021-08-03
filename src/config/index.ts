@@ -19,6 +19,7 @@ export default {
    * Load Wallets of Showrunners
    */
   showrunnerWallets: loadShowrunnersWallets(),
+  masterWallet: process.env.MASTER_WALLET_PRIVATE_KEY,
 
   /**
    * Your favorite port

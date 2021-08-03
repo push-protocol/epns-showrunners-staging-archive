@@ -6,6 +6,9 @@
 import { Service, Inject } from 'typedi';
 import config from '../../config';
 
+import showrunnersHelper from '../../helpers/showrunnersHelper';
+import channelWalletsInfo from '../../config/channelWalletsInfo';
+
 // import PQueue from 'p-queue';
 import { ethers, logger } from 'ethers';
 import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk'
@@ -28,42 +31,84 @@ const epnsSettings: EPNSSettings = {
   contractAddress: config.deployedContract,
   contractABI: config.deployedContractABI
 }
-const sdk = new epnsHelper(config.web3MainnetNetwork, channelKey, settings, epnsSettings)
 
 @Service()
 export default class BtcTickerChannel {
+  constructor(
+    @Inject('logger') private logger,
+  ) {}
+
   // To form and write to smart contract
   public async sendMessageToContract(simulate) {
-    logger.debug(`[${new Date(Date.now())}]-[BTC Ticker]-Getting price of btc... `);
+    const logger = this.logger;
 
-    const getJSON = bent('json');
-    const cmcroute = 'v1/cryptocurrency/quotes/latest';
-    const pollURL = `${config.cmcEndpoint}${cmcroute}?symbol=BTC&CMC_PRO_API_KEY=${config.cmcAPIKey}`;
+    var path = require('path');
+    const dirname = path.basename(__dirname);
+    const wallets = config.showrunnerWallets[`${dirname}`];
 
-    getJSON(pollURL)
-      .then(async (response) => {
-        if (response.status.error_code) {
-          logger.debug(`[${new Date(Date.now())}]-[BTC Ticker]-CMC Error: ${response.status}`);
-        }
-        logger.info(`[${new Date(Date.now())}]-[BTC Ticker]-CMC Response: %o`, response);
+    const currentWalletInfo = await showrunnersHelper.getValidWallet(dirname, wallets);
+    const walletKeyID = `wallet${currentWalletInfo.currentWalletID}`;
+    const walletKey = wallets[walletKeyID];
 
-        // Get data
-        const data = response.data["BTC"];
-        // construct Title and Message from data
-        const price = data.quote.USD.price;
-        const formattedPrice = Number(Number(price).toFixed(2)).toLocaleString();
-        const hourChange = Number(data.quote.USD.percent_change_1h).toFixed(2);
-        const dayChange = Number(data.quote.USD.percent_change_24h).toFixed(2);
-        const weekChange = Number(data.quote.USD.percent_change_7d).toFixed(2);
-        const title = "BTC at $" + formattedPrice;
-        const message = `\nHourly Movement: ${hourChange}%\nDaily Movement: ${dayChange}%\nWeekly Movement: ${weekChange}%`;
-        const payloadTitle = `BTC Price Movement`;
-        const payloadMsg = `BTC at [d:$${formattedPrice}]\n\nHourly Movement: ${hourChange >= 0 ? "[s:" + hourChange + "%]" : "[t:" + hourChange + "%]"}\nDaily Movement: ${dayChange >= 0 ? "[s:" + dayChange + "%]" : "[t:" + dayChange + "%]"}\nWeekly Movement: ${weekChange >= 0 ? "[s:" + weekChange + "%]" : "[t:" + weekChange + "%]"}[timestamp: ${Math.floor(new Date() / 1000)}]`;
-        const channelAddress = ethers.utils.computeAddress(channelWalletsInfo.walletsKV['btcTickerPrivateKey_1'])
-        const notificationType = 1; //broadcasted notification
-        const tx = await sdk.sendNotification(channelAddress, title, message, payloadTitle, payloadMsg, notificationType, simulate)
+    const sdk = new epnsHelper(config.web3MainnetNetwork, walletKey, settings, epnsSettings);
+
+    this.getNewPrice(logger)
+      .then(async (payload) => {
+        const channelAddress = ethers.utils.computeAddress(walletKey);
+
+        const tx = await sdk.sendNotification(channelAddress, payload.notifTitle, payload.notifMsg, payload.title, payload.msg, payload.type, simulate);
         logger.info(tx);
       })
-      .catch(err => logger.debug("Unable to reach CMC API, error: %o", err));
+      .catch(err => {
+        logger.debug("Errored on CMC API... skipped with error: %o", err)
+      });
+  }
+
+  public async getNewPrice(logger) {
+    logger.debug(`[${new Date(Date.now())}]-[BTC Ticker]-Getting price of btc... `);
+
+    return await new Promise((resolve, reject) => {
+      const getJSON = bent('json');
+
+      const cmcroute = 'v1/cryptocurrency/quotes/latest';
+      const pollURL = `${config.cmcEndpoint}${cmcroute}?symbol=BTC&CMC_PRO_API_KEY=${config.cmcAPIKey}`;
+
+      getJSON(pollURL)
+        .then(async (response) => {
+          if (response.status.error_code) {
+            reject(`[${new Date(Date.now())}]-[BTC Ticker]-CMC Error: %o`, response.status);
+          }
+
+          logger.info(`[${new Date(Date.now())}]-[BTC Ticker]-CMC Response: %o`, response);
+
+          // Get data
+          const data = response.data["BTC"];
+
+          // construct Title and Message from data
+          const price = data.quote.USD.price;
+          const formattedPrice = Number(Number(price).toFixed(2)).toLocaleString();
+
+          const hourChange = Number(data.quote.USD.percent_change_1h).toFixed(2);
+          const dayChange = Number(data.quote.USD.percent_change_24h).toFixed(2);
+          const weekChange = Number(data.quote.USD.percent_change_7d).toFixed(2);
+
+          const title = "BTC at $" + formattedPrice;
+          const message = `\nHourly Movement: ${hourChange}%\nDaily Movement: ${dayChange}%\nWeekly Movement: ${weekChange}%`;
+
+          const payloadTitle = `BTC Price Movement`;
+          const payloadMsg = `BTC at [d:$${formattedPrice}]\n\nHourly Movement: ${hourChange >= 0 ? "[s:" + hourChange + "%]" : "[t:" + hourChange + "%]"}\nDaily Movement: ${dayChange >= 0 ? "[s:" + dayChange + "%]" : "[t:" + dayChange + "%]"}\nWeekly Movement: ${weekChange >= 0 ? "[s:" + weekChange + "%]" : "[t:" + weekChange + "%]"}[timestamp: ${Math.floor(new Date() / 1000)}]`;
+
+          const payload = {
+            type: 1,                                                                  // Type of Notification
+            notifTitle: title,                                                              // Title of Notification
+            notifMsg: message,                                                            // Message of Notification
+            title: payloadTitle,                                                       // Internal Title
+            msg: payloadMsg,                                                         // Internal Message
+          };
+
+          resolve(payload);
+        })
+        .catch(err => reject("Unable to reach CMC API, error: %o", err));
+    });
   }
 }

@@ -23,12 +23,6 @@ import BtcTickerChannel from './btcTickerChannel';
 export default () => {
   const startTime = new Date(new Date().setHours(0, 0, 0, 0));
 
-  const dailyRule = new schedule.RecurrenceRule();
-  dailyRule.hour = 0;
-  dailyRule.minute = 0;
-  dailyRule.second = 0;
-  dailyRule.dayOfWeek = new schedule.Range(0, 6);
-
   const sixHourRule = new schedule.RecurrenceRule();
   sixHourRule.hour = new schedule.Range(0, 23, 6);
   sixHourRule.minute = 0;

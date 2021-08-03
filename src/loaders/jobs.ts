@@ -20,18 +20,7 @@ import { EventDispatcher, EventDispatcherInterface } from '../decorators/eventDi
 import fs from 'fs';
 const utils = require('../helpers/utilsHelper');
 
-// import BtcTickerChannel from '../showrunners/btcTickerChannel';
-// import EthTickerChannel from '../showrunners-sdk/ethTickerChannel';
-// import EnsExpirationChannel from '../showrunners/ensExpirationChannel';
-// import EthGasStationChannel from '../showrunners-sdk/ethGasChannel';
-// import CompoundLiquidationChannel from '../showrunners/compoundLiquidationChannel';
-// import Everest from '../showrunners/everestChannel';
-// import WalletTrackerChannel from '../showrunners-sdk/walletTrackerChannel';
 // import WalletMonitoring from '../services/walletMonitoring';
-// import Uniswap from '../showrunners/uniSwapChannel';
-// import HelloWorld from '../showrunners-sdk/helloWorldChannel';
-// import AaveChannel from '../showrunners-sdk/aaveChannel';
-// import TruefiChannel from '../showrunners-sdk/truefiChannel';
 
 export default async ({ logger }) => {
 
@@ -110,7 +99,7 @@ export default async ({ logger }) => {
     // }
   })
 
-  // // 3.1 Wallets Monitoring Service
+  // 3.1 Wallets Monitoring Service
   // schedule.scheduleJob({ start: startTime, rule: oneHourRule }, async function () {
   //   logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - Wallets Monitoring [every Hour]`);
   //   const walletMonitoring = Container.get(WalletMonitoring);
