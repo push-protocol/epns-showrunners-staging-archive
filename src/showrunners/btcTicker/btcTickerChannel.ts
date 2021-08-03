@@ -15,7 +15,6 @@ import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnspr
 // const queue = new PQueue();
 
 const bent = require('bent'); // Download library
-const channelKey = channelWalletsInfo.walletsKV['btcTickerPrivateKey_1']
 
 const infuraSettings: InfuraSettings = {
   projectID: config.infuraAPI.projectID,
