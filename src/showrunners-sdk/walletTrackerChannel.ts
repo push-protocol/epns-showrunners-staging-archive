@@ -9,6 +9,7 @@ import { ethers, logger } from 'ethers';
 import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging'
 const queue = new PQueue();
 let retries = 0
+let getTokenBalanceRetries = 0
 const channelKey = channelWalletsInfo.walletsKV['walletTrackerPrivateKey_1']
 const NETWORK_TO_MONITOR = config.web3RopstenNetwork;
 
@@ -235,69 +236,79 @@ export default class WalletTrackerChannel {
  
 
   public async getTokenBalance(user, networkToMonitor, ticker, tokenContract, simulate){
+   
+    try{
+      if(!tokenContract){
+        tokenContract = sdk.getContract(SUPPORTED_TOKENS[ticker].address, config.erc20DeployedContractABI )
+      }
 
-    if(!tokenContract){
-      tokenContract = sdk.getContract(SUPPORTED_TOKENS[ticker].address, config.erc20DeployedContractABI )
+      // Check simulate object
+      const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride" && simulate.logicOverride.mode) ? simulate.logicOverride.mode : false) : false;
+      const simulateApplyToAddr = logicOverride && simulate.logicOverride.hasOwnProperty("applyToAddr") ? simulate.logicOverride.applyToAddr : false;
+      const simulateRandomEthBal = logicOverride && (simulateApplyToAddr == user || !simulateApplyToAddr) && simulate.logicOverride.hasOwnProperty("randomEthBalance") ? simulate.logicOverride.randomEthBalance : false;
+      const simulateRandomTokenBal = logicOverride && (simulateApplyToAddr == user || !simulateApplyToAddr) && simulate.logicOverride.hasOwnProperty("randomTokenBalance") ? simulate.logicOverride.randomTokenBalance : false;
+
+      return await new Promise((resolve, reject) => {
+
+        if (ticker === 'ETH' ){
+          tokenContract.provider.getBalance(user).then(balance => {
+            // logger.info("wei balance" + balance);
+            let etherBalance;
+
+            if (simulateRandomEthBal) {
+              balance = ethers.utils.parseEther((Math.random() * 100001 / 100).toString());
+              logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Simulating Random Ether Balance: %s`, ethers.utils.formatEther(balance));
+            }
+
+            // balance is a BigNumber (in wei); format is as a string (in ether)
+            etherBalance = ethers.utils.formatEther(balance);
+
+            // logger.info("Ether Balance: " + etherBalance);
+            let tokenInfo = {
+              user,
+              ticker,
+              balance: etherBalance
+            }
+            resolve (tokenInfo)
+          });
+        }
+
+        else{
+          let tokenBalance
+          tokenContract.contract.balanceOf(user)
+          .then(res=> {
+            let decimals = SUPPORTED_TOKENS[ticker].decimals
+
+            // Simulate random balance
+            if (simulateRandomTokenBal) {
+              const random = ethers.BigNumber.from(Math.floor(Math.random() * 10000));
+              const randBal = ethers.BigNumber.from(10).pow(SUPPORTED_TOKENS[ticker].decimals - 2);
+              res = random.mul(randBal);
+              logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Simulating Random Token Balance [%s]: %s`, SUPPORTED_TOKENS[ticker].ticker, res.toString());
+            }
+
+            let rawBalance = Number(Number(res));
+
+            tokenBalance = Number(rawBalance/Math.pow(10, decimals)).toLocaleString()
+            // logger.info("tokenBalance: " + tokenBalance);
+            let tokenInfo = {
+              user,
+              ticker,
+              balance: tokenBalance
+            }
+            resolve (tokenInfo)
+          })
+        }
+      })
+    }catch (error) {
+      logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Getting token balance failed to user: %o | error: %o`, user, error)
+      if (getTokenBalanceRetries <=5 ) {
+        getTokenBalanceRetries++
+        await queue.add(() => this.getTokenBalance(user, networkToMonitor, ticker, tokenContract, simulate));
+      } else {
+        getTokenBalanceRetries = 0
+      }
     }
-
-    // Check simulate object
-    const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride" && simulate.logicOverride.mode) ? simulate.logicOverride.mode : false) : false;
-    const simulateApplyToAddr = logicOverride && simulate.logicOverride.hasOwnProperty("applyToAddr") ? simulate.logicOverride.applyToAddr : false;
-    const simulateRandomEthBal = logicOverride && (simulateApplyToAddr == user || !simulateApplyToAddr) && simulate.logicOverride.hasOwnProperty("randomEthBalance") ? simulate.logicOverride.randomEthBalance : false;
-    const simulateRandomTokenBal = logicOverride && (simulateApplyToAddr == user || !simulateApplyToAddr) && simulate.logicOverride.hasOwnProperty("randomTokenBalance") ? simulate.logicOverride.randomTokenBalance : false;
-
-    return await new Promise((resolve, reject) => {
-
-      if (ticker === 'ETH' ){
-        tokenContract.provider.getBalance(user).then(balance => {
-          // logger.info("wei balance" + balance);
-          let etherBalance;
-
-          if (simulateRandomEthBal) {
-            balance = ethers.utils.parseEther((Math.random() * 100001 / 100).toString());
-            logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Simulating Random Ether Balance: %s`, ethers.utils.formatEther(balance));
-          }
-
-          // balance is a BigNumber (in wei); format is as a string (in ether)
-          etherBalance = ethers.utils.formatEther(balance);
-
-          // logger.info("Ether Balance: " + etherBalance);
-          let tokenInfo = {
-            user,
-            ticker,
-            balance: etherBalance
-          }
-          resolve (tokenInfo)
-        });
-      }
-
-      else{
-        let tokenBalance
-        tokenContract.contract.balanceOf(user)
-        .then(res=> {
-          let decimals = SUPPORTED_TOKENS[ticker].decimals
-
-          // Simulate random balance
-          if (simulateRandomTokenBal) {
-            const random = ethers.BigNumber.from(Math.floor(Math.random() * 10000));
-            const randBal = ethers.BigNumber.from(10).pow(SUPPORTED_TOKENS[ticker].decimals - 2);
-            res = random.mul(randBal);
-            logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Simulating Random Token Balance [%s]: %s`, SUPPORTED_TOKENS[ticker].ticker, res.toString());
-          }
-
-          let rawBalance = Number(Number(res));
-
-          tokenBalance = Number(rawBalance/Math.pow(10, decimals)).toLocaleString()
-          // logger.info("tokenBalance: " + tokenBalance);
-          let tokenInfo = {
-            user,
-            ticker,
-            balance: tokenBalance
-          }
-          resolve (tokenInfo)
-        })
-      }
-    })
   }
 
   public async compareTokenBalance(tokenBalance, tokenBalanceFromDB){
