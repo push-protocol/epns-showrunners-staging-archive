@@ -7,7 +7,9 @@ import config from '../config';
 import channelWalletsInfo from '../config/channelWalletsInfo';
 // import PQueue from 'p-queue';
 import { ethers, logger } from 'ethers';
-import epnsHelper, { InfuraSettings, NetWorkSettings, EPNSSettings } from '@epnsproject/backend-sdk-staging'
+import epnsHelper, { InfuraSettings, NetWorkSettings, EPNSSettings } from '../../../epns-backend-sdk-staging/src'
+import moment from "moment"
+import console from 'console';
 // const queue = new PQueue();
 const gr = require('graphql-request')
 const { request, gql } = gr;
@@ -35,62 +37,82 @@ export default class SnapshotChannel {
   URL_SPACE_PROPOSAL = "https://hub.snapshot.page/graphql"
   URL_DELEGATE = "https://api.thegraph.com/subgraphs/name/snapshot-labs/snapshot"
   DelegateSnapshot: any;
-
+  channelAddress = "0xa71571844A64f6c7aa95dBb69Ef44beac685dF0C"
+  epns = sdk.advanced.getInteractableContracts(epnsSettings.network, settings, channelWalletsInfo.walletsKV['snapshotPrivateKey_1'], epnsSettings.contractAddress, epnsSettings.contractABI)
+  
+  
   public async sendMessageToContract(simulate) {
     logger.debug(`[${new Date(Date.now())}]-[Snapshot]- Checking for new proposals...`);
     // Overide logic if need be
     const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride") && simulate.logicOverride.mode ? simulate.logicOverride.mode : false) : false;
-   // -- End Override logic
+    const simulateDelegateAddr = logicOverride && simulate.logicOverride.hasOwnProperty("delegateAddr") ? simulate.logicOverride.delegateAddr : false;
+    // -- End Override logic
 
-    
     let proposals = await this.fetchProposalHelperFunction();
-    if(Object.keys(proposals).length === 0)
-      {
-        logger.info(`[${new Date(Date.now())}]-[Snapshot]- No Proposals in past 3 hours`)
-        return
-      }
-
-    //Fetch global delegates and see if it is empty or not
-    let globalDelegates = await this.fecthDelegateFromDB("")
-    if (globalDelegates.length === 0) {
-      logger.info(`[${new Date(Date.now())}]-[Snapshot]- Delegates are not yet saved; fetching from API...`)
-      await this.fetchDelegateAndSaveToDB()
+    if (Object.keys(proposals).length === 0) {
+      logger.info(`[${new Date(Date.now())}]-[Snapshot]- No Proposals in past 3 hours`)
+      return
     }
 
+    //Fetch global delegates and see if it is empty or not
+    let globalDelegates = await this.fecthDelegateFromDB("global")
+    if (!simulate.hasOwnProperty("delegateAddr"))
+      if (globalDelegates.length === 0) {
+        logger.info(`[${new Date(Date.now())}]-[Snapshot]- Delegates are not yet saved; fetching from API...`)
+        await this.fetchDelegateAndSaveToDB()
+      }
+
     //Send payload to delegates
-    await this.processAndSendNotification(proposals,globalDelegates,simulate);
+    await this.processAndSendNotification(proposals, globalDelegates, simulate);
 
     logger.info(`[${new Date(Date.now())}]-[Snapshot]- Completed sending notification`)
 
   }
 
-  public async processAndSendNotification(proposal,globalDelegates,simulate) {
+  public async processAndSendNotification(proposal, globalDelegates, simulate) {
     const spaces = Object.keys(proposal);
-    for(let i=0;i<spaces.length;i++)
-    {
+    logger.info(spaces)
+    for (let i = 0; i < spaces.length; i++) {
       logger.info(`[${new Date(Date.now())}]-[Snapshot]- Preparing to send notification for ${spaces[i]}`)
-      for(let j=0;j<proposal[spaces[i]].length;j++)
-      {
-      const title=`New Proposal is live in ${spaces[i]}`
-      const message = `${proposal[spaces[i]][j].title}`
-      const payloadTitle = `New Proposal is live in ${spaces[i]}`;
-      const payloadMsg = `${proposal[spaces[i]][j].title}`;
-      const notificationType = 3;
-      const delegates:any = await this.fecthDelegateFromDB(spaces[i]);
-        for(let k=0;k<globalDelegates.length;k++)
-        {
-          const tx = await sdk.sendNotification(globalDelegates[k].delegate, title, message, payloadTitle, payloadMsg, notificationType, simulate)
-          logger.info(tx);
-        }
+      for (let j = 0; j < proposal[spaces[i]].length; j++) {
+        logger.info(proposal[spaces[i]][j].title)
+        const title = `New Proposal is live in ${spaces[i]}`
+        const message = `Title:${proposal[spaces[i]][j].title}\nStart Date:${moment((proposal[spaces[i]][j].start) * 1000).format("MMMM Do YYYY")}\nEnd Date:${moment((proposal[spaces[i]][j].end) * 1000).format("MMMM Do YYYY")}`
+        const payloadTitle = `New Proposal is live in ${spaces[i]}`;
+        const payloadMsg = `[d:Title] : ${proposal[spaces[i]][j].title}\n[s:Start Date] : ${moment((proposal[spaces[i]][j].start) * 1000).format("MMMM Do YYYY")}\n[t:End Date] : ${moment((proposal[spaces[i]][j].end) * 1000).format("MMMM Do YYYY")} [timestamp: ${Math.floor(new Date() / 1000)}]`;
+        const notificationType = 3;
+        const delegates: any = await this.fecthDelegateFromDB(spaces[i]);
+        const cta: any = `https://snapshot.org/#/${spaces[i]}/proposal/${proposal[spaces[i]][j].id}`
+        console.log(cta)
+        const storageType = 1;
+        const trxConfirmWait = 0;
+        if (!simulate) {
+          for (let k = 0; k < globalDelegates.length; k++) {
+            const payload = await sdk.advanced.preparePayload(globalDelegates[k].delegate, notificationType, title, message, payloadTitle, payloadMsg, cta, null)
+            const ipfsHash = await sdk.advanced.uploadToIPFS(payload, logger, null, simulate)
+            const tx = await sdk.advanced.sendNotification(this.epns.signingContract, globalDelegates[k].delegate, notificationType, storageType, ipfsHash, trxConfirmWait, logger, simulate)
+            logger.info(tx);
+          }
 
-        for(let k=0;k<delegates.length;k++)
-        {
-          const tx = await sdk.sendNotification(delegates[k].delegate, title, message, payloadTitle, payloadMsg, notificationType, simulate)
+          for (let k = 0; k < delegates.length; k++) {
+            const payload = await sdk.advanced.preparePayload(delegates[k].delegate, notificationType, title, message, payloadTitle, payloadMsg, cta, null)
+            const ipfsHash = await sdk.advanced.uploadToIPFS(payload, logger, null, simulate)
+            const tx = await sdk.advanced.sendNotification(this.epns.signingContract, delegates[k].delegate, notificationType, storageType, ipfsHash, trxConfirmWait, logger, simulate)
+            logger.info(tx);
+          }
+        }
+        else {
+          const payload = await sdk.advanced.preparePayload(simulate.delegateAddr, notificationType, title, message, payloadTitle, payloadMsg, cta, null)
+          const ipfsHash = await sdk.advanced.uploadToIPFS(payload, logger, null, simulate)
+          const tx = await sdk.advanced.sendNotification(this.epns.signingContract, simulate.delegateAddr, notificationType, storageType, ipfsHash, trxConfirmWait, logger, simulate)
+
+          // const tx = await sdk.sendNotification(globalDelegates[k].delegate, title, message, payloadTitle, payloadMsg, notificationType, simulate)
           logger.info(tx);
+
         }
       }
     }
-    
+
 
 
   }
@@ -99,7 +121,7 @@ export default class SnapshotChannel {
     logger.info(`[${new Date(Date.now())}]-[Snapshot]- Fetching space details`)
     const spaceQuery = gql`{
         spaces(
-          first: 10,
+          first: 1000,
           skip: 0,
           orderBy: "network",
           orderDirection: asc
@@ -131,7 +153,8 @@ export default class SnapshotChannel {
 
   //Function to fetch proposal details
   public fetchProposalDetails(spaceData: any) {
-    logger.info(`[${new Date(Date.now())}]-[Snapshot]- Fetching Proposals for ${spaceData.id}`)
+    // logger.info(`[${new Date(Date.now())}]-[Snapshot]- Fetching Proposals for ${spaceData.id}`)
+    //3600000 for 1 hr
     return request(this.URL_SPACE_PROPOSAL,
       gql`{
           proposals (
@@ -139,13 +162,15 @@ export default class SnapshotChannel {
             where: {
               space_in: ["${spaceData.id}"],
               state: "active",
-              created_gte:${Math.floor((Date.now() - 9000000) / 1000)}
+              created_gte:${Math.floor((Date.now() - 3600000) / 1000)}
             },
             orderBy: "created",
             orderDirection: desc
           ) {
             id
             title
+            start
+            end
             space {
               id
               name
@@ -170,21 +195,21 @@ export default class SnapshotChannel {
     const res = []
     const allDelegates = await this.fetchDelegateHelperFunction(space)
     for (let item in allDelegates) {
-      logger.info(`[${new Date(Date.now())}]-[Snapshot]- Delegates of ${item} of ${Object.values(allDelegates).length}`)
+      // logger.info(`[${new Date(Date.now())}]-[Snapshot]- Delegates of ${item} of ${Object.values(allDelegates).length}`)
       for (let i = 0; i < allDelegates[item].length; i++) {
         const res = await this.saveSingleDelegateDB(allDelegates[item][i].delegate, allDelegates[item][i].space == "" ? "global" : allDelegates[item][i].space)
-        logger.info(`[${new Date(Date.now())}]-[Snapshot]- Delegates saved ${i} of ${allDelegates[item].length}`)
+        // logger.info(`[${new Date(Date.now())}]-[Snapshot]- Delegates saved ${i} of ${allDelegates[item].length}`)
       }
     }
-    return {status: "success"}
+    return { status: "success" }
   }
 
   //Helper function to fetch delegates of each space
   public async fetchDelegateHelperFunction(spaces: any) {
-    
+
     let res = {};
     for (let i = 0; i < spaces.length; i++) {
-      logger.info(`[${new Date(Date.now())}]-[Snapshot]- Fetching delegates for ${spaces[i].id}`)
+      // logger.info(`[${new Date(Date.now())}]-[Snapshot]- Fetching delegates for ${spaces[i].id}`)
       const delegates = await this.fetchDelegateDetails(spaces[i]);
       if (delegates.success && delegates.data.length != 0)
         res[spaces[i].id] = delegates.data
@@ -221,7 +246,7 @@ export default class SnapshotChannel {
 
 
   //Mongo functions to save multiple delegate
-  
+
   public async saveArrayOfDelegateDB(data): Promise<{}> {
 
     this.DelegateSnapshot = Container.get('DelegateSnapshotModel');
@@ -235,7 +260,7 @@ export default class SnapshotChannel {
   }
 
   //Mongo function to save single delegate
-  
+
   public async saveSingleDelegateDB(delegate, space): Promise<{}> {
     this.DelegateSnapshot = Container.get('DelegateSnapshotModel');
     let singleDelegate;
@@ -252,7 +277,7 @@ export default class SnapshotChannel {
   }
 
   //Mongo function to send all delegate details
-  
+
   public async fetchAllDelegateFromDB(): Promise<[]> {
     this.DelegateSnapshot = Container.get('DelegateSnapshotModel')
     try {
@@ -265,7 +290,7 @@ export default class SnapshotChannel {
   }
 
   //Mongo function to fetch specific delegates
-  
+
   public async fecthDelegateFromDB(space): Promise<[]> {
     this.DelegateSnapshot = Container.get('DelegateSnapshotModel')
     try {

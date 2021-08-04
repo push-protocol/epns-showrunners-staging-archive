@@ -310,8 +310,8 @@ export default ({ logger }) => {
   //   }
   // });
 
-  //2.1 Snapshot Send Proposal
-  schedule.scheduleJob({ start: startTime, rule: tenMinuteRule }, async function () {
+ // 2.1 Snapshot Send Proposal
+  schedule.scheduleJob({ start: startTime, rule: oneHourRule }, async function () {
     logger.info('-- 🛵 Scheduling Showrunner - Snapshot Governance Channel [on 2hr 30 Min]');
     const snapshot = Container.get(SnapshotChannel);
     const taskName = 'Snapshot proposal event checks and sendMessageToContract()';
@@ -326,7 +326,7 @@ export default ({ logger }) => {
   });
 
   //2.2 Snapshot Save Delegates
-  schedule.scheduleJob({ start: startTime, rule: thirtyMinuteRule }, async function () {
+  schedule.scheduleJob({ start: startTime, rule: sixHourRule }, async function () {
     logger.info('-- 🛵 Scheduling Showrunner - Snapshot Governance Channel [on 6 Hours]');
     const snapshot = Container.get(SnapshotChannel);
     const taskName = 'Snapshot checking new delegates';
