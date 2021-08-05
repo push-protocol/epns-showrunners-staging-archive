@@ -81,22 +81,14 @@ export default class UniswapV3Channel{
                     upperTickPrice, lowerTickPrice
                 } = positionDetails;
                 // -- if the current price is not within the set ticks then trigger a notif
-                // if(!withinTicks){
-                if(true){
+                if(!withinTicks){
                     const title = `UniswapV3 LP position out of range.`;
                     const body = `You have stopped receiving fees for your LP position ${tokenZeroName}-${tokenOneName}`;
                     const payloadTitle = `UniswapV3 LP position out of range`;
-                    const payloadMsg = `You have stopped receiving fees for your LP position ${tokenOneName} - ${tokenZeroName}.\n\n[d: Current Price]: $4200.655\n[s: LP Range]: $${upperTickPrice} - $${lowerTickPrice}. [timestamp: ${Math.floor(new Date() / 1000)}]`;
-                    // const payloadMsg = `you have stopped receiving fees for your LP position as the current price:${currentPrice} is out of the set range ${upperTickPrice} - ${lowerTickPrice}. ${new Date(Date.now())}`;
-                    // const notificationType = 3;
-                    const notificationType = 1;
-                    const channelAddress = '0x9601f08b9EcB981D273B72e7f33964Cb98f977fe';
-                    // const tx = await sdk.sendNotification(
-                    //     subscriber, title, body, payloadTitle,
-                    //     payloadMsg, notificationType, simulate
-                    // );
+                    const payloadMsg = `You have stopped receiving fees for your LP position ${tokenOneName} - ${tokenZeroName}.\n\n[d: Current Price]: $${currentPrice}\n[s: LP Range]: $${upperTickPrice} - $${lowerTickPrice}. [timestamp: ${Math.floor(new Date() / 1000)}]`;
+                    const notificationType = 3;
                     const tx = await sdk.sendNotification(
-                        channelAddress, title, body, payloadTitle,
+                        subscriber, title, body, payloadTitle,
                         payloadMsg, notificationType, simulate
                     );
                     txns.push(tx);
