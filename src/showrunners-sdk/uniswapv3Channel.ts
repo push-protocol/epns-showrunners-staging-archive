@@ -4,7 +4,8 @@ import channelWalletsInfo from "../config/channelWalletsInfo";
 import { Pool, tickToPrice } from "@uniswap/v3-sdk";
 import { Token } from '@uniswap/sdk-core';
 import { ethers, logger} from 'ethers';
-import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging';
+import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '../../../epns-backend-sdk-staging/src';
+// import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging';
 
 
 // TODO change channel key to that of uniswap v3 channel
@@ -83,9 +84,9 @@ export default class UniswapV3Channel{
                 // if(!withinTicks){
                 if(true){
                     const title = `UniswapV3 LP position out of range.`;
-                    const body = `you have stopped receiving fees for your LP position ${tokenZeroName}-${tokenOneName}`;
+                    const body = `You have stopped receiving fees for your LP position ${tokenZeroName}-${tokenOneName}`;
                     const payloadTitle = `UniswapV3 LP position out of range`;
-                    const payloadMsg = `you have stopped receiving fees for your LP position ${tokenOneName} - ${tokenZeroName}. \n\n [d: Current Price]: 4200.655\n[b: LP Range]: ${upperTickPrice} - ${lowerTickPrice}. [timestamp: ${Math.floor(new Date() / 1000)}]`;
+                    const payloadMsg = `You have stopped receiving fees for your LP position ${tokenOneName} - ${tokenZeroName}.\n\n[d: Current Price]: $4200.655\n[s: LP Range]: $${upperTickPrice} - $${lowerTickPrice}. [timestamp: ${Math.floor(new Date() / 1000)}]`;
                     // const payloadMsg = `you have stopped receiving fees for your LP position as the current price:${currentPrice} is out of the set range ${upperTickPrice} - ${lowerTickPrice}. ${new Date(Date.now())}`;
                     // const notificationType = 3;
                     const notificationType = 1;
@@ -157,8 +158,8 @@ export default class UniswapV3Channel{
         const tokenOneContract = await sdk.getContract(poolToken1, config.erc20DeployedContractABI);
         const tokenZeroDecimals = await tokenZeroContract.contract.functions.decimals();
         const tokenOneDecimals = await tokenOneContract.contract.functions.decimals();
-        const tokenZeroName = (await tokenZeroContract.contract.functions.name())[0];
-        const tokenOneName = (await tokenOneContract.contract.functions.name())[0];
+        const tokenZeroName = (await tokenZeroContract.contract.functions.symbol())[0];
+        const tokenOneName = (await tokenOneContract.contract.functions.symbol())[0];
             // -- Next we use the decimals to obtain the token object
         const parsedTokenZero = new Token(MAIN_NETWORK_ID, poolToken0 , tokenZeroDecimals[0]);
         const parsedTokenOne = new Token(MAIN_NETWORK_ID, poolToken1 , tokenOneDecimals[0]);
