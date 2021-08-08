@@ -187,6 +187,12 @@ export default {
   aaveLendingPoolDeployedContractABI: require('./aave_LendingPool.json'),
 
   /**
+   * BZX Related
+  */
+  bzxLoanContract: process.env.BZX_LOAN_CONTRACT,
+  bzxLoanDeployedContractABI: require('./bzx_loanPool.json'),
+
+  /**
    * Yam Governance Related
    */
   yamGovernanceDeployedContract: process.env.YAM_GOVERNANCE_DEPLOYED_CONTRACT_ROPSTEN,

@@ -28,7 +28,7 @@ import helloWorld_sdk from './routes/showrunners_sdk/showrunners_helloWorld';
 import aave_sdk from './routes/showrunners_sdk/showrunners_aave';
 import yamGovernance_sdk from './routes/showrunners_sdk/showrunners_yamgovernance';
 import uniswap_sdk from './routes/showrunners_sdk/showrunners_uniSwap';
-
+import bzx_sdk from './routes/showrunners_sdk/showrunners_bzx';
 
 import mailing from './routes/mailing';
 
@@ -63,6 +63,7 @@ export default () => {
 	//console.log(yamGovernance_sdk);
 	yamGovernance_sdk(app);
 	uniswap_sdk(app);
+	bzx_sdk(app);
 	// ensDomain_sdk(app);
 
   
