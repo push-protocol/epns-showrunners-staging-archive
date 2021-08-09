@@ -23,9 +23,9 @@ export default (app: Router) => {
             Logger.debug('Calling /showrunners-sdk/bzx/send_message ticker endpoint with body: %o', req.body )
             try{
                 const bzx = Container.get(Bzx);
-                const { success, data } = await bzx.sendMessageToContract(req.body.simulate);
+                const response = await bzx.sendMessageToContract(req.body.simulate);
 
-                return res.status(201).json({ success,  data });
+                return res.status(201).json(response);
             } catch (e) {
                 Logger.error('🔥 error: %o', e);
                 return next(e);
