@@ -31,6 +31,7 @@ import HelloWorld from '../showrunners-sdk/helloWorldChannel';
 import AaveChannel from '../showrunners-sdk/aaveChannel';
 import TruefiChannel from '../showrunners-sdk/truefiChannel';
 import YamGovernanceChannel from "../showrunners-sdk/yamGovernanceChannel";
+import BzxChannel from "../showrunners-sdk/bzxChannel";
 
 export default ({ logger }) => {
   // 1. SHOWRUNNERS SERVICE
@@ -266,6 +267,22 @@ export default ({ logger }) => {
 
     try {
       await uniswap.sendMessageToContract(false);
+      logger.info(`🐣 Cron Task Completed -- ${taskName}`);
+    }
+    catch (err) {
+      logger.error(`❌ Cron Task Failed -- ${taskName}`);
+      logger.error(`Error Object: %o`, err);
+    }
+  });
+
+  // BZX CHANNEL
+  schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
+    logger.info('-- 🛵 Scheduling Showrunner - BZX Channel [on 24 Hours]');
+    const bzx = Container.get(BzxChannel);
+    const taskName = 'BZX Loan event checks and sendMessageToContract()';
+
+    try {
+      await bzx.sendMessageToContract(false);
       logger.info(`🐣 Cron Task Completed -- ${taskName}`);
     }
     catch (err) {
