@@ -43,6 +43,50 @@ export default class PoolTogetherChannel {
   }
 
   public async getWinners(web3network, poolTogether, fromBlock, toBlock, simulate) {
-    
+    logger.debug(`[${new Date(Date.now())}]-[Pool Together]- Getting eventLog, eventCount, blocks...`);
+
+    if (!toBlock) {
+      logger.info(`[${new Date(Date.now())}]-[Pool Together]- Mostly coming from routes... resetting toBlock to latest`);
+      toBlock = "latest";
+    }
+
+    const cach = this.cached;
+
+    return await new Promise(async(resolve, reject) => {
+      const filter = poolTogether.contract.filters.Awarded();
+      logger.debug(`[${new Date(Date.now())}]-[Pool Together]- Looking for Awarded() from %d to %s`, fromBlock, toBlock);
+
+      poolTogether.contract.queryFilter(filter, fromBlock, toBlock)
+      .then(async (eventLog) => {
+        logger.debug(`[${new Date(Date.now())}]-[Pool Together]- Awarded() --> %o`, eventLog);
+
+        // Need to fetch latest block
+        try {
+          toBlock = await poolTogether.provider.getBlockNumber();
+          logger.debug(`[${new Date(Date.now())}]-[Pool Together]- Latest block updated to --> %s`, toBlock);
+        }
+        catch (err) {
+          logger.debug(`[${new Date(Date.now())}]-[Pool Together]- !Errored out while fetching Block Number --> %o`, err);
+        }
+
+        const info = {
+          change: true,
+          log: eventLog,
+          blockChecker: fromBlock,
+          lastBlock: toBlock,
+          eventCount: eventLog.length
+        }
+
+        resolve(info);
+        logger.debug(`[${new Date(Date.now())}]-[Pool Together]- Events retreived for Awarded() call of Yam Governance Contract --> %d Events`, eventLog.length);
+      })
+      .catch(err => {
+        logger.debug(`[${new Date(Date.now())}]-[Pool Together]- Unable to obtain query filter, error: %o`, err);
+        resolve({
+          success: false,
+          err: "Unable to obtain query filter, error: %o" + err
+        });
+      });
+    });
   }
 }
