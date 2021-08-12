@@ -3,12 +3,14 @@
 // @recent_changes: Created Logic
 
 import moment from 'moment';
-import { Service, Inject } from 'typedi';
+import { Service, Inject, Token } from 'typedi';
 import config from '../config';
 import channelWalletsInfo from '../config/channelWalletsInfo';
 import { ethers, logger } from 'ethers';
-import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging'
+// import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '../../../epns-backend-sdk-staging/src';
+import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging';
 
+const bent = require('bent'); // Download library
 
 // TODO change to use bzx channel
 // const channelKey = channelWalletsInfo.walletsKV['yamGovernancePrivateKey_1'];
@@ -38,11 +40,19 @@ const CONTRACT_DEFAULTS = {
     'tenorTreshold': 3, // number of days from loan tenor end we would want to alert them. i.e 3 days before their loan expires
     'liquidationTreshold': 10, //percentage we would want to notify them when their current margin is within 10% above the minimum margin allowed before liquidation
     'dateUnit': 'days', //the unit which we want to to compare date differences.
-    'toEth': (num) => num / (10 ** 18) // convert a number from eth to unit
 };
+const CUSTOMIZABLE_DEFAULTS = {
+    'toEth': (num) => Number((num / (10 ** 18)).toFixed(3)), // convert a number from eth to unit 3.dp
+    'dateFormat': "DD-MM-YY",
+    'precision': 3, //number of decimal places
+    'loansCTA': 'https://app.fulcrum.trade/borrow/user-loans',
+    'tradeCTA': 'https://app.fulcrum.trade/trade';
+}
 
 const sdk = new epnsHelper(NETWORK_TO_MONITOR, channelKey, settings, epnsSettings)
 const debugLogger = (message) => DEBUG && logger.info(message);
+const getJSON = bent('json');
+
 @Service()
 export default class bzxChannel {
     constructor(){}
@@ -120,6 +130,8 @@ export default class bzxChannel {
                 // get details on the token
                 const tokenContract = await sdk.getContract(loanToken, config.erc20DeployedContractABI);
                 const [loanTokenName] = (await tokenContract.contract.functions.name());
+                const [loanTokenSymbol] = (await tokenContract.contract.functions.symbol());
+                const loanTokenPrice = await this.getPrice(loanTokenSymbol, undefined);
     
                 // convert the timeStamp to date and find how many days it is away from today
                 const parsedEndDate = moment(parseInt(endTimestamp) * 1000);
@@ -127,8 +139,8 @@ export default class bzxChannel {
                 // check if the currentMargin is within 10% above the mainatanance margin
                 const upperBoundary = parseInt(maintainanceMargin) + (parseInt(maintainanceMargin) * CONTRACT_DEFAULTS.liquidationTreshold / 100);
                 // calculate current prices
-                const currentMarginPrice = CONTRACT_DEFAULTS.toEth(currentMargin) // convert the margins to units;
-                const mainatananceMarginPrice = CONTRACT_DEFAULTS.toEth(maintainanceMargin) //convert the margins to units;
+                const currentMarginPrice = loanTokenPrice * CUSTOMIZABLE_DEFAULTS.toEth(currentMargin) // convert the margins to units;
+                const mainatananceMarginPrice = loanTokenPrice * CUSTOMIZABLE_DEFAULTS.toEth(maintainanceMargin) //convert the margins to units;
                 // define the conditions for sending notifications
                 const belowBoundary = upperBoundary > currentMargin; // this would be true if the current margin is less that 10 percent greater than the maintainance margin
                 const warningDate = CONTRACT_DEFAULTS.tenorTreshold > dateDifference; // this would be true if the loan is within x days of its expiration date
@@ -139,7 +151,8 @@ export default class bzxChannel {
                     const title = `BzX Loan of ${loanTokenName} is approaching liquidation`;
                     const body = `BzX Loan of ${loanTokenName} is approaching liquidation please fund your account`;
                     const payloadTitle = `BzX Loan of ${loanTokenName} is approaching liquidation`;
-                    const payloadMsg = `BzX Loan of ${loanTokenName} is approaching liquidation please fund your account.\n\n[d: Current Margin]: ${currentMarginPrice}\n\n[s: Maintainance Margin]: $${mainatananceMarginPrice} [timestamp: ${Math.floor(+new Date() / 1000)}]`;
+                    const payloadMsg = `BzX Loan of ${loanTokenName} is approaching liquidation please fund your account.\n\n[d: Current Margin Price]: $${currentMarginPrice}\n\n[s: Maintainance Margin Price]: $${mainatananceMarginPrice} [timestamp: ${Math.floor(+new Date() / 1000)}]`;
+                    const cta = CUSTOMIZABLE_DEFAULTS.tradeCTA;
                     // const notificationType = 3;
                     // const tx = await sdk.sendNotification(
                     //     subscriber, title, body, payloadTitle,
@@ -159,9 +172,10 @@ export default class bzxChannel {
                 if (true){
                     debugLogger(`[BzX sendMessageToContracts] - The Loan of ${loanTokenName} of subscriber :${subscriber},  is ${dateDifference} days from expiration`);
                     const title = `BzX Loan of ${loanTokenName} is close to it's tenor end.`;
-                    const body = `Your Loan of ${loanTokenName} from BzX is [s: ${dateDifference} Days away from its due date]`;
+                    const body = `Your Loan of ${loanTokenName} from BzX is [s: ${dateDifference} Days] away from its due date\n\n[d: Due Date]: ${parsedEndDate.format(CUSTOMIZABLE_DEFAULTS.dateFormat)}`;
                     const payloadTitle = `BzX Loan of ${loanTokenName} close to it's tenor end.`;
                     const payloadMsg = `Your Loan of ${loanTokenName} from BzX is [s: ${dateDifference} Days away from its due date]`;
+                    const cta = CUSTOMIZABLE_DEFAULTS.loansCTA;
                     // const notificationType = 3;
                     // const tx = await sdk.sendNotification(
                     //     subscriber, title, body, payloadTitle,
@@ -192,6 +206,22 @@ export default class bzxChannel {
             }
             return response;
         }
+    }
+    public async getPrice(symbol, simulate){
+        // to get the current price of a token by its symbol
+        //  Overide logic if need be
+        const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride") ? simulate.hasOwnProperty("logicOverride") : false) : false;
+        const tokenSymbol = logicOverride && simulate.logicOverride.mode && simulate.logicOverride.hasOwnProperty("symbol") ? simulate.logicOverride.symbol : symbol;
+        //  -- End Override logic
+    
+        const cmcroute = 'v1/cryptocurrency/quotes/latest';
+        const pollURL = `${config.cmcEndpoint}${cmcroute}?symbol=${tokenSymbol}&CMC_PRO_API_KEY=${config.cmcAPIKey}`;
+        debugLogger(`[BZX getPrice] obtaining prices from CMC API`);
+        const response = await getJSON(pollURL);
+        const data = response.data[tokenSymbol];
+        const price = Number(data.quote.USD.price.toFixed(CUSTOMIZABLE_DEFAULTS.precision));
+        debugLogger(`[BZX getPrice] obtained prices for token ${tokenSymbol} as ${price}`);
+        return price;
     }
 
 }
