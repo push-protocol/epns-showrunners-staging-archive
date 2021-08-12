@@ -4,8 +4,8 @@ import channelWalletsInfo from "../config/channelWalletsInfo";
 import { Pool, tickToPrice } from "@uniswap/v3-sdk";
 import { Token } from '@uniswap/sdk-core';
 import { ethers, logger} from 'ethers';
-import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '../../../epns-backend-sdk-staging/src';
-// import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging';
+import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging';
+import epnsNotify from '../helpers/epnsNotifyHelper';
 
 
 // TODO change channel key to that of uniswap v3 channel
@@ -28,7 +28,7 @@ const epnsSettings: EPNSSettings = {
 
 const DEBUG = true; //set to false to turn of logging
 const NETWORK_TO_MONITOR = config.web3MainnetNetwork;
-const UNISWAP_POOL_URL = "https://info.uniswap.org/#/pools/";
+const UNISWAP_POOL_URL = "https://app.uniswap.org/#/pool/";
 const CUSTOMIZABLE_SETTINGS = {
     'precision': 3, // precision of the floating point decimals
     'homestead': 1, // the chain id for mainnet
@@ -39,7 +39,9 @@ const sdk = new epnsHelper(NETWORK_TO_MONITOR, channelKey, settings, epnsSetting
 const debugLogger = (message) => DEBUG && logger.info(message);
 @Service()
 export default class UniswapV3Channel{
-    constructor(){}
+    constructor(
+        @Inject('logger') private logger,
+    ){}
     // to check all the wallet addresses in the channel and send notification to teh interested subset
     public async sendMessageToContracts(simulate){
         debugLogger(`[${new Date(Date.now())}]-[UNIV3 LP sendMessageToContracts] `);
@@ -82,16 +84,18 @@ export default class UniswapV3Channel{
                     ctaLink
                 } = positionDetails;
                 // -- if the current price is not within the set ticks then trigger a notif
-                if(!withinTicks){
+                // if(!withinTicks){
+                if(true){
                     const title = `UniswapV3 LP position out of range.`;
                     const body = `You have stopped receiving fees for your LP position ${tokenZeroName}-${tokenOneName}`;
                     const payloadTitle = `UniswapV3 LP position out of range`;
                     const payloadMsg = `You have stopped receiving fees for your LP position ${tokenOneName} - ${tokenZeroName}.\n\n[d: Current Price]: $${currentPrice}\n[s: LP Range]: $${upperTickPrice} - $${lowerTickPrice}. [timestamp: ${Math.floor(new Date() / 1000)}]`;
                     // todo add CTA
                     const notificationType = 3;
-                    const tx = await sdk.sendNotification(
+                    const tx = await this.sendNotification(
                         subscriber, title, body, payloadTitle,
-                        payloadMsg, notificationType, simulate
+                        payloadMsg, notificationType,
+                        ctaLink, simulate
                     );
                     txns.push(tx);
                     debugLogger(`[UNIV3 LP sendMessageToContracts] - sent notification to ${subscriber}`); 
@@ -166,7 +170,7 @@ export default class UniswapV3Channel{
             poolToken0, poolToken1, poolFees
         ) ).toString();
         const poolContract = await sdk.getContract(poolAddress, config.uniswapDeployedPoolContractABI)
-        const ctaLink = `${UNISWAP_POOL_URL}${poolContract}`
+        const ctaLink = `${UNISWAP_POOL_URL}`
         
         // get the necessary details to fetch the relative price
         debugLogger(`[UNIV3 LP getPositionDetails] - creating SDK liquidity pool instance...`);
@@ -206,5 +210,70 @@ export default class UniswapV3Channel{
             currentPrice, upperTickPrice, lowerTickPrice, withinTicks,
             poolAddress, tokenZeroName, tokenOneName, ctaLink
         };
+    }
+
+    public async sendNotification(subscriber, title, body, payloadTitle, payloadMsg, notificationType, cta, simulate){
+        const logger = this.logger;
+        debugLogger("[UNIV3 LP sendNotification] - Getting EPNS interactable contract ")
+        const epns = this.getEPNSInteractableContract(config.web3RopstenNetwork);
+        const payload = await epnsNotify.preparePayload(
+            null,
+            notificationType,
+            title,
+            body,
+            payloadTitle,
+            payloadMsg,
+            cta,
+            null
+        );
+        debugLogger('Payload Prepared: %o' + JSON.stringify(payload));
+
+        const txn = await epnsNotify.uploadToIPFS(payload, logger, simulate)
+            .then(async (ipfshash) => {
+                debugLogger("Success --> uploadToIPFS(): %o" + ipfshash);
+                const storageType = 1; // IPFS Storage Type
+                const txConfirmWait = 0; // Wait for 0 tx confirmation
+                // Send Notification
+                const notification = await epnsNotify.sendNotification(
+                    epns.signingContract,                                           // Contract connected to signing wallet
+                    subscriber,        // Recipient to which the payload should be sent
+                    parseInt(payload.data.type),                                    // Notification Type
+                    storageType,                                                    // Notificattion Storage Type
+                    ipfshash,                                                       // Notification Storage Pointer
+                    txConfirmWait,                                                  // Should wait for transaction confirmation
+                    logger,                                                         // Logger instance (or console.log) to pass
+                    simulate                                                        // Passing true will not allow sending actual notification
+                ).then ((tx) => {
+                    debugLogger("Transaction mined: %o | Notification Sent" + tx.hash);
+                    debugLogger("🙌 UNISWAP Channel Logic Completed!");
+                    return tx;
+                })
+                .catch (err => {
+                    logger.error("🔥Error --> sendNotification(): %o", err);
+                });
+
+                return notification;
+            })
+            .catch (err => {
+                logger.error("🔥Error --> Unable to obtain ipfshash, error: %o" + err.message);
+            });
+
+            return txn;
+
+    }
+
+    public getEPNSInteractableContract(web3network) {
+        // Get Contract
+        return epnsNotify.getInteractableContracts(
+            web3network,                                                                // Network for which the interactable contract is req
+            {                                                                       // API Keys
+                etherscanAPI: config.etherscanAPI,
+                infuraAPI: config.infuraAPI,
+                alchemyAPI: config.alchemyAPI
+            },
+            channelKey,                   // Private Key of the Wallet sending Notification
+            config.deployedContract,                                                // The contract address which is going to be used
+            config.deployedContractABI                                              // The contract abi which is going to be useds
+        );
     }
 }
