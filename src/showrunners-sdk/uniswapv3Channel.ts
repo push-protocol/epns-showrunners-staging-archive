@@ -28,13 +28,13 @@ const epnsSettings: EPNSSettings = {
 
 const DEBUG = true; //set to false to turn of logging
 const NETWORK_TO_MONITOR = config.web3MainnetNetwork;
+const UNISWAP_POOL_URL = "https://info.uniswap.org/#/pools/";
 const CUSTOMIZABLE_SETTINGS = {
     'precision': 3, // precision of the floating point decimals
     'homestead': 1, // the chain id for mainnet
     'ropsten': 3, // the chain id for ropsten
     'kovan': 42 // the chain id for kovan.
-}
-
+};
 const sdk = new epnsHelper(NETWORK_TO_MONITOR, channelKey, settings, epnsSettings);
 const debugLogger = (message) => DEBUG && logger.info(message);
 @Service()
@@ -78,7 +78,8 @@ export default class UniswapV3Channel{
                 const {
                     withinTicks, tokenZeroName,
                     tokenOneName, currentPrice,
-                    upperTickPrice, lowerTickPrice
+                    upperTickPrice, lowerTickPrice,
+                    ctaLink
                 } = positionDetails;
                 // -- if the current price is not within the set ticks then trigger a notif
                 if(!withinTicks){
@@ -86,6 +87,7 @@ export default class UniswapV3Channel{
                     const body = `You have stopped receiving fees for your LP position ${tokenZeroName}-${tokenOneName}`;
                     const payloadTitle = `UniswapV3 LP position out of range`;
                     const payloadMsg = `You have stopped receiving fees for your LP position ${tokenOneName} - ${tokenZeroName}.\n\n[d: Current Price]: $${currentPrice}\n[s: LP Range]: $${upperTickPrice} - $${lowerTickPrice}. [timestamp: ${Math.floor(new Date() / 1000)}]`;
+                    // todo add CTA
                     const notificationType = 3;
                     const tx = await sdk.sendNotification(
                         subscriber, title, body, payloadTitle,
@@ -164,6 +166,7 @@ export default class UniswapV3Channel{
             poolToken0, poolToken1, poolFees
         ) ).toString();
         const poolContract = await sdk.getContract(poolAddress, config.uniswapDeployedPoolContractABI)
+        const ctaLink = `${UNISWAP_POOL_URL}${poolContract}`
         
         // get the necessary details to fetch the relative price
         debugLogger(`[UNIV3 LP getPositionDetails] - creating SDK liquidity pool instance...`);
@@ -201,7 +204,7 @@ export default class UniswapV3Channel{
         const withinTicks = ( currentPrice > minTick ) && ( currentPrice < maxTick );
         return {
             currentPrice, upperTickPrice, lowerTickPrice, withinTicks,
-            poolAddress, tokenZeroName, tokenOneName
+            poolAddress, tokenZeroName, tokenOneName, ctaLink
         };
     }
 }
