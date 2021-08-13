@@ -8,7 +8,7 @@ import { handleResponse } from '../../helpers/utilsHelper';
 const route = Router();
 
 export default (app: Router) => {
-  app.use('/showrunners-sdk/ensdomain', route);
+  app.use('/showrunners/ensdomain', route);
 
   /**
    * Send Message
@@ -25,7 +25,7 @@ export default (app: Router) => {
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/ensdomain/send_message endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/ensdomain/send_message endpoint with body: %o', req.body )
       try {
         const ensDomain = Container.get(EnsExiprationChannel);
         const data = await ensDomain.sendMessageToContract(req.body.simulate);
@@ -50,21 +50,18 @@ export default (app: Router) => {
     '/check_expiry',
     celebrate({
       body: Joi.object({
-        network: Joi.string().required(),
-        address: Joi.string().required(),
-        triggerThresholdInSecs: Joi.number().required(),
-        simulate: Joi.bool(),
+        simulate: [Joi.bool(), Joi.object()],
       }),
     }),
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/ensdomain/check_expiry endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/ensdomain/check_expiry endpoint with body: %o', req.body )
       try {
         const { address, network, triggerThresholdInSecs, simulate } = req.body;
 
         const ensDomain = Container.get(EnsExiprationChannel);
-        const data = await ensDomain.checkENSDomainExpiry(network, null, address, triggerThresholdInSecs, simulate);
+        const data = await ensDomain.checkENSDomainExpiry(null, null, null, null, null, simulate);
 
         if (data.success && data.success == false) {
           return handleResponse(res, 500, false, "Expiry data", JSON.stringify(data.err));
@@ -88,22 +85,18 @@ export default (app: Router) => {
     '/domain_info',
     celebrate({
       body: Joi.object({
-        address: Joi.string().required(),
-        ensUrl: Joi.string().required(),
-        triggerThresholdInSecs: Joi.number().required(),
-        network: Joi.string().required(),
-        simulate: Joi.bool(),
+        simulate: [Joi.bool(), Joi.object()],
       }),
     }),
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/ensdomain/domain_info endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/ensdomain/domain_info endpoint with body: %o', req.body )
       try {
         const { address, ensUrl, triggerThresholdInSecs, network, simulate } = req.body;
 
         const ensDomain = Container.get(EnsExiprationChannel);
-        const dataInfo = await ensDomain.getDomain(null, null, address, ensUrl, null, triggerThresholdInSecs, network, simulate );
+        const dataInfo = await ensDomain.getDomain(null, null, address, ensUrl, null, triggerThresholdInSecs, network, null, simulate );
 
         if (dataInfo.success && dataInfo.success == false) {
           return handleResponse(res, 500, false, "Data Info", JSON.stringify(dataInfo.err));

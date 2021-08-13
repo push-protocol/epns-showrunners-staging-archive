@@ -3,12 +3,11 @@
 
 import { Service, Inject } from 'typedi';
 import config from '../../config';
-import channelWalletsInfo from '../../config/channelWalletsInfo';
+import showrunnersHelper from '../../helpers/showrunnersHelper';
 // import PQueue from 'p-queue';
 import { ethers, logger } from 'ethers';
 import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk'
 // const queue = new PQueue();
-const channelKey = channelWalletsInfo.walletsKV['alphahomoraPrivateKey_1']
 
 const infuraSettings: InfuraSettings = {
   projectID: config.infuraAPI.projectID,
@@ -24,21 +23,39 @@ const epnsSettings: EPNSSettings = {
   contractAddress: config.deployedContract,
   contractABI: config.deployedContractABI
 }
-const sdk = new epnsHelper(config.web3MainnetNetwork, channelKey, settings, epnsSettings)
+const alphaHomoraSettings = require('./alphaHomoraSettings.json')
+const homoraBankDeployedContractABI = require('./HomoraBank.json')
+const NETWORK_TO_MONITOR = config.web3MainnetNetwork
 
 @Service()
 export default class AlphaHomoraChannel {
+  constructor(
+    @Inject('logger') private logger,
+  ) {}
+
+  public async getWalletKey() {
+    var path = require('path');
+    const dirname = path.basename(__dirname);
+    const wallets = config.showrunnerWallets[`${dirname}`];
+    const currentWalletInfo = await showrunnersHelper.getValidWallet(dirname, wallets);
+    const walletKeyID = `wallet${currentWalletInfo.currentWalletID}`;
+    const walletKey = wallets[walletKeyID];
+    return walletKey;
+  }
   // To form and write to smart contract
   public async sendMessageToContract(simulate) {
+    const logger = this.logger;
+    const walletKey = await this.getWalletKey()
+    const sdk = new epnsHelper(NETWORK_TO_MONITOR, walletKey, settings, epnsSettings);
     const users = await sdk.getSubscribedUsers()
-    const AlphaHomoraContract = await sdk.getContract(config.homoraBankDeployedContract, config.homoraBankDeployedContractABI)
+    const AlphaHomoraContract = await sdk.getContract(alphaHomoraSettings.homoraBankDeployedContract, homoraBankDeployedContractABI)
     let next_pos = await AlphaHomoraContract.contract.functions.nextPositionId()
     next_pos = Number(next_pos.toString())
     logger.info({next_pos})
-    await this.processDebtRatio(users, 100, AlphaHomoraContract.contract, simulate);
+    await this.processDebtRatio(users, 100, AlphaHomoraContract.contract, sdk, simulate);
   }
 
-  public async processDebtRatio(users: Array<string>, id: number, contract, simulate: boolean | Object) {
+  public async processDebtRatio(users: Array<string>, id: number, contract, sdk, simulate: boolean | Object) {
     const position = await contract.functions.getPositionInfo(id)
     logger.info({ position: position.owner })
     if (users.includes(position.owner)) {}
@@ -47,14 +64,14 @@ export default class AlphaHomoraChannel {
     collateralCredit = Number(ethers.utils.formatEther(collateralCredit[0]))
     const debtRatio = (borrowCredit / collateralCredit) * 100
     logger.info({ debtRatio })
-    if (debtRatio > Number(config.homoraDebtRatioThreshold)) {
+    if (debtRatio > Number(alphaHomoraSettings.homoraDebtRatioThreshold)) {
       const notificationType = 3;
       const tx = await sdk.sendNotification(
         position.owner,
         'Position Liquidation',
-        `Your position of id: ${id} is at ${config.homoraDebtRatioThreshold}% debt ratio and is at risk of liquidation`,
+        `Your position of id: ${id} is at ${alphaHomoraSettings.homoraDebtRatioThreshold}% debt ratio and is at risk of liquidation`,
         'Position Liquidation',
-        `Your position of id: ${id} is at ${config.homoraDebtRatioThreshold}% debt ratio and is at risk of liquidation. [timestamp: ${Math.floor(new Date() / 1000)}]`,
+        `Your position of id: ${id} is at ${alphaHomoraSettings.homoraDebtRatioThreshold}% debt ratio and is at risk of liquidation. [timestamp: ${Math.floor(new Date() / 1000)}]`,
         notificationType,
         simulate
       )

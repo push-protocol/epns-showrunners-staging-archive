@@ -73,10 +73,7 @@ export default class WalletTrackerChannel {
       return;
     }
     this.running = true;
-
     const users = await sdk.getSubscribedUsers()
-
-    // const epns = this.getEPNSInteractableContract(config.web3RopstenNetwork);
     const interactableERC20s = await this.getSupportedERC20sArray(NETWORK_TO_MONITOR);
     const epns = sdk.advanced.getInteractableContracts(config.web3RopstenNetwork, settings, channelKey, config.deployedContract, config.deployedContractABI);
 
@@ -99,7 +96,8 @@ export default class WalletTrackerChannel {
         const message = "Crypto Movement from your wallet detected!";
         const payloadTitle = "Crypto Movement Alert!";
         const payloadMsg = this.prettyTokenBalances(object.changedTokens);
-        const tx = await sdk.sendNotification(user, title, message, payloadTitle, payloadMsg, simulate)
+        const notificationType = 3;
+        const tx = await sdk.sendNotification(user, title, message, payloadTitle, payloadMsg, notificationType, simulate)
         logger.info(tx);
         logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Transaction successful: %o | Notification Sent`, tx.hash);
         logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- 🙌 Wallet Tracker Channel Logic Completed for user : %o`, user);
@@ -185,11 +183,8 @@ export default class WalletTrackerChannel {
     this.getTokenBalance(user, networkToMonitor, ticker, interactableERC20s[ticker], simulate)
     .then((userToken: any) => {
 
-      // logger.info('userToken: %o', userToken)
       this.getTokenBalanceFromDB(user, ticker)
       .then((userTokenArrayFromDB: any) =>{
-        // logger.info('userTokenArrayFromDB: %o', userTokenArrayFromDB)
-        // logger.info('userTokenArrayFromDB.length: %o', userTokenArrayFromDB.length)
         if(userTokenArrayFromDB.length == 0){
           this.addUserTokenToDB(user, ticker, userToken.balance)
           .then(addedToken =>{
@@ -208,7 +203,6 @@ export default class WalletTrackerChannel {
             return userTokenFromDB = usertoken
           })
 
-          // logger.info('userTokenFromDB: %o', userTokenFromDB)
           let tokenBalanceStr= userToken.balance
           let tokenBalance= Number(tokenBalanceStr.replace(/,/g, ''))
           let tokenBalanceFromDBStr= userTokenFromDB.balance
@@ -216,7 +210,6 @@ export default class WalletTrackerChannel {
 
           this.compareTokenBalance(tokenBalance, tokenBalanceFromDB)
           .then(resultToken => {
-            // logger.info('resultToken: %o', resultToken)
             if(resultToken.changed){
               this.updateUserTokenBalance(user, ticker, resultToken.tokenBalance)
             }
@@ -249,7 +242,6 @@ export default class WalletTrackerChannel {
 
       if (ticker === 'ETH' ){
         tokenContract.provider.getBalance(user).then(balance => {
-          // logger.info("wei balance" + balance);
           let etherBalance;
 
           if (simulateRandomEthBal) {
@@ -259,8 +251,6 @@ export default class WalletTrackerChannel {
 
           // balance is a BigNumber (in wei); format is as a string (in ether)
           etherBalance = ethers.utils.formatEther(balance);
-
-          // logger.info("Ether Balance: " + etherBalance);
           let tokenInfo = {
             user,
             ticker,
@@ -287,7 +277,6 @@ export default class WalletTrackerChannel {
           let rawBalance = Number(Number(res));
 
           tokenBalance = Number(rawBalance/Math.pow(10, decimals)).toLocaleString()
-          // logger.info("tokenBalance: " + tokenBalance);
           let tokenInfo = {
             user,
             ticker,
@@ -378,7 +367,6 @@ export default class WalletTrackerChannel {
         userTokenData = await this.UserTokenModel.find({ user: userAddress }).populate("token")
       }
 
-      // logger.info('userTokenDataDB: %o', userTokenData)
       return userTokenData
     } catch (error) {
       logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- getTokenBalanceFromDB Error: %o`, error);
@@ -394,7 +382,6 @@ export default class WalletTrackerChannel {
         ticker,
         balance
       })
-      // logger.info('addUserTokenToDB: %o', userToken)
       return userToken;
     } catch (error) {
       logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- addUserTokenToDB Error: %o`, error);

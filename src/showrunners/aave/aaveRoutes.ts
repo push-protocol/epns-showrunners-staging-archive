@@ -8,7 +8,7 @@ import aaveChannel from './aaveChannel';
 const route = Router();
 
 export default (app: Router) => {
-  app.use('/showrunners-sdk/aave', route);
+  app.use('/showrunners/aave', route);
 
   /**
    * Send Message
@@ -25,7 +25,7 @@ export default (app: Router) => {
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/aave/send_message endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/aave/send_message endpoint with body: %o', req.body )
       try {
         const aave = Container.get(aaveChannel);
         const { success,  data } = await aave.sendMessageToContract(req.body.simulate);
@@ -48,10 +48,10 @@ export default (app: Router) => {
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/aave/send_message endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/aave/send_message endpoint with body: %o', req.body )
       try {
         const aave = Container.get(aaveChannel);
-        const { success,  data } = await aave.checkHealthFactor(null, null, req.body.simulate);
+        const { success,  data } = await aave.checkHealthFactor(null, null, null, req.body.simulate);
 
         return handleResponse(res, 201, true, success, data);
       } catch (e) {
