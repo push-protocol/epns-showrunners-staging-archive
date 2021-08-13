@@ -46,6 +46,9 @@ const wallets = [
         },
         {
             yamGovernancePrivateKey_1: process.env.YAM_GOVERNANCE_PRIVATE_KEY
+        },
+        {
+            pooltogetherPrivateKey_1: process.env.POOLTOGETHER_PRIVATE_KEY
         }
 ]
     

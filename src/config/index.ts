@@ -193,6 +193,11 @@ export default {
   yamGovernanceDeployedContractABI: require('./yamGovernance.json'),
 
   /**
+   * Pool Together Related
+   */
+  poolTogetherDeployedContractABI: require('./poolTogether.json'),
+
+  /**
    * WALLET TRACKER related
    */
   erc20DeployedContractABI: require('./erc20.json'),
