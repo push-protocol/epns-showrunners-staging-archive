@@ -7,8 +7,9 @@ import { Service, Inject, Token } from 'typedi';
 import config from '../config';
 import channelWalletsInfo from '../config/channelWalletsInfo';
 import { ethers, logger } from 'ethers';
-// import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '../../../epns-backend-sdk-staging/src';
-import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging';
+import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '../../../epns-backend-sdk-staging/src';
+// import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging';
+import epnsNotify from '../helpers/epnsNotifyHelper';
 
 const bent = require('bent'); // Download library
 
@@ -46,7 +47,7 @@ const CUSTOMIZABLE_DEFAULTS = {
     'dateFormat': "DD-MM-YY",
     'precision': 3, //number of decimal places
     'loansCTA': 'https://app.fulcrum.trade/borrow/user-loans',
-    'tradeCTA': 'https://app.fulcrum.trade/trade';
+    'tradeCTA': 'https://app.fulcrum.trade/trade',
 }
 
 const sdk = new epnsHelper(NETWORK_TO_MONITOR, channelKey, settings, epnsSettings)
@@ -55,7 +56,9 @@ const getJSON = bent('json');
 
 @Service()
 export default class bzxChannel {
-    constructor(){}
+    constructor(
+        @Inject('logger') private logger
+    ){}
 
     public async sendMessageToContract(simulate) {
         try{
@@ -160,9 +163,10 @@ export default class bzxChannel {
                     // );
                     const notificationType = 1;
                     const channelAddress = ethers.utils.computeAddress(channelKey);
-                    const tx = await sdk.sendNotification(
+                    const tx = await this.sendNotification(
                         channelAddress, title, body, payloadTitle,
-                        payloadMsg, notificationType, simulate
+                        payloadMsg, notificationType, CUSTOMIZABLE_DEFAULTS.tradeCTA,
+                        simulate
                     );
                     // to remove after testing
                     debugLogger(`[BZX sendMessageToContracts] - sent notification to ${subscriber}`); 
@@ -184,9 +188,10 @@ export default class bzxChannel {
                     // to remove after testing
                     const notificationType = 1;
                     const channelAddress = ethers.utils.computeAddress(channelKey);
-                    const tx = await sdk.sendNotification(
+                    const tx = await this.sendNotification(
                         channelAddress, title, body, payloadTitle,
-                        payloadMsg, notificationType, simulate
+                        payloadMsg, notificationType, CUSTOMIZABLE_DEFAULTS.loansCTA,
+                        simulate
                     );
                     // to remove after testing
                     debugLogger(`[BZX sendMessageToContracts] - sent notification to ${subscriber}`); 
@@ -222,6 +227,70 @@ export default class bzxChannel {
         const price = Number(data.quote.USD.price.toFixed(CUSTOMIZABLE_DEFAULTS.precision));
         debugLogger(`[BZX getPrice] obtained prices for token ${tokenSymbol} as ${price}`);
         return price;
+    }
+
+    public async sendNotification(subscriber, title, body, payloadTitle, payloadMsg, notificationType, cta, simulate){
+        const logger = this.logger;
+        debugLogger("[UNIV3 LP sendNotification] - Getting EPNS interactable contract ")
+        const epns = this.getEPNSInteractableContract(config.web3RopstenNetwork);
+        const payload = await epnsNotify.preparePayload(
+            null,
+            notificationType,
+            title,
+            body,
+            payloadTitle,
+            payloadMsg,
+            cta,
+            null
+        );
+        debugLogger('Payload Prepared: %o' + JSON.stringify(payload));
+
+        const txn = await epnsNotify.uploadToIPFS(payload, logger, simulate)
+            .then(async (ipfshash) => {
+                debugLogger("Success --> uploadToIPFS(): %o" + ipfshash);
+                const storageType = 1; // IPFS Storage Type
+                const txConfirmWait = 0; // Wait for 0 tx confirmation
+                // Send Notification
+                const notification = await epnsNotify.sendNotification(
+                    epns.signingContract,                                           // Contract connected to signing wallet
+                    subscriber,        // Recipient to which the payload should be sent
+                    parseInt(payload.data.type),                                    // Notification Type
+                    storageType,                                                    // Notificattion Storage Type
+                    ipfshash,                                                       // Notification Storage Pointer
+                    txConfirmWait,                                                  // Should wait for transaction confirmation
+                    logger,                                                         // Logger instance (or console.log) to pass
+                    simulate                                                        // Passing true will not allow sending actual notification
+                ).then ((tx) => {
+                    debugLogger("Transaction mined: %o | Notification Sent" + tx.hash);
+                    debugLogger("🙌 UNISWAP Channel Logic Completed!");
+                    return tx;
+                })
+                .catch (err => {
+                    logger.error("🔥Error --> sendNotification(): %o", err);
+                });
+
+                return notification;
+            })
+            .catch (err => {
+                logger.error("🔥Error --> Unable to obtain ipfshash, error: %o" + err.message);
+            });
+
+            return txn;
+    }
+
+    public getEPNSInteractableContract(web3network) {
+        // Get Contract
+        return epnsNotify.getInteractableContracts(
+            web3network,                                                                // Network for which the interactable contract is req
+            {                                                                       // API Keys
+                etherscanAPI: config.etherscanAPI,
+                infuraAPI: config.infuraAPI,
+                alchemyAPI: config.alchemyAPI
+            },
+            channelKey,                   // Private Key of the Wallet sending Notification
+            config.deployedContract,                                                // The contract address which is going to be used
+            config.deployedContractABI                                              // The contract abi which is going to be useds
+        );
     }
 
 }
