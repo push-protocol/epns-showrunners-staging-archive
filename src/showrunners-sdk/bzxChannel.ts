@@ -7,15 +7,14 @@ import { Service, Inject, Token } from 'typedi';
 import config from '../config';
 import channelWalletsInfo from '../config/channelWalletsInfo';
 import { ethers, logger } from 'ethers';
-import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '../../../epns-backend-sdk-staging/src';
-// import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging';
+import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging';
 import epnsNotify from '../helpers/epnsNotifyHelper';
 
 const bent = require('bent'); // Download library
 
 // TODO change to use bzx channel
 // const channelKey = channelWalletsInfo.walletsKV['yamGovernancePrivateKey_1'];
-const channelKey = '0xf71b681abcd31f5e94f049aed513684fa0c8dcfdb7ff93b08dcbaabc79493ba8';
+const channelKey = '0x7bc768f3aae49e8aa84339077567905c32a1762fe8d75d1d9a42eb9e9d571ab0';
 
 const infuraSettings: InfuraSettings = {
   projectID: config.infuraAPI.projectID,
@@ -92,7 +91,7 @@ export default class bzxChannel {
     
             // for each subscriber get their loan details into a single array
             // for all these subscribers we then get their loans
-            debugLogger(`[BZX sendMessageToContracts] - getting all the subscribers and the number of loans they have, as well as the information in the loan`);
+            debugLogger(`[BZX sendMessageToContracts] - filtering out subscribers with no loans`);
             const allSubscribersLoans = await Promise.all(subscribersWithLoans.map(async (oneSubscriber) => {
                 const { loanCount , subscriber } = oneSubscriber;
                 // using the details above get all the active laons the user has
@@ -123,19 +122,19 @@ export default class bzxChannel {
             const allLoans = [].concat.apply([], allSubscribersLoans);
     
             // go through all the loans and if they meet any of our criterias then we send the notification
-            debugLogger(`[BZX sendMessageToContracts] - getting all the subscribers and the number of loans they have, as well as the information in the loan`);
+            debugLogger(`[BZX sendMessageToContracts] - selecting customers who meet our conditions for notifications`);
             await Promise.all(allLoans.map(async(oneLoan) => {
                 const {
                     endTimestamp, startMargin,
                     currentMargin, maintainanceMargin,
                     subscriber, loanToken
                 } = oneLoan;
-                // get details on the token
+                // get details on the loan token
                 const tokenContract = await sdk.getContract(loanToken, config.erc20DeployedContractABI);
                 const [loanTokenName] = (await tokenContract.contract.functions.name());
                 const [loanTokenSymbol] = (await tokenContract.contract.functions.symbol());
+
                 const loanTokenPrice = await this.getPrice(loanTokenSymbol, undefined);
-    
                 // convert the timeStamp to date and find how many days it is away from today
                 const parsedEndDate = moment(parseInt(endTimestamp) * 1000);
                 const dateDifference = parsedEndDate.diff(moment(), CONTRACT_DEFAULTS.dateUnit);
