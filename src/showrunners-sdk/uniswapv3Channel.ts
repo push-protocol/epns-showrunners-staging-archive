@@ -84,13 +84,11 @@ export default class UniswapV3Channel{
                     ctaLink
                 } = positionDetails;
                 // -- if the current price is not within the set ticks then trigger a notif
-                // if(!withinTicks){
-                if(true){
+                if(!withinTicks){
                     const title = `UniswapV3 LP position out of range.`;
                     const body = `You have stopped receiving fees for your LP position ${tokenZeroName}-${tokenOneName}`;
                     const payloadTitle = `UniswapV3 LP position out of range`;
                     const payloadMsg = `You have stopped receiving fees for your LP position ${tokenOneName} - ${tokenZeroName}.\n\n[d: Current Price]: $${currentPrice}\n[s: LP Range]: $${upperTickPrice} - $${lowerTickPrice}. [timestamp: ${Math.floor(new Date() / 1000)}]`;
-                    // todo add CTA
                     const notificationType = 3;
                     const tx = await this.sendNotification(
                         subscriber, title, body, payloadTitle,
