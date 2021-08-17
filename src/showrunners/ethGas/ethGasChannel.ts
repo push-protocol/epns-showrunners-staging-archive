@@ -34,7 +34,10 @@ const PRICE_THRESHOLD_MULTIPLIER = 1.3; // multiply by 1.3x for checking high pr
 
 @Service()
 export default class GasStationChannel {
-  constructor(@Inject('cached') private cached, @Inject('logger') private logger,) {
+  constructor(
+    @Inject('cached') private cached, 
+    @Inject('logger') private logger,
+    ) {
     //initializing cache
     this.cached.setCache(HIGH_PRICE_FLAG, false);
     this.cached.setCache(GAS_PRICE_FOR_THE_DAY, 0);
@@ -195,7 +198,7 @@ export default class GasStationChannel {
    * @return {Promise<{ gasPrice: IGas }>}
    */
   public async setGasPrice(price: Number): Promise<{ gasPrice: IGas }> {
-    this.GasPriceModel = Container.get('GasPriceModel');
+    this.GasPriceModel = Container.get('ethGasModel');
     const gasPrice = await this.GasPriceModel.find()
         .sort({ _id: -1 })
       .limit(1);
@@ -221,7 +224,7 @@ export default class GasStationChannel {
    * @return {Promise<{ average: Number }>}
    */
   public async getAverageGasPrice(): Promise<{ average: Number }> {
-    this.GasPriceModel = Container.get('GasPriceModel');
+    this.GasPriceModel = Container.get('ethGasModel');
     try {
       const gasPrices = await this.GasPriceModel.find()
         .sort({ _id: -1 })
@@ -248,7 +251,7 @@ export default class GasStationChannel {
 
   public async clearGasPrices(): Promise<null> {
     // this.logger.silly('Get gas price');
-    this.GasPriceModel = Container.get('GasPriceModel');
+    this.GasPriceModel = Container.get('ethGasModel');
     await this.GasPriceModel.deleteMany({});
     return null;
   }

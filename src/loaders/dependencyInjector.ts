@@ -6,7 +6,7 @@ import config from '../config';
 
 export default ({ models }: { models: { name: string; model: any }[] }) => {
   try {
-    LoggerInstance.info('✌️   Loading Mongo DB Mpdels');
+    LoggerInstance.info('✌️   Loading Mongo DB Models');
 
     models.forEach(m => {
       LoggerInstance.info('   --  ✔️  Loading Mongo DB Model: %s', m)
