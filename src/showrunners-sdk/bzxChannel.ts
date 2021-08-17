@@ -3,18 +3,17 @@
 // @recent_changes: Created Logic
 
 import moment from 'moment';
-import { Service, Inject, Token } from 'typedi';
+import { Service, Inject } from 'typedi';
 import config from '../config';
 import channelWalletsInfo from '../config/channelWalletsInfo';
-import { ethers, logger } from 'ethers';
+import { logger } from 'ethers';
 import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging';
 import epnsNotify from '../helpers/epnsNotifyHelper';
 
 const bent = require('bent'); // Download library
 
 // TODO change to use bzx channel
-// const channelKey = channelWalletsInfo.walletsKV['yamGovernancePrivateKey_1'];
-const channelKey = '0x7bc768f3aae49e8aa84339077567905c32a1762fe8d75d1d9a42eb9e9d571ab0';
+const channelKey = channelWalletsInfo.walletsKV['bzxPrivateKey_1'];
 
 const infuraSettings: InfuraSettings = {
   projectID: config.infuraAPI.projectID,
@@ -146,24 +145,18 @@ export default class bzxChannel {
                 // define the conditions for sending notifications
                 const belowBoundary = upperBoundary > currentMargin; // this would be true if the current margin is less that 10 percent greater than the maintainance margin
                 const warningDate = CONTRACT_DEFAULTS.tenorTreshold > dateDifference; // this would be true if the loan is within x days of its expiration date
-                // if(belowBoundary){
-                if(true){
+                if(belowBoundary){
                     // send them a notification that they are close to liquidation
                     debugLogger(`[BZX sendMessageToContracts] - The Loan of ${loanTokenName} of subscriber :${subscriber},  is below treshold with current margin of :${currentMarginPrice} & maintainance margin:${mainatananceMarginPrice}`);
                     const title = `BzX Loan of ${loanTokenName} is approaching liquidation`;
-                    const body = `BzX Loan of ${loanTokenName} is approaching liquidation please fund your account`;
+                    const body = `Your loan of ${loanTokenName} is approaching liquidation please fund your account`;
                     const payloadTitle = `BzX Loan of ${loanTokenName} is approaching liquidation`;
-                    const payloadMsg = `BzX Loan of ${loanTokenName} is approaching liquidation please fund your account.\n\n[d: Current Margin Price]: $${currentMarginPrice}\n\n[s: Maintainance Margin Price]: $${mainatananceMarginPrice} [timestamp: ${Math.floor(+new Date() / 1000)}]`;
+                    const payloadMsg = `Your loan of ${loanTokenName} is approaching liquidation please fund your account.\n\n[d: Current Margin Price]: $${currentMarginPrice}\n\n[s: Maintainance Margin Price]: $${mainatananceMarginPrice} [timestamp: ${Math.floor(+new Date() / 1000)}]`;
                     const cta = CUSTOMIZABLE_DEFAULTS.tradeCTA;
-                    // const notificationType = 3;
-                    // const tx = await sdk.sendNotification(
-                    //     subscriber, title, body, payloadTitle,
-                    //     payloadMsg, notificationType, simulate
-                    // );
-                    const notificationType = 1;
-                    const channelAddress = ethers.utils.computeAddress(channelKey);
+
+                    const notificationType = 3;
                     const tx = await this.sendNotification(
-                        channelAddress, title, body, payloadTitle,
+                        subscriber, title, body, payloadTitle,
                         payloadMsg, notificationType, CUSTOMIZABLE_DEFAULTS.tradeCTA,
                         simulate
                     );
@@ -171,24 +164,16 @@ export default class bzxChannel {
                     debugLogger(`[BZX sendMessageToContracts] - sent notification to ${subscriber}`); 
                     txns.push(tx);
                 }
-                // if (warningDate){
-                if (true){
+                if (warningDate){
                     debugLogger(`[BzX sendMessageToContracts] - The Loan of ${loanTokenName} of subscriber :${subscriber},  is ${dateDifference} days from expiration`);
                     const title = `BzX Loan of ${loanTokenName} is close to it's tenor end.`;
                     const body = `Your Loan of ${loanTokenName} from BzX is [s: ${dateDifference} Days] away from its due date\n\n[d: Due Date]: ${parsedEndDate.format(CUSTOMIZABLE_DEFAULTS.dateFormat)}`;
                     const payloadTitle = `BzX Loan of ${loanTokenName} close to it's tenor end.`;
                     const payloadMsg = `Your Loan of ${loanTokenName} from BzX is [s: ${dateDifference} Days away from its due date]`;
-                    const cta = CUSTOMIZABLE_DEFAULTS.loansCTA;
-                    // const notificationType = 3;
-                    // const tx = await sdk.sendNotification(
-                    //     subscriber, title, body, payloadTitle,
-                    //     payloadMsg, notificationType, simulate
-                    // );
-                    // to remove after testing
-                    const notificationType = 1;
-                    const channelAddress = ethers.utils.computeAddress(channelKey);
+
+                    const notificationType = 3;
                     const tx = await this.sendNotification(
-                        channelAddress, title, body, payloadTitle,
+                        subscriber, title, body, payloadTitle,
                         payloadMsg, notificationType, CUSTOMIZABLE_DEFAULTS.loansCTA,
                         simulate
                     );

@@ -46,6 +46,8 @@ const wallets = [
         },
         {
             yamGovernancePrivateKey_1: process.env.YAM_GOVERNANCE_PRIVATE_KEY
+        },{
+            bzxPrivateKey_1: process.env.BZX_DEPLOYED_CONTRACT
         }
 ]
     

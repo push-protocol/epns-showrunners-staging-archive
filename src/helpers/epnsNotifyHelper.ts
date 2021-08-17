@@ -27,8 +27,7 @@ export default {
       const jsonizedPayload = JSON.stringify(payload);
       const { create } = require('ipfs-http-client')
 
-      // let ipfsURL = config.ipfsLocal? config.ipfsLocal: config.ipfsInfura;
-      let ipfsURL = config.ipfsInfura ? config.ipfsInfura : config.ipfsLocal;
+      let ipfsURL = config.ipfsLocal? config.ipfsLocal: config.ipfsInfura;
       let ipfs = null
       try{
         ipfs = create(ipfsURL);
