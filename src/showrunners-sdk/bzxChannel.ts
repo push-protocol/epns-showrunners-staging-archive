@@ -46,7 +46,7 @@ const CUSTOMIZABLE_DEFAULTS = {
     'dateFormat': "DD-MM-YY",
     'precision': 3, //number of decimal places
     'loansCTA': 'https://app.fulcrum.trade/borrow/user-loans',
-    'tradeCTA': 'https://app.fulcrum.trade/trade',
+    'tradeCTA': 'https://app.fulcrum.trade/borrow/user-loans',
 }
 
 const sdk = new epnsHelper(NETWORK_TO_MONITOR, channelKey, settings, epnsSettings)
