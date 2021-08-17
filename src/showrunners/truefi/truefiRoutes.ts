@@ -7,7 +7,7 @@ import { celebrate, Joi } from 'celebrate';
 const route = Router();
 
 export default (app: Router) => {
-  app.use('/showrunners-sdk/truefi', route);
+  app.use('/showrunners/truefi', route);
 
   // to add an incoming feed
   route.post(
@@ -20,7 +20,7 @@ export default (app: Router) => {
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/truefi/send_message ticker endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/truefi/send_message ticker endpoint with body: %o', req.body )
       try {
         const truefi = Container.get(Truefi);
         const response = await truefi.sendMessageToContract(req.body.simulate);
@@ -43,10 +43,10 @@ export default (app: Router) => {
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/truefi/check_active_loans ticker endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/truefi/check_active_loans ticker endpoint with body: %o', req.body )
       try {
         const truefi = Container.get(Truefi);
-        const response = await truefi.checkActiveLoans(null, null, req.body.simulate);
+        const response = await truefi.checkActiveLoans(null, null, null, req.body.simulate);
 
         return res.status(201).json(response);
       } catch (e) {
@@ -66,10 +66,10 @@ export default (app: Router) => {
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/truefi/check_borrower ticker endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/truefi/check_borrower ticker endpoint with body: %o', req.body )
       try {
         const truefi = Container.get(Truefi);
-        const response = await truefi.checkBorrower(null, null, null, null, req.body.simulate);
+        const response = await truefi.checkBorrower(null, null, null, null, null, req.body.simulate);
 
         return res.status(201).json(response);
       } catch (e) {
@@ -89,10 +89,10 @@ export default (app: Router) => {
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/truefi/check_loan_expiry ticker endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/truefi/check_loan_expiry ticker endpoint with body: %o', req.body )
       try {
         const truefi = Container.get(Truefi);
-        const response = await truefi.checkLoanExpiry(null, null, null, req.body.simulate);
+        const response = await truefi.checkLoanExpiry(null, null, null, null, req.body.simulate);
 
         return res.status(201).json(response);
       } catch (e) {
@@ -112,10 +112,10 @@ export default (app: Router) => {
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/truefi/check_new_loans ticker endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/truefi/check_new_loans ticker endpoint with body: %o', req.body )
       try {
         const truefi = Container.get(Truefi);
-        const response = await truefi.checkNewLoans(null, null, null, req.body.simulate);
+        const response = await truefi.checkNewLoans(null, null, null, null, req.body.simulate);
 
         return res.status(200).json(response);
       } catch (e) {

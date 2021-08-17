@@ -23,6 +23,7 @@ const epnsSettings: EPNSSettings = {
   contractAddress: config.deployedContract,
   contractABI: config.deployedContractABI
 }
+const truefiSettings = require('./truefiSettings.json')
 const truefiLenderDeployedContractABI= require('./truefiLender.json')
 const truefiRatingAgencyDeployedContractABI= require('./TrueRatingAgencyV2.json')
 const truefiLoanFactoryDeployedContractABI= require('./truefiLoanFactory.json')
@@ -72,7 +73,7 @@ export default class TruefiChannel {
     const walletKey = await this.getWalletKey()
     const sdk = new epnsHelper(NETWORK_TO_MONITOR, walletKey, settings, epnsSettings);
     const epns = sdk.advanced.getInteractableContracts(config.web3RopstenNetwork, settings, walletKey, config.deployedContract, config.deployedContractABI);
-    logger.info('Checking for truefi address... ');
+    logger.info(`[${new Date(Date.now())}]-[TrueFi]- Checking for truefi address... `);
     const users = await sdk.getSubscribedUsers()
     const loans = await this.checkNewLoans(epns, users, truefiNetwork, sdk, simulate)
     await this.checkActiveLoans(loans, truefiNetwork, sdk, simulate)
@@ -83,26 +84,33 @@ export default class TruefiChannel {
   }
 
   public async checkActiveLoans(loans, truefiNetwork, sdk, simulate) {
+    const logger = this.logger;
     const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride") ? simulate.hasOwnProperty("logicOverride") : false) : false;
     if(!loans) loans = logicOverride && simulate.logicOverride.hasOwnProperty("loans") ? simulate.logicOverride.loans : [];
     if(!truefiNetwork) truefiNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("truefiNetwork") ? simulate.logicOverride.truefiNetwork : config.web3MainnetNetwork;
+    if(!sdk){
+      const walletKey = await this.getWalletKey()
+      sdk = new epnsHelper(NETWORK_TO_MONITOR, walletKey, settings, epnsSettings);
+    }
     try {      
-      const loanPromise = loans.map(async loan => await sdk.getContract(loan, config.truefiLoanTokenDeployedContractABI))
+      const loanPromise = loans.map(async loan => await sdk.getContract(loan, truefiLoanTokenDeployedContractABI))
       const loanObj = await Promise.all(loanPromise)
       const checkStatusPromise = loanObj.map(loan => this.checkStatus(loan))
       await Promise.all(checkStatusPromise)
     } catch (error) {
-      console.log("error: %o", error)
+      logger.error(`[${new Date(Date.now())}]-[TrueFi]- error: %o`, error)
     }
   }
 
   public async checkExpiry(epns, users, truefiNetwork, sdk, simulate) {
+    const logger = this.logger;
     const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride") ? simulate.hasOwnProperty("logicOverride") : false) : false;
     if (!users) users = logicOverride && simulate.logicOverride.hasOwnProperty("users") ? simulate.logicOverride.users : [];
     const epnsNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("epnsNetwork") ? simulate.logicOverride.epnsNetwork : config.web3RopstenNetwork;
     if(!truefiNetwork) truefiNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("truefiNetwork") ? simulate.logicOverride.truefiNetwork : config.web3MainnetNetwork;
     if(!epns){
       const walletKey = await this.getWalletKey()
+      sdk = new epnsHelper(NETWORK_TO_MONITOR, walletKey, settings, epnsSettings);
       epns = sdk.advanced.getInteractableContracts(config.web3RopstenNetwork, settings, walletKey, config.deployedContract, config.deployedContractABI);
     }
     const cache = this.cached;
@@ -112,6 +120,7 @@ export default class TruefiChannel {
   }
 
   public async checkBorrower(epns, users, loan, truefiNetwork, sdk, simulate) {
+    const logger = this.logger;
     const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride") ? simulate.hasOwnProperty("logicOverride") : false) : false;
     if (!users) users = logicOverride && simulate.logicOverride.hasOwnProperty("users") ? simulate.logicOverride.users : [];
     if (!loan) loan = logicOverride && simulate.logicOverride.hasOwnProperty("loans") ? simulate.logicOverride.loans[0] : "";
@@ -119,17 +128,19 @@ export default class TruefiChannel {
     if(!truefiNetwork) truefiNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("truefiNetwork") ? simulate.logicOverride.truefiNetwork : config.web3MainnetNetwork;
     if(!epns){
       const walletKey = await this.getWalletKey()
+      sdk = new epnsHelper(NETWORK_TO_MONITOR, walletKey, settings, epnsSettings);
       epns = sdk.advanced.getInteractableContracts(config.web3RopstenNetwork, settings, walletKey, config.deployedContract, config.deployedContractABI);
     }
-    const loanContract = await sdk.getContract(loan, config.truefiLoanTokenDeployedContractABI)
+    const loanContract = await sdk.getContract(loan, truefiLoanTokenDeployedContractABI)
     const borrower = await loanContract.contract.borrower()
     if (users.includes(borrower)) {
-      console.log({users, borrower})
+      logger.info(`[${new Date(Date.now())}]-[TrueFi]- %o`, {users, borrower})
     }
     return this.checkLoanExpiry(epns, borrower, loanContract, sdk, simulate)
   }
 
   public async checkLoanExpiry(epns, borrower, loanContract, sdk, simulate) {
+    const logger = this.logger;
     let loan
     let users
     let truefiNetwork
@@ -138,6 +149,7 @@ export default class TruefiChannel {
     if(!truefiNetwork) truefiNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("truefiNetwork") ? simulate.logicOverride.truefiNetwork : config.web3MainnetNetwork;
     if(!epns){
       const walletKey = await this.getWalletKey()
+      sdk = new epnsHelper(NETWORK_TO_MONITOR, walletKey, settings, epnsSettings);
       epns = sdk.advanced.getInteractableContracts(config.web3RopstenNetwork, settings, walletKey, config.deployedContract, config.deployedContractABI);
     }
     if (!borrower) {
@@ -146,7 +158,7 @@ export default class TruefiChannel {
     }
     if (!loanContract) {
       loan = logicOverride && simulate.logicOverride.hasOwnProperty("loans") ? simulate.logicOverride.loans[0] : "";
-      loanContract = await sdk.getContract(loan, config.truefiLoanTokenDeployedContractABI)
+      loanContract = await sdk.getContract(loan, truefiLoanTokenDeployedContractABI)
     }
     
     let [start, term] = await Promise.all([loanContract.contract.start(), loanContract.contract.term()])
@@ -155,12 +167,12 @@ export default class TruefiChannel {
     const now = parseInt(Date.now()/1000);
     const passed = now - start
     const days = Math.floor((passed - term) / 86400)
-    console.log({now, start, term, passed, days})
-    if (days <= Number(config.truefiDueLoanDays)) {
-      await this.sendNotification(epns, borrower, { days }, NOTIFICATION_TYPE.DUE_LOAN, sdk, simulate)
-      logger.info(" Added processAndSendNotification `Due Loans` for user: %o ", borrower)
+    logger.info(`[${new Date(Date.now())}]-[TrueFi]- %o`, {now, start, term, passed, days})
+    if (days <= Number(truefiSettings.truefiDueLoanDays)) {
+      await this.sendNotification(epns, borrower, { days }, NOTIFICATION_TYPE.DUE_LOAN, simulate)
+      logger.info(`[${new Date(Date.now())}]-[TrueFi]- Added processAndSendNotification 'Due Loans' for user: %o `, borrower)
     }
-    return {expiringDays: days, benchmark: config.truefiDueLoanDays}
+    return {expiringDays: days, benchmark: truefiSettings.truefiDueLoanDays}
   }
 
   public async checkStatus(loan) {
@@ -170,15 +182,17 @@ export default class TruefiChannel {
   }
 
   public async checkNewLoans(epns, users, truefiNetwork, sdk, simulate) {
+    const logger = this.logger;
     const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride") ? simulate.hasOwnProperty("logicOverride") : false) : false;
     if (!users) users = logicOverride && simulate.logicOverride.hasOwnProperty("users") ? simulate.logicOverride.users : [];
     const epnsNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("epnsNetwork") ? simulate.logicOverride.epnsNetwork : config.web3RopstenNetwork;
     if(!truefiNetwork) truefiNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("truefiNetwork") ? simulate.logicOverride.truefiNetwork : config.web3MainnetNetwork;
     if(!epns){
       const walletKey = await this.getWalletKey()
+      sdk = new epnsHelper(NETWORK_TO_MONITOR, walletKey, settings, epnsSettings);
       epns = sdk.advanced.getInteractableContracts(config.web3RopstenNetwork, settings, walletKey, config.deployedContract, config.deployedContractABI);
     }
-    const truefi = await sdk.getContract(config.truefiLoanFactoryDeployedContract, config.truefiLoanFactoryDeployedContractABI)
+    const truefi = await sdk.getContract(truefiSettings.truefiLoanFactoryDeployedContract, truefiLoanFactoryDeployedContractABI)
     const cache = this.cached;
     // get and store last checked block number to run filter
     const filter = truefi.contract.filters.LoanTokenCreated();
@@ -187,17 +201,18 @@ export default class TruefiChannel {
     startBlock = Number(startBlock)
     const eventLog = await truefi.contract.queryFilter(filter, startBlock)
     const loans = eventLog.map((log) => log.args.contractAddress)
-    logger.info("loans: %o, startBlock: %o", loans, startBlock)
+    logger.info(`[${new Date(Date.now())}]-[TrueFi]- loans: %o, startBlock: %o`, loans, startBlock)
     for (let index = 0; index < users.length; index++) {
-      await queue.add(async() => this.sendNotification(epns, users[index], {loans}, NOTIFICATION_TYPE.NEW_LOAN, sdk, simulate));
-      logger.info(" Added processAndSendNotification `New Loans` for user:%o ", users[index])
+      await queue.add(async() => this.sendNotification(epns, users[index], {loans}, NOTIFICATION_TYPE.NEW_LOAN, simulate));
+      logger.info(`[${new Date(Date.now())}]-[TrueFi]- Added processAndSendNotification 'New Loans' for user:%o `, users[index])
     }
     return loans;
   }
 
-  public async sendNotification(epns, user, data, notificationType, sdk, simulate) {
+  public async sendNotification(epns, user, data, notificationType, simulate) {
+    const logger = this.logger;
     try{
-      logger.info('Preparing payload...');
+      logger.info(`[${new Date(Date.now())}]-[TrueFi]- Preparing payload...`);
       let title, message, payloadTitle, payloadMsg, notifType;
       switch (notificationType) {
         case NOTIFICATION_TYPE.RATE:
@@ -225,14 +240,14 @@ export default class TruefiChannel {
         default:
           break;
       }
-
+      const walletKey = await this.getWalletKey()
+      const sdk = new epnsHelper(NETWORK_TO_MONITOR, walletKey, settings, epnsSettings);
       const txPromise = await sdk.sendNotification(user, title, message, payloadTitle, payloadMsg, notifType, simulate)
-      console.log("🚀 ~ file: truefiChannel.ts ~ line 207 ~ TruefiChannel ~ sendNotification ~ txPromise", txPromise)
       const tx = await txPromise;
-      logger.info(tx);
-      logger.info("Transaction successful: %o | Notification Sent", tx.hash);
+      logger.info(`[${new Date(Date.now())}]-[TrueFi]- %o`, tx);
+      logger.info(`[${new Date(Date.now())}]-[TrueFi]- Transaction successful: %o | Notification Sent`, tx.hash);
     } catch (error) {
-      logger.throwError("Sending notifications failed: %o", error)
+      logger.error(`[${new Date(Date.now())}]-[TrueFi]- Sending notifications failed: %o`, error)
       // if (retries <=5 ) {
       //   retries++
       //   await queue.add(() => this.processAndSendNotification(epns, user, NETWORK_TO_MONITOR, simulate, interactableERC20s));

@@ -3,14 +3,12 @@
 
 import { Service, Inject, Container } from 'typedi';
 import config from '../../config';
-import channelWalletsInfo from '../../config/channelWalletsInfo';
+import showrunnersHelper from '../../helpers/showrunnersHelper';
 import PQueue from 'p-queue';
 import { ethers, logger } from 'ethers';
 import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk'
 const queue = new PQueue();
 let retries = 0
-const channelKey = channelWalletsInfo.walletsKV['walletTrackerPrivateKey_1']
-const NETWORK_TO_MONITOR = config.web3RopstenNetwork;
 
 const infuraSettings: InfuraSettings = {
   projectID: config.infuraAPI.projectID,
@@ -26,7 +24,8 @@ const epnsSettings: EPNSSettings = {
   contractAddress: config.deployedContract,
   contractABI: config.deployedContractABI
 }
-const sdk = new epnsHelper(NETWORK_TO_MONITOR, channelKey, settings, epnsSettings)
+const erc20DeployedContractABI= require('./erc20.json')
+const NETWORK_TO_MONITOR = config.web3RopstenNetwork;
 
 const SUPPORTED_TOKENS = {
   'ETH':{
@@ -45,16 +44,28 @@ const CUSTOMIZABLE_SETTINGS = {
 export default class WalletTrackerChannel {
   running: any;
   UserTokenModel: any;
-  constructor() {
+  constructor(
+    @Inject('logger') private logger,
+  ) {
     let running = false;
     // this.running =  false;
   }
+  public async getWalletKey() {
+    var path = require('path');
+    const dirname = path.basename(__dirname);
+    const wallets = config.showrunnerWallets[`${dirname}`];
+    const currentWalletInfo = await showrunnersHelper.getValidWallet(dirname, wallets);
+    const walletKeyID = `wallet${currentWalletInfo.currentWalletID}`;
+    const walletKey = wallets[walletKeyID];
+    return walletKey;
+  }
 
-  public async getSupportedERC20sArray(web3network) {
+  public async getSupportedERC20sArray(web3Network, sdk) {
+    const logger = this.logger;
     let erc20s = [];
 
     for (const ticker in SUPPORTED_TOKENS) {
-      await sdk.getContract(SUPPORTED_TOKENS[ticker].address, config.erc20DeployedContractABI )
+      await sdk.getContract(SUPPORTED_TOKENS[ticker].address, erc20DeployedContractABI )
       .then(res => {
         erc20s[`${ticker}`] = res
 
@@ -66,6 +77,7 @@ export default class WalletTrackerChannel {
   }
 
   public async sendMessageToContract(simulate) {
+    const logger = this.logger;
 
     // Ignore call if this is already running
     if (this.running) {
@@ -73,12 +85,15 @@ export default class WalletTrackerChannel {
       return;
     }
     this.running = true;
+    const walletKey = await this.getWalletKey()
+    const sdk = new epnsHelper(NETWORK_TO_MONITOR, walletKey, settings, epnsSettings);
     const users = await sdk.getSubscribedUsers()
-    const interactableERC20s = await this.getSupportedERC20sArray(NETWORK_TO_MONITOR);
-    const epns = sdk.advanced.getInteractableContracts(config.web3RopstenNetwork, settings, channelKey, config.deployedContract, config.deployedContractABI);
+    const interactableERC20s = await this.getSupportedERC20sArray(NETWORK_TO_MONITOR, sdk);
 
     users.forEach(async user => {
-      await queue.add(() => this.processAndSendNotification(epns, user, NETWORK_TO_MONITOR, simulate, interactableERC20s));
+      const walletKey = await this.getWalletKey()
+      const sdk = new epnsHelper(NETWORK_TO_MONITOR, walletKey, settings, epnsSettings);
+      await queue.add(() => this.processAndSendNotification(user, NETWORK_TO_MONITOR, sdk, simulate, interactableERC20s));
       logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Added processAndSendNotification for user:%o `, user)
     });
     
@@ -87,9 +102,9 @@ export default class WalletTrackerChannel {
     logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Done for all`);
   }
 
-  public async processAndSendNotification(epns, user, NETWORK_TO_MONITOR, simulate, interactableERC20s) {
+  public async processAndSendNotification(user, NETWORK_TO_MONITOR, sdk, simulate, interactableERC20s) {
     try{
-      const object = await this.checkWalletMovement(user, NETWORK_TO_MONITOR, simulate, interactableERC20s);
+      const object = await this.checkWalletMovement(user, NETWORK_TO_MONITOR, sdk, interactableERC20s, simulate);
       if (object.success) {
         const user = object.user
         const title = "Wallet Tracker Alert!";
@@ -109,14 +124,44 @@ export default class WalletTrackerChannel {
       logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Sending notifications failed to user: %o | error: %o`, user, error)
       if (retries <=5 ) {
         retries++
-        await queue.add(() => this.processAndSendNotification(epns, user, NETWORK_TO_MONITOR, simulate, interactableERC20s));
+        await queue.add(() => this.processAndSendNotification(user, NETWORK_TO_MONITOR, sdk, simulate, interactableERC20s));
       } else {
         retries = 0
       }
     }
   }
 
-  public async checkWalletMovement(user, networkToMonitor, simulate, interactableERC20s) {
+  public async checkWalletMovement(user, networkToMonitor, sdk, interactableERC20s, simulate) {
+    const logger = this.logger;
+    //simulate object settings START
+    try{
+      const logicOverride = typeof simulate == 'object' ? ((simulate.hasOwnProperty("logicOverride") && simulate.logicOverride.mode) ? simulate.logicOverride.mode : false) : false;
+      const simulateApplyToAddr = logicOverride && simulate.logicOverride.hasOwnProperty("applyToAddr") ? simulate.logicOverride.applyToAddr : false;
+      const simulateNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("network") ? simulate.logicOverride.network : false;
+      if(!sdk){
+        const walletKey = await this.getWalletKey()
+        sdk = new epnsHelper(NETWORK_TO_MONITOR, walletKey, settings, epnsSettings);
+      }
+      // check and recreate provider mostly for routes
+      if (!interactableERC20s) {
+        logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Mostly coming from routes... rebuilding interactable erc20s`);
+        //need token address
+        interactableERC20s = this.getSupportedERC20sArray(networkToMonitor, sdk);
+        logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Rebuilt interactable erc20s --> %o`, interactableERC20s);
+      }
+      if(!user){
+        if(simulateApplyToAddr){
+          user = simulateApplyToAddr
+        }
+        else{
+          logger.debug(`[${new Date(Date.now())}]-[Wallet Tracker]- user is not defined`)
+        }
+      }
+    }
+    catch(err){
+      logger.error(`[${new Date(Date.now())}]-[Wallet Tracker]- error: ${err}`)
+    }
+    //simulate object settings END
 
     // check and return if the wallet is the channel owner
     if (this.isChannelOwner(user)) {
@@ -125,21 +170,12 @@ export default class WalletTrackerChannel {
         data: "Channel Owner User: " + user
       };
     }
-
-    // check and recreate provider mostly for routes
-    if (!interactableERC20s) {
-      logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Mostly coming from routes... rebuilding interactable erc20s`);
-      //need token address
-      interactableERC20s = this.getSupportedERC20sArray(networkToMonitor);
-      logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Rebuilt interactable erc20s --> %o`, interactableERC20s);
-    }
-
     let changedTokens = [];
 
     // let promises = SUPPORTED_TOKENS.map(token => {
     let promises = [];
     for (const ticker in SUPPORTED_TOKENS) {
-      promises.push(this.checkTokenMovement(user, networkToMonitor, ticker, interactableERC20s, simulate))
+      promises.push(this.checkTokenMovement(user, networkToMonitor, ticker, interactableERC20s, sdk, simulate))
     }
 
     const results = await Promise.all(promises)
@@ -160,27 +196,31 @@ export default class WalletTrackerChannel {
     }
   }
 
-  public isChannelOwner(user) {
-    if (ethers.utils.computeAddress(channelWalletsInfo.walletsKV['walletTrackerPrivateKey_1']) == user) {
+  public async isChannelOwner(user) {
+    const walletKey = await this.getWalletKey()
+    if (ethers.utils.computeAddress(walletKey) == user) {
       return true;
     }
 
     return false;
   }
 
-  public async checkTokenMovement(user, networkToMonitor, ticker, interactableERC20s, simulate) {
+  public async checkTokenMovement(user, networkToMonitor, ticker, interactableERC20s, sdk, simulate) {
+    const logger = this.logger;
 
     // check and recreate provider mostly for routes
     if (!interactableERC20s) {
       logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Mostly coming from routes... rebuilding interactable erc20s`);
       //need token address
-      interactableERC20s = this.getSupportedERC20sArray(networkToMonitor);
+      const walletKey = await this.getWalletKey()
+      sdk = new epnsHelper(NETWORK_TO_MONITOR, walletKey, settings, epnsSettings);
+      interactableERC20s = this.getSupportedERC20sArray(networkToMonitor, sdk);
       logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Rebuilt interactable erc20s --> %o`, interactableERC20s);
     }
 
     return new Promise((resolve) => {
 
-    this.getTokenBalance(user, networkToMonitor, ticker, interactableERC20s[ticker], simulate)
+    this.getTokenBalance(user, networkToMonitor, ticker, interactableERC20s[ticker], sdk, simulate)
     .then((userToken: any) => {
 
       this.getTokenBalanceFromDB(user, ticker)
@@ -226,10 +266,13 @@ export default class WalletTrackerChannel {
 
  
 
-  public async getTokenBalance(user, networkToMonitor, ticker, tokenContract, simulate){
+  public async getTokenBalance(user, networkToMonitor, ticker, tokenContract, sdk, simulate){
+    const logger = this.logger;
 
     if(!tokenContract){
-      tokenContract = sdk.getContract(SUPPORTED_TOKENS[ticker].address, config.erc20DeployedContractABI )
+      const walletKey = await this.getWalletKey()
+      sdk = new epnsHelper(NETWORK_TO_MONITOR, walletKey, settings, epnsSettings);
+      tokenContract = sdk.getContract(SUPPORTED_TOKENS[ticker].address, erc20DeployedContractABI )
     }
 
     // Check simulate object
@@ -251,6 +294,7 @@ export default class WalletTrackerChannel {
 
           // balance is a BigNumber (in wei); format is as a string (in ether)
           etherBalance = ethers.utils.formatEther(balance);
+          console.log("🚀 ~ file: walletTrackerChannel.ts ~ line 297 ~ WalletTrackerChannel ~ tokenContract.provider.getBalance ~ etherBalance", etherBalance)
           let tokenInfo = {
             user,
             ticker,
@@ -322,6 +366,7 @@ export default class WalletTrackerChannel {
 
   // Pretty format token balances
   public prettyTokenBalances(changedTokens) {
+    const logger = this.logger;
     const h1 = "[d:Summary & Latest Balance]\n---------";
 
     let body = '';
@@ -358,7 +403,8 @@ export default class WalletTrackerChannel {
 
   //MONGODB
   public async getTokenBalanceFromDB(userAddress: string, ticker: string): Promise<{}> {
-    this.UserTokenModel = Container.get('UserTokenModel');
+    const logger = this.logger;
+    this.UserTokenModel = Container.get('walletTrackerModel');
     try {
       let userTokenData
       if (ticker) {
@@ -375,7 +421,8 @@ export default class WalletTrackerChannel {
 
   //MONGODB
   public async addUserTokenToDB(user: string, ticker: string, balance: String): Promise<{}> {
-    this.UserTokenModel = Container.get('UserTokenModel');
+    const logger = this.logger;
+    this.UserTokenModel = Container.get('walletTrackerModel');
     try {
       const userToken = await this.UserTokenModel.create({
         user,
@@ -390,7 +437,8 @@ export default class WalletTrackerChannel {
 
   //MONGODB
   public async updateUserTokenBalance(user: string, ticker: string, balance: string): Promise<{}> {
-    this.UserTokenModel = Container.get('UserTokenModel');
+    const logger = this.logger;
+    this.UserTokenModel = Container.get('walletTrackerModel');
     try {
       const userToken = await this.UserTokenModel.findOneAndUpdate(
         { user, ticker },
@@ -406,7 +454,8 @@ export default class WalletTrackerChannel {
 
   //MONGODB
   public async clearUserTokenDB(): Promise<boolean> {
-    this.UserTokenModel = Container.get('UserTokenModel');
+    const logger = this.logger;
+    this.UserTokenModel = Container.get('walletTrackerModel');
     try {
       await this.UserTokenModel.deleteMany({})
       return true;

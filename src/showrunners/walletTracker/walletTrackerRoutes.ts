@@ -7,7 +7,7 @@ import { celebrate, Joi } from 'celebrate';
 const route = Router();
 
 export default (app: Router) => {
-  app.use('/showrunners-sdk/wallet_tracker', route);
+  app.use('/showrunners/wallet_tracker', route);
 
   /**
    * Send Message
@@ -24,7 +24,7 @@ export default (app: Router) => {
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/wallet_tracker/send_message endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/wallet_tracker/send_message endpoint with body: %o', req.body )
       try {
         const walletTracker = Container.get(WalletTrackerChannel);
         const result = await walletTracker.sendMessageToContract(req.body.simulate);
@@ -45,16 +45,16 @@ export default (app: Router) => {
     '/get_supported_erc20s_array',
     celebrate({
       body: Joi.object({
-        provider: Joi.string().required(),
+        simulate: [Joi.bool(), Joi.object()],
       }),
     }),
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/get_supported_erc20s_array endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/get_supported_erc20s_array endpoint with body: %o', req.body )
       try {
         const walletTracker = Container.get(WalletTrackerChannel);
-        const result = walletTracker.getSupportedERC20sArray(req.body.provider);
+        const result = walletTracker.getSupportedERC20sArray(req.body.simulate);
         Logger.info("result: %o", result)
 
         return res.status(201).json({result});
@@ -74,15 +74,13 @@ export default (app: Router) => {
     '/check_wallet_movement',
     celebrate({
       body: Joi.object({
-        user: Joi.string().required(),
-        provider: Joi.string().required(),
         simulate: [Joi.bool(), Joi.object()],
       }),
     }),
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/wallet_tracker/check_wallet_movement endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/wallet_tracker/check_wallet_movement endpoint with body: %o', req.body )
       try {
         const walletTracker = Container.get(WalletTrackerChannel);
         const result = await walletTracker.checkWalletMovement(req.body.user, req.body.provider, req.body.simulate, null);
@@ -103,15 +101,13 @@ export default (app: Router) => {
     '/check_token_movement',
     celebrate({
       body: Joi.object({
-        user: Joi.string().required(),
-        provider: Joi.string().required(),
-        ticker: Joi.string().required(),
+        simulate: [Joi.bool(), Joi.object()],
       }),
     }),
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/wallet_tracker/check_token_movement endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/wallet_tracker/check_token_movement endpoint with body: %o', req.body )
       try {
         const walletTracker = Container.get(WalletTrackerChannel);
         const result = await walletTracker.checkTokenMovement(req.body.user, req.body.provider, req.body.ticker, null);
@@ -133,15 +129,13 @@ export default (app: Router) => {
     '/get_token_balance',
     celebrate({
       body: Joi.object({
-        user: Joi.string().required(),
-        provider: Joi.string().required(),
-        ticker: Joi.string().required(),
+        simulate: [Joi.bool(), Joi.object()],
       }),
     }),
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/wallet_tracker/get_token_balance endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/wallet_tracker/get_token_balance endpoint with body: %o', req.body )
       try {
         const walletTracker = Container.get(WalletTrackerChannel);
         const result = await walletTracker.getTokenBalance(req.body.user, req.body.provider, req.body.ticker, null);
@@ -163,14 +157,13 @@ export default (app: Router) => {
     '/compare_token_balance',
     celebrate({
       body: Joi.object({
-        tokenBalance: Joi.number().required(),
-        tokenBalanceFromDB: Joi.number().required(),
+        simulate: [Joi.bool(), Joi.object()],
       }),
     }),
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/wallet_tracker/compare_token_balance endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/wallet_tracker/compare_token_balance endpoint with body: %o', req.body )
       try {
         const walletTracker = Container.get(WalletTrackerChannel);
         const result = await walletTracker.compareTokenBalance(req.body.tokenBalance, req.body.tokenBalanceFromDB);
@@ -191,13 +184,13 @@ export default (app: Router) => {
     '/pretty_token_balances',
     celebrate({
       body: Joi.object({
-        changedTokensJSON: Joi.array(),
+        simulate: [Joi.bool(), Joi.object()],
       }),
     }),
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/wallet_tracker/pretty_token_balances endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/wallet_tracker/pretty_token_balances endpoint with body: %o', req.body )
       try {
         const walletTracker = Container.get(WalletTrackerChannel);
         const result = await walletTracker.prettyTokenBalances(req.body.changedTokensJSON);
@@ -218,14 +211,13 @@ export default (app: Router) => {
     '/get_token_balance_from_db',
     celebrate({
       body: Joi.object({
-        user: Joi.string().required(),
-        ticker: Joi.string().required(),
+        simulate: [Joi.bool(), Joi.object()],
       }),
     }),
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/wallet_tracker/get_token_balance_from_db endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/wallet_tracker/get_token_balance_from_db endpoint with body: %o', req.body )
       try {
         const walletTracker = Container.get(WalletTrackerChannel);
         const result = await walletTracker.getTokenBalanceFromDB(req.body.user, req.body.ticker);
@@ -246,15 +238,13 @@ export default (app: Router) => {
     '/add_user_token_to_db',
     celebrate({
       body: Joi.object({
-        user: Joi.string().required(),
-        ticker: Joi.string().required(),
-        balance: Joi.string().required(),
+        simulate: [Joi.bool(), Joi.object()],
       }),
     }),
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/wallet_tracker/add_user_token_to_db endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/wallet_tracker/add_user_token_to_db endpoint with body: %o', req.body )
       try {
         const walletTracker = Container.get(WalletTrackerChannel);
         const result = await walletTracker.addUserTokenToDB(req.body.user, req.body.ticker, req.body.balance);
@@ -275,15 +265,13 @@ export default (app: Router) => {
     '/update_user_token_balance',
     celebrate({
       body: Joi.object({
-        user: Joi.string().required(),
-        ticker: Joi.string().required(),
-        balance: Joi.string().required(),
+        simulate: [Joi.bool(), Joi.object()],
       }),
     }),
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/wallet_tracker/update_user_token_balance endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/wallet_tracker/update_user_token_balance endpoint with body: %o', req.body )
       try {
         const walletTracker = Container.get(WalletTrackerChannel);
         const result = await walletTracker.updateUserTokenBalance(req.body.user, req.body.ticker, req.body.balance);
@@ -305,7 +293,7 @@ export default (app: Router) => {
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/wallet_tracker/clear_user_token_db endpoint with body: %o', req.body )
+      Logger.debug('Calling /showrunners/wallet_tracker/clear_user_token_db endpoint with body: %o', req.body )
       try {
         const walletTracker = Container.get(WalletTrackerChannel);
         const result = await walletTracker.clearUserTokenDB();
