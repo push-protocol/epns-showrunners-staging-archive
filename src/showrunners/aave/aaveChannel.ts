@@ -25,7 +25,7 @@ const epnsSettings: EPNSSettings = {
 const aaveSettings = require('./aaveSettings.json')
 const aaveLendingPoolDeployedContractABI = require('./aave_LendingPool.json')
 const NETWORK_TO_MONITOR = config.web3PolygonMainnetRPC
-const HEALTH_FACTOR_THRESHOLD = 2.3;
+const HEALTH_FACTOR_THRESHOLD = 1.6;
 const CUSTOMIZABLE_SETTINGS = {
   'precision': 3,
 }
