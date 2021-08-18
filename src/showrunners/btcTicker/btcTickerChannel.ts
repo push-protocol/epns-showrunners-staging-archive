@@ -11,7 +11,7 @@ import showrunnersHelper from '../../helpers/showrunnersHelper';
 import { ethers, logger } from 'ethers';
 import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk'
 
-// const btcTickerSettings = require('./btcTickerSettings.json')
+
 
 const bent = require('bent'); // Download library
 
@@ -31,7 +31,7 @@ const epnsSettings: EPNSSettings = {
 }
 
 const NETWORK_TO_MONIOR = config.web3MainnetNetwork;
-
+const btcTickerSettings = require('./btcTickerSettings.json')
 @Service()
 export default class BtcTickerChannel {
   constructor(
@@ -71,7 +71,7 @@ export default class BtcTickerChannel {
       const getJSON = bent('json');
 
       const cmcroute = 'v1/cryptocurrency/quotes/latest';
-      const pollURL = `${config.cmcEndpoint}${cmcroute}?symbol=BTC&CMC_PRO_API_KEY=${config.cmcAPIKey}`;
+      const pollURL = `${btcTickerSettings.cmcEndpoint}${cmcroute}?symbol=BTC&CMC_PRO_API_KEY=${btcTickerSettings.cmcAPIKey}`;
 
       getJSON(pollURL)
         .then(async (response) => {

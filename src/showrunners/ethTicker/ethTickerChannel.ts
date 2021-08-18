@@ -28,6 +28,8 @@ const epnsSettings: EPNSSettings = {
   contractABI: config.deployedContractABI
 }
 const NETWORK_TO_MONIOR = config.web3MainnetNetwork;
+// const ethTickerSettings = require('./ethTickerSettings.json')
+
 
 @Service()
 export default class EthTickerChannel {
