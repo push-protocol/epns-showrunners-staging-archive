@@ -20,7 +20,6 @@ import { EventDispatcher, EventDispatcherInterface } from '../decorators/eventDi
 import fs from 'fs';
 const utils = require('../helpers/utilsHelper');
 
-// import WalletMonitoring from '../services/walletMonitoring';
 
 export default async ({ logger }) => {
 
@@ -78,6 +77,59 @@ export default async ({ logger }) => {
     }
   }
 
+  // 2. WALLET MONITORING SERVICE
+  logger.info(`    -- Checking and Loading Wallet Monitoring Jobs...`);
+  const absPath = `${__dirname}/../services/walletMonitoring.ts`
+  const relativePath = `../services/walletMonitoring.ts`
+  const FLAG = config.walletMonitoring;
+
+  if (FLAG === 'ON' || FLAG === 'on') {
+    logger.info(`     ✔️  Wallet Monitoring is ON`)
+    try{
+      const WalletMonitoring = await import(absPath)
+
+      // 3.1 Wallets Monitoring Service
+      logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - Wallets Monitoring [every Hour]`);
+      schedule.scheduleJob({ start: startTime, rule: oneHourRule }, async function () {
+      const walletMonitoring = Container.get(WalletMonitoring);
+      const taskName = 'WalletMonitoring event checks and processWallet()';
+    
+      try {
+        await walletMonitoring.processWallets(false);
+        logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
+      }
+      catch (err) {
+        logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
+        logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
+      }
+      });
+    
+      // 3.2 Main Wallet Monitoring Service
+      logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - Main Wallets Monitoring [every Hour]`);
+      schedule.scheduleJob({ start: startTime, rule: oneHourRule }, async function () {
+        const walletMonitoring = Container.get(WalletMonitoring);
+        const taskName = 'Main Wallet Monitoring event checks and processWallet()';
+      
+        try {
+          await walletMonitoring.processMainWallet(false);
+          logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
+        }
+        catch (err) {
+          logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
+          logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
+        }
+      });
+
+    }catch(err){
+      logger.info(`     ❌  Aborting - Errored while loading Wallet Monitoring Jobs - Turn WALLET_MONITORING --> OFF in the env (for development purpose)`)
+      process.exit(1)
+    }
+  }
+  else if (FLAG === 'OFF' || FLAG === 'off'){
+    logger.info(`     ❌  Wallet Monitoring is OFF... scheduling Wallet Monitoring Jobs skipped`)
+  }
+
+
   // 2. EVENT DISPATHER SERVICE
   const eventDispatcher = Container.get(EventDispatcherInterface);
   eventDispatcher.on("newBlockMined", async function (data) {
@@ -99,36 +151,6 @@ export default async ({ logger }) => {
     // }
   })
 
-  // 3.1 Wallets Monitoring Service
-  // schedule.scheduleJob({ start: startTime, rule: oneHourRule }, async function () {
-  //   logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - Wallets Monitoring [every Hour]`);
-  //   const walletMonitoring = Container.get(WalletMonitoring);
-  //   const taskName = 'WalletMonitoring event checks and processWallet()';
-  //
-  //   try {
-  //     await walletMonitoring.processWallets(false);
-  //     logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
-  //   }
-  //   catch (err) {
-  //     logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
-  //     logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
-  //   }
-  // });
-  //
-  // // 3.2 Main Wallet Monitoring Service
-  // schedule.scheduleJob({ start: startTime, rule: oneHourRule }, async function () {
-  //   logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - Main Wallets Monitoring [every Hour]`);
-  //   const walletMonitoring = Container.get(WalletMonitoring);
-  //   const taskName = 'Main Wallet Monitoring event checks and processWallet()';
-  //
-  //   try {
-  //     await walletMonitoring.processMainWallet(false);
-  //     logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
-  //   }
-  //   catch (err) {
-  //     logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
-  //     logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
-  //   }
-  // });
+  
 
 };
