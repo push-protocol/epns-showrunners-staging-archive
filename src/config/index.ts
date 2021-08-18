@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
-import loadShowrunnersWallets from './channelsConfig'
+import loadShowrunnersWallets from './channelsConfig';
+import staticConfig from './staticConfig.json'
 
 // Set the NODE_ENV to 'development' by default
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
@@ -20,56 +21,64 @@ export default {
    */
   showrunnerWallets: loadShowrunnersWallets(),
   masterWallet: process.env.MASTER_WALLET_PRIVATE_KEY,
+  walletMonitoring: process.env.WALLET_MONITORING,
+
+
+  // Static Config BEGIN
 
   /**
    * Your favorite port
    */
-  environment: process.env.NODE_ENV,
+  environment: staticConfig.NODE_ENV,
 
   /**
    * Your favorite port
    */
-  port: parseInt((process.env.PORT || '3000'), 10),
+  port: parseInt((staticConfig.PORT || '3000'), 10),
 
   /**
    * Your favorite port
    */
-  runningOnMachine: process.env.RUNNING_ON_MACHINE,
+  runningOnMachine: staticConfig.RUNNING_ON_MACHINE,
 
   /**
    * Used by winston logger
    */
   logs: {
-    level: process.env.LOG_LEVEL || 'silly',
+    level: staticConfig.LOG_LEVEL || "silly",
   },
 
   /**
    * Trusted URLs, used as middleware for some and for future
    */
-  trusterURLs: JSON.parse(process.env.TRUSTED_URLS),
+  trusterURLs: JSON.parse(JSON.stringify(staticConfig.TRUSTED_URLS)),
 
   /**
    * The database config
    */
-  dbhost: process.env.DB_HOST,
-  dbname: process.env.DB_NAME,
-  dbuser: process.env.DB_USER,
-  dbpass: process.env.DB_PASS,
-  mongodb: process.env.MONGO_URI,
-  redisURL: process.env.REDIS_URL,
+  dbhost: staticConfig.DB_HOST,
+  dbname: staticConfig.DB_NAME,
+  dbuser: staticConfig.DB_USER,
+  dbpass: staticConfig.DB_PASS,
+  mongodb: staticConfig.MONGO_URI,
+  redisURL: staticConfig.REDIS_URL,
 
   /**
    * File system config
    */
-  fsServerURL: process.env.NODE_ENV == 'development' ? process.env.FS_SERVER_DEV : process.env.FS_SERVER_PROD,
-  staticServePath: process.env.SERVE_STATIC_FILES,
-  staticCachePath: __dirname + '/../../' + process.env.SERVE_STATIC_FILES + '/' + process.env.SERVE_CACHE_FILES + '/',
+  fsServerURL: staticConfig.NODE_ENV == 'development' ? staticConfig.FS_SERVER_DEV : staticConfig.FS_SERVER_PROD,
+  staticServePath: staticConfig.SERVE_STATIC_FILES,
+  staticCachePath: __dirname + '/../../' + staticConfig.SERVE_STATIC_FILES + '/' + staticConfig.SERVE_CACHE_FILES + '/',
   staticAppPath: __dirname + '/../../',
 
   /**
    * Server related config
    */
-  maxDefaultAttempts: process.env.DEFAULT_MAX_ATTEMPTS,
+  maxDefaultAttempts: staticConfig.DEFAULT_MAX_ATTEMPTS,
+
+  // Static Config END
+
+
 
   /**
    * Web3 Related

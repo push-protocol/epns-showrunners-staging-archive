@@ -1,0 +1,18 @@
+{
+    "NODE_ENV": "development",
+    "PORT": "5432",
+    "RUNNING_ON_MACHINE": "windows",
+    "TRUSTED_URLS": [ "https://epns.io", "https://backend.epns.io", "https://app.epns.io", "https://www.epns.io" ],
+    "DB_HOST": "localhost",
+    "DB_NAME": "dbname",
+    "DB_USER": "2roor",
+    "DB_PASS": "s1mpl3",
+    "MONGO_URI": "mongodb://localhost:27017",
+    "REDIS_URL": "redis://localhost:6379",
+    "FS_SERVER_DEV": "http://localhost:4000/cache/",
+    "FS_SERVER_PROD": "https://showrunners.epns.io/cache/",
+    "SERVE_STATIC_FILES": "public",
+    "SERVE_CACHE_FILES": "cache",
+    "LOG_LEVEL": "debug",
+    "DEFAULT_MAX_ATTEMPTS": "3"
+}
