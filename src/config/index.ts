@@ -119,96 +119,96 @@ export default {
   /**
    * ENS Related
    */
-  ensDeployedContract: process.env.ENS_DEPLOYED_CONTRACT,
-  ensDeployedContractABI: require('./ens_contract.json'),
+  // ensDeployedContract: process.env.ENS_DEPLOYED_CONTRACT,
+  // ensDeployedContractABI: require('./ens_contract.json'),
 
-  /**
-   * UNISWAP Related
-   */
-  uniswapDeployedContractRopsten: process.env.UNI_GOVERNANCE_DEPLOYED_CONTRACT_ROPSTEN,
-  uniswapDeployedContractMainnet: process.env.UNI_GOVERNANCE_DEPLOYED_CONTRACT_MAINNET,
-  uniswapDeployedContractABI: require('./uni_contract.json'),
+  // /**
+  //  * UNISWAP Related
+  //  */
+  // uniswapDeployedContractRopsten: process.env.UNI_GOVERNANCE_DEPLOYED_CONTRACT_ROPSTEN,
+  // uniswapDeployedContractMainnet: process.env.UNI_GOVERNANCE_DEPLOYED_CONTRACT_MAINNET,
+  // uniswapDeployedContractABI: require('./uni_contract.json'),
 
-    /**
-   * COMPOUND Related
-   */
-  compComptrollerDeployedContract: process.env.COMPOUND_COMPTROLLER_DEPLOYED_CONTRACT,
-  compComptrollerDeployedContractABI: require('./comp_comptroller.json'),
+  //   /**
+  //  * COMPOUND Related
+  //  */
+  // compComptrollerDeployedContract: process.env.COMPOUND_COMPTROLLER_DEPLOYED_CONTRACT,
+  // compComptrollerDeployedContractABI: require('./comp_comptroller.json'),
 
-  /**
-   * COMPOUND Related
-   */
-  truefiLenderDeployedContract: process.env.TRUEFI_LENDER_DEPLOYED_CONTRACT,
-  truefiLenderDeployedContractABI: require('./truefiLender.json'),
+  // /**
+  //  * COMPOUND Related
+  //  */
+  // truefiLenderDeployedContract: process.env.TRUEFI_LENDER_DEPLOYED_CONTRACT,
+  // truefiLenderDeployedContractABI: require('./truefiLender.json'),
 
-  truefiRatingAgencyDeployedContract: process.env.TRUEFI_RATING_AGENCY_V2_CONTRACT,
-  truefiRatingAgencyDeployedContractABI: require('./TrueRatingAgencyV2.json'),
+  // truefiRatingAgencyDeployedContract: process.env.TRUEFI_RATING_AGENCY_V2_CONTRACT,
+  // truefiRatingAgencyDeployedContractABI: require('./TrueRatingAgencyV2.json'),
 
-  truefiLoanFactoryDeployedContract: process.env.TRUEFI_LOAN_FACTORY_CONTRACT,
-  truefiLoanFactoryDeployedContractABI: require('./truefiLoanFactory.json'),
+  // truefiLoanFactoryDeployedContract: process.env.TRUEFI_LOAN_FACTORY_CONTRACT,
+  // truefiLoanFactoryDeployedContractABI: require('./truefiLoanFactory.json'),
 
-  truefiLoanTokenDeployedContractABI: require('./truefiLoanToken.json'),
-  truefiDueLoanDays: process.env.TRUEFI_DUE_LOAN_DAYS,
+  // truefiLoanTokenDeployedContractABI: require('./truefiLoanToken.json'),
+  // truefiDueLoanDays: process.env.TRUEFI_DUE_LOAN_DAYS,
 
-  cDaiDeployedContract:process.env.CDAI,
-  cDaiDeployedContractABI: require('./cDai.json'),
+  // cDaiDeployedContract:process.env.CDAI,
+  // cDaiDeployedContractABI: require('./cDai.json'),
 
-  cBatDeployedContract:process.env.CBAT,
-  cBatDeployedContractABI: require('./cBat.json'),
+  // cBatDeployedContract:process.env.CBAT,
+  // cBatDeployedContractABI: require('./cBat.json'),
 
-  cEthDeployedContract:process.env.CETH,
-  cEthDeployedContractABI: require('./cEth.json'),
+  // cEthDeployedContract:process.env.CETH,
+  // cEthDeployedContractABI: require('./cEth.json'),
 
-  cRepDeployedContract:process.env.CREP,
-  cRepDeployedContractABI: require('./cRep.json'),
+  // cRepDeployedContract:process.env.CREP,
+  // cRepDeployedContractABI: require('./cRep.json'),
 
-  cSaiDeployedContract:process.env.CSAI,
-  cSaiDeployedContractABI: require('./cSai.json'),
+  // cSaiDeployedContract:process.env.CSAI,
+  // cSaiDeployedContractABI: require('./cSai.json'),
 
-  cUniDeployedContract:process.env.CUNI,
-  cUniDeployedContractABI: require('./cUni.json'),
+  // cUniDeployedContract:process.env.CUNI,
+  // cUniDeployedContractABI: require('./cUni.json'),
 
-  cUsdcDeployedContract:process.env.CUSDC,
-  cUsdcDeployedContractABI: require('./cUsdc.json'),
+  // cUsdcDeployedContract:process.env.CUSDC,
+  // cUsdcDeployedContractABI: require('./cUsdc.json'),
 
-  cUsdtDeployedContract:process.env.CUSDT,
-  cUsdtDeployedContractABI: require('./cUsdt.json'),
+  // cUsdtDeployedContract:process.env.CUSDT,
+  // cUsdtDeployedContractABI: require('./cUsdt.json'),
 
-  cWbtcDeployedContract:process.env.CWBTC,
-  cWbtcDeployedContractABI: require('./cWbtc.json'),
+  // cWbtcDeployedContract:process.env.CWBTC,
+  // cWbtcDeployedContractABI: require('./cWbtc.json'),
 
-  cZrxDeployedContract:process.env.CZRX,
-  cZrxDeployedContractABI: require('./cZrx.json'),
+  // cZrxDeployedContract:process.env.CZRX,
+  // cZrxDeployedContractABI: require('./cZrx.json'),
 
-  priceOracleDeployedContract:process.env.PRICE,
-  priceOracleDeployedContractABI: require('./priceOracle.json'),
+  // priceOracleDeployedContract:process.env.PRICE,
+  // priceOracleDeployedContractABI: require('./priceOracle.json'),
 
-    /**
-   * EVEREST Related
-   */
-  everestDeployedContract: process.env.EVEREST_DEPLOYED_CONTRACT,
-  everestDeployedContractABI: require('./everest.json'),
+  //   /**
+  //  * EVEREST Related
+  //  */
+  // everestDeployedContract: process.env.EVEREST_DEPLOYED_CONTRACT,
+  // everestDeployedContractABI: require('./everest.json'),
 
-    /**
-   * AlphaHomora Related
-   */
-  homoraBankDeployedContract: process.env.HOMORA_BANK_DEPLOYED_CONTRACT,
-  homoraBankDeployedContractABI: require('./HomoraBank.json'),
-  homoraDebtRatioThreshold: process.env.HOMORA_DEBT_RATIO_THRESHOLD,
+  //   /**
+  //  * AlphaHomora Related
+  //  */
+  // homoraBankDeployedContract: process.env.HOMORA_BANK_DEPLOYED_CONTRACT,
+  // homoraBankDeployedContractABI: require('./HomoraBank.json'),
+  // homoraDebtRatioThreshold: process.env.HOMORA_DEBT_RATIO_THRESHOLD,
 
-  /**
-   * AAVE Related
-   */
-  aaveLendingPoolDeployedContractKovan: process.env.AAVE_LENDINGPOOL_DEPLOYED_CONTRACT_KOVAN,
-  aaveLendingPoolDeployedContractMainnet: process.env.AAVE_LENDINGPOOL_DEPLOYED_CONTRACT_MAINNET,
-  aaveLendingPoolDeployedContractPolygonMainnet: process.env.AAVE_LENDINGPOOL_DEPLOYED_CONTRACT_POLYGON_MAINNET,
-  aaveLendingPoolDeployedContractPolygonMumbai: process.env.AAVE_LENDINGPOOL_DEPLOYED_CONTRACT_POLYGON_MUMBAI,
-  aaveLendingPoolDeployedContractABI: require('./aave_LendingPool.json'),
+  // /**
+  //  * AAVE Related
+  //  */
+  // aaveLendingPoolDeployedContractKovan: process.env.AAVE_LENDINGPOOL_DEPLOYED_CONTRACT_KOVAN,
+  // aaveLendingPoolDeployedContractMainnet: process.env.AAVE_LENDINGPOOL_DEPLOYED_CONTRACT_MAINNET,
+  // aaveLendingPoolDeployedContractPolygonMainnet: process.env.AAVE_LENDINGPOOL_DEPLOYED_CONTRACT_POLYGON_MAINNET,
+  // aaveLendingPoolDeployedContractPolygonMumbai: process.env.AAVE_LENDINGPOOL_DEPLOYED_CONTRACT_POLYGON_MUMBAI,
+  // aaveLendingPoolDeployedContractABI: require('./aave_LendingPool.json'),
 
-  /**
-   * WALLET TRACKER related
-   */
-  erc20DeployedContractABI: require('./erc20.json'),
+  // /**
+  //  * WALLET TRACKER related
+  //  */
+  // erc20DeployedContractABI: require('./erc20.json'),
 
   /**
    * IPFS related
@@ -228,13 +228,13 @@ export default {
   /**
    * Showrunners config, always at last since this is a seperate module
    */
-  cmcAPIKey: process.env.CMC_API_KEY,
-  cmcEndpoint: process.env.CMC_ENDPOINT,
+  // cmcAPIKey: process.env.CMC_API_KEY,
+  // cmcEndpoint: process.env.CMC_ENDPOINT,
 
-  gasAPIKey: process.env.GAS_API_KEY,
-  gasEndpoint: process.env.GAS_ENDPOINT,
+  // gasAPIKey: process.env.GAS_API_KEY,
+  // gasEndpoint: process.env.GAS_ENDPOINT,
 
-  ensEndpoint: process.env.ENS_ENDPOINT,
+  // ensEndpoint: process.env.ENS_ENDPOINT,
 
   cmcSandboxAPIKey: process.env.CMS_SANDBOX_API_KEY,
   cmcSandboxEndpoint: process.env.CMC_SANDBOX_ENDPOINT,

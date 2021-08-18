@@ -33,6 +33,7 @@ export default () => {
     }
   }
 
+  //WALLET MONITORING ROUTES
   LoggerInstance.info(`    -- Checking and Loading Wallet Monitoring Routes...`);
   const absPath = `${__dirname}/routes/walletMonitoringRoutes.ts`
   const relativePath = `./routes/walletMonitoringRoutes.ts`

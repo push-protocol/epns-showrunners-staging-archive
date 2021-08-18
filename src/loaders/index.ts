@@ -18,6 +18,7 @@ import './events';
 export default async ({ expressApp }) => {
   logger.info('✌️   Injecting dependencies loaders');
 
+  //require db models from all channel folders
   function loadDBModels(){
     logger.info(`    -- Checking DB Models...`);
     const channelFolderPath = `${__dirname}/../showrunners/`
