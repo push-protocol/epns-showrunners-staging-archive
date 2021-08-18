@@ -113,7 +113,7 @@ export default class AaveChannel {
       const payloadMsg = `Dear [d:${userAddress}] your account has healthFactor ${newHealthFactor} . Maintain it above 1 to avoid liquidation.[timestamp: ${Math.floor(new Date() / 1000)}]`;
       const notificationType = 3;
       const tx = await sdk.sendNotification(userAddress, title, message, payloadTitle, payloadMsg, notificationType, simulate)
-      logger.info(`[${new Date(Date.now())}]-[Aave Channel]- transaction: ${tx}`)
+      logger.info(`[${new Date(Date.now())}]-[Aave Channel]- transaction: %o`, tx)
       return{
         success: true,
         data: tx

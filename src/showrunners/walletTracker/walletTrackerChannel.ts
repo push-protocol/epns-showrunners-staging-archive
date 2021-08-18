@@ -113,7 +113,7 @@ export default class WalletTrackerChannel {
         const payloadMsg = this.prettyTokenBalances(object.changedTokens);
         const notificationType = 3;
         const tx = await sdk.sendNotification(user, title, message, payloadTitle, payloadMsg, notificationType, simulate)
-        logger.info(tx);
+        logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- transaction: %o`, tx);
         logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- Transaction successful: %o | Notification Sent`, tx.hash);
         logger.info(`[${new Date(Date.now())}]-[Wallet Tracker]- 🙌 Wallet Tracker Channel Logic Completed for user : %o`, user);
       }
@@ -294,7 +294,6 @@ export default class WalletTrackerChannel {
 
           // balance is a BigNumber (in wei); format is as a string (in ether)
           etherBalance = ethers.utils.formatEther(balance);
-          console.log("🚀 ~ file: walletTrackerChannel.ts ~ line 297 ~ WalletTrackerChannel ~ tokenContract.provider.getBalance ~ etherBalance", etherBalance)
           let tokenInfo = {
             user,
             ticker,

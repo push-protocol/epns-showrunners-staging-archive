@@ -268,7 +268,7 @@ export default class EnsExpirationChannel {
       }
       const notificationType = 3;
       const tx = await sdk.sendNotification(userAddress, title, message, payloadTitle, payloadMsg, notificationType, simulate)
-      logger.info(tx)
+      logger.info(`[${new Date(Date.now())}]-[ENS]- transaction: %o`, tx)
       resolve({
         success: true,
         data: tx

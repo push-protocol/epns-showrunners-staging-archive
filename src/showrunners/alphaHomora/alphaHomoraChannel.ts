@@ -75,7 +75,7 @@ export default class AlphaHomoraChannel {
         notificationType,
         simulate
       )
-      logger.info(tx)
+      logger.info(`[${new Date(Date.now())}]-[Alpha Homora]- transaction: %o`, tx)
     }
   }
 }

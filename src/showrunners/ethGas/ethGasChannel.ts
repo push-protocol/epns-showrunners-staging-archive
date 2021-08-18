@@ -150,7 +150,7 @@ export default class GasStationChannel {
     const channelAddress = ethers.utils.computeAddress(walletKey)
     const notificationType = 1; //broadcasted notification
     const tx = await sdk.sendNotification(channelAddress, title, message, payloadTitle, payloadMsg, notificationType, simulate)
-    logger.info(tx);
+    logger.info(`[${new Date(Date.now())}]-[ETH Gas]- transaction: %o`, tx);
   }
 
   // To update gas price average
