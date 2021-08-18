@@ -76,6 +76,21 @@ export default {
    */
   maxDefaultAttempts: staticConfig.DEFAULT_MAX_ATTEMPTS,
 
+  /**
+   * IPFS related
+   */
+   ipfsMaxAttempts: staticConfig.IPFS_MAX_ATTEMPTS,
+   ipfsGateway: staticConfig.IPFS_GATEWAY,
+   ipfsLocal: staticConfig.IPFS_LOCAL_ENDPOINT,
+   ipfsInfura: staticConfig.IPFS_INFURA_ENDPOINT,
+ 
+   /**
+   * ETH threshold
+   */
+   ethThreshold: staticConfig.SHOWRUNNER_WALLET_ETH_THRESHOLD,
+   ethMainThreshold: staticConfig.MASTER_WALLET_ETH_THRESHOLD,
+   etherTransferAmount: staticConfig.ETHER_TRANSFER_AMOUNT,
+
   // Static Config END
 
 
@@ -210,13 +225,7 @@ export default {
   //  */
   // erc20DeployedContractABI: require('./erc20.json'),
 
-  /**
-   * IPFS related
-   */
-  ipfsMaxAttempts: process.env.IPFS_MAX_ATTEMPTS,
-  ipfsGateway: process.env.IPFS_GATEWAY,
-  ipfsLocal: process.env.IPFS_LOCAL_ENDPOINT,
-  ipfsInfura: process.env.IPFS_INFURA_ENDPOINT,
+  
 
   /**
    * API configs
@@ -228,23 +237,18 @@ export default {
   /**
    * Showrunners config, always at last since this is a seperate module
    */
-  // cmcAPIKey: process.env.CMC_API_KEY,
-  // cmcEndpoint: process.env.CMC_ENDPOINT,
+  cmcAPIKey: process.env.CMC_API_KEY,
+  cmcEndpoint: process.env.CMC_ENDPOINT,
 
   // gasAPIKey: process.env.GAS_API_KEY,
   // gasEndpoint: process.env.GAS_ENDPOINT,
 
   // ensEndpoint: process.env.ENS_ENDPOINT,
 
-  cmcSandboxAPIKey: process.env.CMS_SANDBOX_API_KEY,
-  cmcSandboxEndpoint: process.env.CMC_SANDBOX_ENDPOINT,
+  // cmcSandboxAPIKey: process.env.CMS_SANDBOX_API_KEY,
+  // cmcSandboxEndpoint: process.env.CMC_SANDBOX_ENDPOINT,
 
-  /**
-   * ETH threshold
-   */
-  ethThreshold: process.env.SHOWRUNNER_WALLET_ETH_THRESHOLD,
-  ethMainThreshold: process.env.MASTER_WALLET_ETH_THRESHOLD,
-  etherTransferAmount: process.env.ETHER_TRANSFER_AMOUNT,
+
 
   /**
    * mail config

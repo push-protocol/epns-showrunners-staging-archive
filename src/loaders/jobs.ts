@@ -81,10 +81,10 @@ export default async ({ logger }) => {
   logger.info(`    -- Checking and Loading Wallet Monitoring Jobs...`);
   const absPath = `${__dirname}/../services/walletMonitoring.ts`
   const relativePath = `../services/walletMonitoring.ts`
-  const FLAG = config.walletMonitoring;
+  const FLAG = Number(config.walletMonitoring);
 
-  if (FLAG === 'ON' || FLAG === 'on') {
-    logger.info(`     ✔️  Wallet Monitoring is ON`)
+  if (FLAG === 1) {
+    logger.info(`     ✔️  Wallet Monitoring is ${FLAG}`)
     try{
       const WalletMonitoring = await import(absPath)
 
@@ -121,12 +121,12 @@ export default async ({ logger }) => {
       });
 
     }catch(err){
-      logger.info(`     ❌  Aborting - Errored while loading Wallet Monitoring Jobs - Turn WALLET_MONITORING --> OFF in the env (for development purpose)`)
+      logger.info(`     ❌  Aborting - Wallet Monitoring requires Master Wallet private key. Include 'MASTER_WALLET_PRIVATE_KEY' or change 'WALLET_MONITORING' to 0 in the env file`)
       process.exit(1)
     }
   }
-  else if (FLAG === 'OFF' || FLAG === 'off'){
-    logger.info(`     ❌  Wallet Monitoring is OFF... scheduling Wallet Monitoring Jobs skipped`)
+  else if (FLAG === 0){
+    logger.info(`     ❌  Wallet Monitoring is ${FLAG}... scheduling Wallet Monitoring Jobs skipped`)
   }
 
 

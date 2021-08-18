@@ -37,22 +37,22 @@ export default () => {
   LoggerInstance.info(`    -- Checking and Loading Wallet Monitoring Routes...`);
   const absPath = `${__dirname}/routes/walletMonitoringRoutes.ts`
   const relativePath = `./routes/walletMonitoringRoutes.ts`
-  const FLAG = config.walletMonitoring;
+  const FLAG = Number(config.walletMonitoring);
 
-    if (FLAG === 'ON' || FLAG === 'on') {
-      LoggerInstance.info(`     ✔️  Wallet Monitoring is ON`)
+    if (FLAG === 1) {
+      LoggerInstance.info(`     ✔️  Wallet Monitoring is ${FLAG}`)
       try{
         const cronning = require(absPath)
         cronning.default(app);
 
         LoggerInstance.info(`     ✔️  ${relativePath} Loaded!`)
       }catch(err){
-        LoggerInstance.info(`     ❌  Aborting - Errored while loading Wallet Monitoring Routes - Turn WALLET_MONITORING --> OFF in the env (for development purpose)`)
+        LoggerInstance.info(`     ❌  Aborting - Wallet Monitoring requires Master Wallet private key. Include 'MASTER_WALLET_PRIVATE_KEY' or change 'WALLET_MONITORING' to 0 in the env file`)
         process.exit(1)
       }
     }
-    else if (FLAG === 'OFF' || FLAG === 'off'){
-      LoggerInstance.info(`     ❌  Wallet Monitoring is OFF... ${relativePath} skipped`)
+    else if (FLAG === 0){
+      LoggerInstance.info(`     ❌  Wallet Monitoring is ${FLAG}... ${relativePath} skipped`)
     }
 
 	// SOCKETS
