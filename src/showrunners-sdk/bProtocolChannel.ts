@@ -9,10 +9,8 @@ import channelWalletsInfo from '../config/channelWalletsInfo';
 import { ethers, logger } from 'ethers';
 // import epnsHelper, { InfuraSettings, NetWorkSettings, EPNSSettings } from '../../../epns-backend-sdk-staging/src'
 import epnsHelper, { InfuraSettings, NetWorkSettings, EPNSSettings } from '@epnsproject/backend-sdk-staging'
-import moment from "moment"
 import console from 'console';
-import { concatAST } from 'graphql';
-import userTokenModel from '../models/userTokenModel';
+
 
 const NETWORK_TO_MONITOR = config.web3MainnetNetwork;
 const channelKey = channelWalletsInfo.walletsKV['bprotocolPrivateKey_1']

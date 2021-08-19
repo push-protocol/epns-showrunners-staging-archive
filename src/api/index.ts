@@ -26,9 +26,11 @@ import truefi_sdk from './routes/showrunners_sdk/showrunners_truefi';
 import alphahomora_sdk from './routes/showrunners_sdk/showrunners_alphaHomora';
 import helloWorld_sdk from './routes/showrunners_sdk/showrunners_helloWorld';
 import aave_sdk from './routes/showrunners_sdk/showrunners_aave';
+import yamGovernance_sdk from './routes/showrunners_sdk/showrunners_yamgovernance';
 import uniswap_sdk from './routes/showrunners_sdk/showrunners_uniSwap';
 import snapshot_sdk from "./routes/showrunners_sdk/showrunners_snapshot"
 import bprotocol_sdk from "./routes/showrunners_sdk/showrunners_bprotocol"
+
 import mailing from './routes/mailing';
 
 // guaranteed to get dependencies
@@ -38,6 +40,10 @@ export default () => {
 	// -- SHOWRUNNERS ROUTES
 	ensDomain(app);
 	compoundTicker(app);
+
+	gasPrice(app);
+	wallet_tracker(app);
+	//wallet_monitoring(app);
 	everest(app);
 	truefi(app);
 	helloWorld(app);
@@ -53,10 +59,15 @@ export default () => {
 	helloWorld_sdk(app);
 	alphahomora_sdk(app);
 	aave_sdk(app);
+	everest_sdk(app);
+	compoundTicker_sdk(app);
+	//console.log(yamGovernance_sdk);
+	yamGovernance_sdk(app);
 	uniswap_sdk(app);
 	snapshot_sdk(app);
 	bprotocol_sdk(app);
 	// ensDomain_sdk(app);
+
   
 	// SOCKETS
 	socketWeb3(app);

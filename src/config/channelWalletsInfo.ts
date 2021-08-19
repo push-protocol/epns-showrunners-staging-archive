@@ -49,6 +49,9 @@ const wallets = [
         },
         {
             bprotocolPrivateKey_1:process.env.BPROTOCOL_PRIVATE_KEY
+        },
+        {
+            yamGovernancePrivateKey_1: process.env.YAM_GOVERNANCE_PRIVATE_KEY
         }
 ]
     
