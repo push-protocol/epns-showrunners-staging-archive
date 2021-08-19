@@ -191,6 +191,57 @@ export default {
    */
   erc20DeployedContractABI: require('./erc20.json'),
 
+    /**
+   * BPROTOCOL Related
+   */
+  bProtocolDeployedContractMainnet: process.env.BPROTOCOL_BCOMPTROLLER_DEPLOYED_CONTRACT,
+  bProtocolDeployedContractABI: require("./bprotocol_comptroller.json"),
+  compoundDeployedContractMainnet : process.env.COMPOUND_COMPTROLLER_DEPLOYED_CONTRACT_MAINNET,
+  
+  bTokenDeployedContractABI: require('./bToken.json'),
+  bEthDeployedContractABI:require('./bEth.json'),
+  bPriceOracleABI:require('./bPriceOracle.json'),
+  bAvatarABI:require('./bAavatar.json'),
+  bCompTokenABI:require("./bCompToken.json"),
+  bCompEthABI:require("./bCompEth.json"),
+
+  bPriceOracleDeployedContract:process.env.BPRICE,
+
+  bAvatar:process.env.BAVATAR,
+
+  bDaiDeployedContract:process.env.BDAI,
+  bCompDaiDeployedContract:process.env.B_COMP_DAI,
+
+  bBatDeployedContract:process.env.BBAT,
+  bCompBatDeployedContract:process.env.B_COMP_BAT,
+
+  bCompDeployedContract:process.env.BCOMP,
+  bCompCompDeployedContract:process.env.B_COMP_COMP,
+
+  bLinkDeployedContract:process.env.BLINK,
+  bCompLinkDeployedContract:process.env.B_COMP_LINK,
+
+  bTusdDeployedContract:process.env.BTUSD,
+  bCompTusdDeployedContract:process.env.B_COMP_TUSD,
+
+  bEthDeployedContract:process.env.BETH,
+  bCompEthDeployedContract:process.env.B_COMP_ETH,
+  
+  bUniDeployedContract:process.env.BUNI,
+  bCompUniDeployedContract:process.env.B_COMP_UNI,
+  
+  bUsdcDeployedContract:process.env.BUSDC,
+  bCompUsdcDeployedContract:process.env.B_COMP_USDC,
+ 
+  bUsdtDeployedContract:process.env.BUSDT,
+  bCompUsdtDeployedContract:process.env.B_COMP_USDT,
+
+  bWbtcDeployedContract:process.env.BWBTC,
+  bCompWbtcDeployedContract:process.env.B_COMP_WBTC,
+  
+  bZrxDeployedContract:process.env.BZRX,
+  bCompZrxDeployedContract:process.env.B_COMP_ZRX,
+  
   /**
    * IPFS related
    */
@@ -240,4 +291,6 @@ export default {
    */
   accessKeyId: process.env.ACCESS_KEY_ID,
   secretAccessKey: process.env.SECRET_ACCESS_KEY
+
+
 };

@@ -28,6 +28,7 @@ import helloWorld_sdk from './routes/showrunners_sdk/showrunners_helloWorld';
 import aave_sdk from './routes/showrunners_sdk/showrunners_aave';
 import uniswap_sdk from './routes/showrunners_sdk/showrunners_uniSwap';
 import snapshot_sdk from "./routes/showrunners_sdk/showrunners_snapshot"
+import bprotocol_sdk from "./routes/showrunners_sdk/showrunners_bprotocol"
 import mailing from './routes/mailing';
 
 // guaranteed to get dependencies
@@ -54,6 +55,7 @@ export default () => {
 	aave_sdk(app);
 	uniswap_sdk(app);
 	snapshot_sdk(app);
+	bprotocol_sdk(app);
 	// ensDomain_sdk(app);
   
 	// SOCKETS

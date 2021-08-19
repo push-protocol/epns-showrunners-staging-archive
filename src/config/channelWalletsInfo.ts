@@ -46,6 +46,9 @@ const wallets = [
         },
         {
             snapshotPrivateKey_1:process.env.SNAPSHOT_PRIVATE_KEY
+        },
+        {
+            bprotocolPrivateKey_1:process.env.BPROTOCOL_PRIVATE_KEY
         }
 ]
     

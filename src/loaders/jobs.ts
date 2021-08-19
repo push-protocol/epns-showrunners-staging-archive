@@ -23,6 +23,7 @@ import EthTickerChannel from '../showrunners-sdk/ethTickerChannel';
 import EnsExpirationChannel from '../showrunners/ensExpirationChannel';
 import EthGasStationChannel from '../showrunners-sdk/ethGasChannel';
 import CompoundLiquidationChannel from '../showrunners/compoundLiquidationChannel';
+import BProtocolLiquidationChannel from '../showrunners-sdk/bProtocolChannel';
 import Everest from '../showrunners/everestChannel';
 import WalletTrackerChannel from '../showrunners-sdk/walletTrackerChannel';
 import WalletMonitoring from '../services/walletMonitoring';
@@ -339,5 +340,22 @@ export default ({ logger }) => {
       logger.error(`Error Object: %o`, err);
     }
   });
+
+  //3.1 B.Protocol
+  schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
+    logger.info(`[${new Date(Date.now())}] -- 🛵 Scheduling Showrunner - BProtocol Liquidation Channel [on 24 Hours]`);
+    const bprotocolTicker = Container.get(BProtocolLiquidationChannel);
+    const taskName = 'B.Protocol Liquidation address checks and sendMessageToContract()';
+
+    try {
+      await bprotocolTicker.sendMessageToContract(false);
+      logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
+    }
+    catch (err) {
+      logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
+      logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
+    }
+  });
+
 
 };
