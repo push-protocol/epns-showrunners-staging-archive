@@ -6,7 +6,8 @@ import config from '../config';
 import channelWalletsInfo from '../config/channelWalletsInfo';
 import { ethers, logger } from 'ethers';
 import PQueue from 'p-queue';
-import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging'
+import epnsHelper, { InfuraSettings, NetWorkSettings, EPNSSettings } from '../../../epns-backend-sdk-staging/src'
+// import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging'
 const queue = new PQueue();
 const NETWORK_TO_MONITOR = config.web3MainnetNetwork;
 const channelKey = channelWalletsInfo.walletsKV['truefiPrivateKey_1'];
@@ -86,7 +87,7 @@ export default class TruefiChannel {
     const epnsNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("epnsNetwork") ? simulate.logicOverride.epnsNetwork : config.web3RopstenNetwork;
     if(!truefiNetwork) truefiNetwork = logicOverride && simulate.logicOverride.hasOwnProperty("truefiNetwork") ? simulate.logicOverride.truefiNetwork : config.web3MainnetNetwork;
     if(!epns){
-      epns = sdk.advanced.getInteractableContracts(config.web3RopstenNetwork, settings, channelKey, config.deployedContract, config.deployedContractABI);
+      epns = sdk.advanced.getInteractableContracts(epnsSettings.network, settings, channelKey, epnsSettings.contractAddress, epnsSettings.contractABI);
     }
     const cache = this.cached;
     const loans = await cache.getLCache(LOANS)
@@ -150,6 +151,8 @@ export default class TruefiChannel {
     return null
   }
 
+  
+
   public async checkNewLoans(epns, users, truefiNetwork, simulate) {
     const logicOverride = typeof simulate == 'object' ? (simulate.hasOwnProperty("logicOverride") ? simulate.hasOwnProperty("logicOverride") : false) : false;
     if (!users) users = logicOverride && simulate.logicOverride.hasOwnProperty("users") ? simulate.logicOverride.users : [];
@@ -159,6 +162,7 @@ export default class TruefiChannel {
       epns = sdk.advanced.getInteractableContracts(config.web3RopstenNetwork, settings, channelKey, config.deployedContract, config.deployedContractABI);
     }
     const truefi = await sdk.getContract(config.truefiLoanFactoryDeployedContract, config.truefiLoanFactoryDeployedContractABI)
+    console.log(truefi)
     const cache = this.cached;
     // get and store last checked block number to run filter
     const filter = truefi.contract.filters.LoanTokenCreated();
@@ -167,6 +171,7 @@ export default class TruefiChannel {
     startBlock = Number(startBlock)
     const eventLog = await truefi.contract.queryFilter(filter, startBlock)
     const loans = eventLog.map((log) => log.args.contractAddress)
+
     logger.info("loans: %o, startBlock: %o", loans, startBlock)
     for (let index = 0; index < users.length; index++) {
       await queue.add(async() => this.sendNotification(epns, users[index], {loans}, NOTIFICATION_TYPE.NEW_LOAN, simulate));
@@ -175,10 +180,15 @@ export default class TruefiChannel {
     return loans;
   }
 
+
+
   public async sendNotification(epns, user, data, notificationType, simulate) {
     try{
       logger.info('Preparing payload...');
       let title, message, payloadTitle, payloadMsg, notifType;
+      let cta = `https://app.truefi.io/home`
+      let storageType = 1;
+      let trxConfirmWait = 0;
       switch (notificationType) {
         case NOTIFICATION_TYPE.RATE:
           title = "Truefi Rate Change";
@@ -205,10 +215,13 @@ export default class TruefiChannel {
         default:
           break;
       }
-
-      const txPromise = await sdk.sendNotification(user, title, message, payloadTitle, payloadMsg, notifType, simulate)
-      console.log("🚀 ~ file: truefiChannel.ts ~ line 207 ~ TruefiChannel ~ sendNotification ~ txPromise", txPromise)
-      const tx = await txPromise;
+      const payload = await sdk.advanced.preparePayload(user, notificationType, title, message, payloadTitle, payloadMsg, cta, null)
+      console.log(payload)
+      const ipfsHash = await sdk.advanced.uploadToIPFS(payload, logger, null, simulate)
+      const tx:any = await sdk.advanced.sendNotification(epns.signingContract, user, notificationType, storageType, ipfsHash, trxConfirmWait, logger, simulate)
+      // const txPromise = await sdk.sendNotification(user, title, message, payloadTitle, payloadMsg, notifType, simulate)
+      // console.log("🚀 ~ file: truefiChannel.ts ~ line 207 ~ TruefiChannel ~ sendNotification ~ txPromise", txPromise)
+      // const tx = await txPromise;
       logger.info(tx);
       logger.info("Transaction successful: %o | Notification Sent", tx.hash);
     } catch (error) {
@@ -222,7 +235,3 @@ export default class TruefiChannel {
     }
   }
 }
-
-
-
-
