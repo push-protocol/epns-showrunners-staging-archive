@@ -18,7 +18,7 @@ import logger from '../../loaders/logger';
 import { Container } from 'typedi';
 import schedule from 'node-schedule';
 
-import SnapshotChannel from "./snapshotChannel"
+import TracerDAOChannel from "./tracerDAOChannel"
 
 export default () => {
     const startTime = new Date(new Date().setHours(0, 0, 0, 0));
@@ -28,19 +28,34 @@ export default () => {
     threeHourRule.minute = 0;
     threeHourRule.second = 0;
 
-    const dailyRule = new schedule.RecurrenceRule();
-    dailyRule.hour = 0;
-    dailyRule.minute = 0;
-    dailyRule.second = 0;
-    dailyRule.dayOfWeek = new schedule.Range(0, 6);
+    const sixHourRule = new schedule.RecurrenceRule();
+    sixHourRule.hour = new schedule.Range(0, 23, 6);
+    sixHourRule.minute = 0;
+    sixHourRule.second = 0;
 
-    //Snapshot send proposal
-    logger.info('-- 🛵 Scheduling Showrunner - Snapshot Governance Channel [on 3hr ]');
-    schedule.scheduleJob({ start: startTime, rule: threeHourRule }, async function () {
-        const snapshot = Container.get(SnapshotChannel);
-        const taskName = 'Snapshot proposal event checks and sendMessageToContract()';
+
+        //TracerDAO send new proposal
+        logger.info('-- 🛵 Scheduling Showrunner - TracerDAO Channel [on 3hr ]');
+        schedule.scheduleJob({ start: startTime, rule: threeHourRule }, async function () {
+            const tracerdao = Container.get(TracerDAOChannel);
+            const taskName = 'TracerDAO proposal event checks and sendMessageToContract()';
+            try {
+                await tracerdao.sendMessageToContract(false);
+                logger.info(`🐣 Cron Task Completed -- ${taskName}`);
+            }
+            catch (err) {
+                logger.error(`❌ Cron Task Failed -- ${taskName}`);
+                logger.error(`Error Object: %o`, err);
+            }
+        })
+
+            //TracerDAO send finsished proposals
+    logger.info('-- 🛵 Scheduling Showrunner - TracerDAO Channel [on 6 Hours]');
+    schedule.scheduleJob({ start: startTime, rule: sixHourRule }, async function () {
+        const tarcerdao = Container.get(TracerDAOChannel);
+        const taskName = 'TracerDAO checking finsihed proposals';
         try {
-            await snapshot.sendMessageToContract(false);
+            await tarcerdao.fetchVotesForFinsihedProposal(false);
             logger.info(`🐣 Cron Task Completed -- ${taskName}`);
         }
         catch (err) {
@@ -49,18 +64,4 @@ export default () => {
         }
     })
 
-    //Snapshot save delegates
-    logger.info('-- 🛵 Scheduling Showrunner - Snapshot Governance Channel [on 6 Hours]');
-    schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
-        const snapshot = Container.get(SnapshotChannel);
-        const taskName = 'Snapshot checking new delegates';
-        try {
-            await snapshot.fetchDelegateAndSaveToDB();
-            logger.info(`🐣 Cron Task Completed -- ${taskName}`);
-        }
-        catch (err) {
-            logger.error(`❌ Cron Task Failed -- ${taskName}`);
-            logger.error(`Error Object: %o`, err);
-        }
-    })
 }
