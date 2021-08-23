@@ -25,7 +25,7 @@ const epnsSettings: EPNSSettings = {
   contractABI: config.deployedContractABI
 }
 
-const NETWORK_TO_MONITOR = config.web3MainnetNetwork;
+const NETWORK_TO_MONITOR = config.web3RopstenNetwork;
 
 const sdk = new epnsHelper(NETWORK_TO_MONITOR, channelKey, settings, epnsSettings)
 
@@ -74,7 +74,7 @@ export default class PoolTogetherChannel {
     console.log("poolTogether send_notification fromblock", fromBlock);
 
     // Array of poolTogether pool contract addresses
-    const poolContracts = [];
+    const poolContracts = ['0xf5D1B5e872b413dd879519D3D2773D081d315189'];
     
     for (let i = 0; i < poolContracts.length; i++) {
       let poolTogether = await sdk.getContract(poolContracts[i], config.poolTogetherDeployedContractABI);
@@ -95,14 +95,16 @@ export default class PoolTogetherChannel {
           let winner = info.log[i].args.winner;
           let amount = info.log[i].args.amount;
 
-          let title = "You Have WOOOONNNN!!🎊🎊";
-          let body = "You have won " + amount + "from poolTogether. Wen PARTY??";
-          let payloadTitle = "You Have WOOOONNNN!!🎊🎊";
+          console.log("Winner -----", winner);
+
+          let title = "You Have WOOOONNNN!!";
+          let body = "You have won " + amount + " from poolTogether. Wen PARTY??";
+          let payloadTitle = "You Have WOOOONNNN!!";
           let payloadBody = "You have won " + amount + "from poolTogether. Wen PARTY??";
-          const notificationType = 3;
-          //const tx = await sdk.sendNotification(winner, title, body, payloadTitle, payloadBody, notificationType, simulate);
-          //logger.info(tx);
-          logger.info(body);
+          const notificationType = 1;
+          const tx = await sdk.sendNotification('0xA81465BB6F71358c37549b8f319dCdD0BED79f37', title, body, payloadTitle, payloadBody, notificationType, simulate);
+          logger.info(tx);
+          //logger.info(body);
         }
       })
       .catch(err => {
