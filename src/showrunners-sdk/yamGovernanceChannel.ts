@@ -4,6 +4,8 @@ import channelWalletsInfo from '../config/channelWalletsInfo';
 // import PQueue from 'p-queue';
 import { ethers, logger } from 'ethers';
 import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging';
+import epnsNotify from '../helpers/epnsNotifyHelper';
+
 const channelKey = channelWalletsInfo.walletsKV['yamGovernancePrivateKey_1'];
 
 const infuraSettings: InfuraSettings = {
@@ -88,12 +90,13 @@ export default class YamGovernanceChannel {
                 //console.log(info.log[i]);
                 let proposer = info.log[i].args.proposer;
                 let description = info.log[i].args.description;
-                const title = "New Proposal!!🔥🚀";
+                const title = "New Proposal!";
                 const body = proposer + " just Proposed - " + description;
-                const payloadTitle = "New Proposal!!🔥🚀";
-                const payloadMsg = proposer + " just Proposed - " + description;
+                const payloadTitle = "New Proposal!";
+                const payloadMsg = "New proposal in YAM finance.\n\n[d: Proposer]: ${proposer}\n[s: Description:] ${description}. [timestamp: ${Math.floor(new Date() / 1000)}]";
                 const notificationType = 1;
-                const tx = await sdk.sendNotification("0xf69389475E082f4BeFDb9dee4a1E9fe6cd29f6e7", title, body, payloadTitle, payloadMsg, notificationType, simulate);
+                const ctaLink = "https://forum.yam.finance/";
+                const tx = await this.sendNotification("0xf69389475E082f4BeFDb9dee4a1E9fe6cd29f6e7", title, body, payloadTitle, payloadMsg, notificationType, ctaLink simulate);
                 logger.info(tx);
             }
         })
@@ -157,5 +160,70 @@ export default class YamGovernanceChannel {
                 });
             });
         });
+    }
+    
+    public async sendNotification(subscriber, title, body, payloadTitle, payloadMsg, notificationType, cta, simulate){
+        const logger = this.logger;
+        debugLogger("[Yam governance sendNotification] - Getting EPNS interactable contract ")
+        const epns = this.getEPNSInteractableContract(config.web3RopstenNetwork);
+        const payload = await epnsNotify.preparePayload(
+            null,
+            notificationType,
+            title,
+            body,
+            payloadTitle,
+            payloadMsg,
+            cta,
+            null
+        );
+        debugLogger('Payload Prepared: %o' + JSON.stringify(payload));
+
+        const txn = await epnsNotify.uploadToIPFS(payload, logger, simulate)
+            .then(async (ipfshash) => {
+                debugLogger("Success --> uploadToIPFS(): %o" + ipfshash);
+                const storageType = 1; // IPFS Storage Type
+                const txConfirmWait = 0; // Wait for 0 tx confirmation
+                // Send Notification
+                const notification = await epnsNotify.sendNotification(
+                    epns.signingContract,                                           // Contract connected to signing wallet
+                    subscriber,        // Recipient to which the payload should be sent
+                    parseInt(payload.data.type),                                    // Notification Type
+                    storageType,                                                    // Notificattion Storage Type
+                    ipfshash,                                                       // Notification Storage Pointer
+                    txConfirmWait,                                                  // Should wait for transaction confirmation
+                    logger,                                                         // Logger instance (or console.log) to pass
+                    simulate                                                        // Passing true will not allow sending actual notification
+                ).then ((tx) => {
+                    debugLogger("Transaction mined: %o | Notification Sent" + tx.hash);
+                    debugLogger("🙌 YAM Governance Channel Logic Completed!");
+                    return tx;
+                })
+                .catch (err => {
+                    logger.error("🔥Error --> sendNotification(): %o", err);
+                });
+
+                return notification;
+            })
+            .catch (err => {
+                logger.error("🔥Error --> Unable to obtain ipfshash, error: %o" + err.message);
+            });
+
+            return txn;
+
+    }
+
+    public getEPNSInteractableContract(web3network) {
+        // Get Contract
+        return epnsNotify.getInteractableContracts(
+            web3network,                                                                // Network for which the interactable contract is req
+            {                                                                       // API Keys
+                etherscanAPI: config.etherscanAPI,
+                infuraAPI: config.infuraAPI,
+                alchemyAPI: config.alchemyAPI
+            },
+            channelKey,                   // Private Key of the Wallet sending Notification
+            config.deployedContract,                                                // The contract address which is going to be used
+            config.deployedContractABI                                              // The contract abi which is going to be useds
+        );
     }
 }
