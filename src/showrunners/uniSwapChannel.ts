@@ -13,7 +13,7 @@ import epnsNotify from '../helpers/epnsNotifyHelper';
 
 // SET CONSTANTS
 const BLOCK_NUMBER = 'block_number';
-const NETWORK_TO_MONITOR = config.web3RopstenNetwork;
+const NETWORK_TO_MONITOR = config.web3MainnetNetwork;
 
 @Service()
 export default class uniSwapChannel {
