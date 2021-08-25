@@ -28,14 +28,13 @@ export default () => {
     threeHourRule.minute = 0;
     threeHourRule.second = 0;
 
-    const dailyRule = new schedule.RecurrenceRule();
-    dailyRule.hour = 0;
-    dailyRule.minute = 0;
-    dailyRule.second = 0;
-    dailyRule.dayOfWeek = new schedule.Range(0, 6);
+    const sixHourRule = new schedule.RecurrenceRule();
+    sixHourRule.hour = new schedule.Range(0, 23, 6);
+    sixHourRule.minute = 0;
+    sixHourRule.second = 0;
 
     //Snapshot send proposal
-    logger.info('-- 🛵 Scheduling Showrunner - Snapshot Governance Channel [on 3hr ]');
+    logger.info('-- 🛵 Scheduling Showrunner - Snapshot Governance Channel [on 3 Hours]');
     schedule.scheduleJob({ start: startTime, rule: threeHourRule }, async function () {
         const snapshot = Container.get(SnapshotChannel);
         const taskName = 'Snapshot proposal event checks and sendMessageToContract()';
@@ -51,7 +50,7 @@ export default () => {
 
     //Snapshot save delegates
     logger.info('-- 🛵 Scheduling Showrunner - Snapshot Governance Channel [on 6 Hours]');
-    schedule.scheduleJob({ start: startTime, rule: dailyRule }, async function () {
+    schedule.scheduleJob({ start: startTime, rule: sixHourRule }, async function () {
         const snapshot = Container.get(SnapshotChannel);
         const taskName = 'Snapshot checking new delegates';
         try {
