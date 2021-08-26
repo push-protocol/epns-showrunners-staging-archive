@@ -1,7 +1,6 @@
 {
 	"info": {
 		"_postman_id": "a78f4580-2301-403c-aab5-1f93f6281d34",
-
 		"name": "EPNS Showrunners Staging SDK Copy",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1509,7 +1508,6 @@
 					"response": []
 				}
 			]
-
 		},
 		{
 			"name": "Snapshot",
@@ -1568,7 +1566,33 @@
 					"response": []
 				}
 			]
-
+		},
+		{
+			"name": "BProtocol",
+			"item": [
+				{
+					"name": "bprotocol/send_message/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "localhost:5432/apis/showrunners-sdk/bprotocol/send_message/",
+							"host": [
+								"localhost"
+							],
+							"port": "5432",
+							"path": [
+								"apis",
+								"showrunners-sdk",
+								"bprotocol",
+								"send_message",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }
