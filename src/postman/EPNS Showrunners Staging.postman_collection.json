@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "0a01a91b-38b5-4fe5-a428-08244ea5b757",
-		"name": "EPNS Showrunners Staging SDK",
+		"_postman_id": "616c9d2f-15fe-45d9-aed2-713264d35d33",
+		"name": "EPNS Showrunners Staging SDK Copy",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -1435,6 +1435,63 @@
 								"showrunners",
 								"ensdomain",
 								"domain_info"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Snapshot",
+			"item": [
+				{
+					"name": "/snapshot/send_message/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"simulate\": {\n\t\t\"payloadMode\": \"Real\",\n\t\t\"txMode\": \"Real\",\n\t\t\"logicOverride\": {\n            \"mode\": false,\n            \"delegateAddr\":\"0xD8634C39BBFd4033c0d3289C4515275102423681\"\n\t\t},\n\t\t\"txOverride\": {\n            \"mode\": true,\n\t\t\t\"recipientAddr\": \"0xD8634C39BBFd4033c0d3289C4515275102423681\",\n\t\t\t\"notificationType\": 3\n\t\t}\n\t}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:5432/apis/showrunners/snapshot/send_message/",
+							"host": [
+								"localhost"
+							],
+							"port": "5432",
+							"path": [
+								"apis",
+								"showrunners",
+								"snapshot",
+								"send_message",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/snapshot/check_delegates",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "localhost:5432/apis/showrunners/snapshot/check_delegates",
+							"host": [
+								"localhost"
+							],
+							"port": "5432",
+							"path": [
+								"apis",
+								"showrunners",
+								"snapshot",
+								"check_delegates"
 							]
 						}
 					},
