@@ -103,7 +103,7 @@ export default class BProtocol {
    
           await this.getUsersTotal(bprotocol, NETWORK_TO_MONITOR, userAddress, avatarAddress, simulate);
         } catch (error) {
-         logger.error(error)
+         logger.error(`[${new Date(Date.now())}]-[BProtocol]- Error while getting avater,${error}`)
         }
       });
     });
