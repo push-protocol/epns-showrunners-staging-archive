@@ -61,8 +61,8 @@ export default class TracerDAOChannel {
           skip: 0,
           where: {
             space_in: ["tracer.eth"],
-            end_lte:1629380490,
-            end_gte:1629341000
+            end_lte:${Date.now()/1000},
+            end_gte:${(Date.now()/1000)-21600}
             
           },
           
@@ -94,7 +94,7 @@ export default class TracerDAOChannel {
         // -- End Override logic
 
         let proposals = await this.fetchNewProposalDetails();
-        console.log(proposals.data)
+        // console.log(proposals.data)
         if (proposals.data.length === 0) {
             logger.info(`[${new Date(Date.now())}]-[TrackerDAO]- No Proposals in past 3 hours`)
             return
@@ -129,12 +129,12 @@ export default class TracerDAOChannel {
     public async fetchVotesForFinsihedProposal(simulate) {
         logger.info(`[${new Date(Date.now())}]-[TrackerDAO]- Fetching Votes Finished Proposals`)
         const finished = await this.fetchRecentlyEndedProposals();
-        console.log(finished.data)
+        // console.log(finished.data)
         const walletKey = await this.getWalletKey()
         const sdk = new epnsHelper(config.web3MainnetNetwork, walletKey, settings, epnsSettings);
         const epns = sdk.advanced.getInteractableContracts(config.web3RopstenNetwork, settings, walletKey, config.deployedContract, config.deployedContractABI);
         const users = await sdk.getSubscribedUsers()
-        console.log(users)
+        // console.log(users)
 
         for (let i = 0; i < finished.data.length; i++) {
             let voteQuery = `{
@@ -153,7 +153,7 @@ export default class TracerDAOChannel {
               }`
 
             const voteResult = await request(this.URL_SPACE_PROPOSAL, voteQuery);
-            console.log(voteResult.votes)
+            // console.log(voteResult.votes)
             const totalVotes = voteResult.votes.length;
             let choice1: number = 0;
             let choice2: number = 0;
@@ -202,6 +202,7 @@ export default class TracerDAOChannel {
 
         switch (notificationType) {
             case (NOTIFICATION_TYPE.NEW):
+                logger.info(`[${new Date(Date.now())}]-[TrackerDAO]- Sending Notification for New Proposals`)
                 for (let i = 0; i < proposal.length; i++) {
                     title = `New Proposal is live in TrcaerDAO`
                     message = `Title:${proposal[i].title}\nStart Date:${moment((proposal[i].start) * 1000).format("MMMM Do YYYY")}\nEnd Date:${moment((proposal[i].end) * 1000).format("MMMM Do YYYY")}`
@@ -222,6 +223,7 @@ export default class TracerDAOChannel {
                 }
                 break;
             case(NOTIFICATION_TYPE.STATUS):
+            logger.info(`[${new Date(Date.now())}]-[TrackerDAO]- Sending notification for finihed Proposals`)
                     title = `Proposal in TracerDAO concluded`
                     message = `Title:${proposal.title}\n Choice${proposal.res} got majority vote of ${proposal.percent}`
                     payloadTitle = `Proposal in TracerDAO concluded`;
@@ -232,7 +234,7 @@ export default class TracerDAOChannel {
                     trxConfirmWait = 0;
                     logger.info(proposal.title)
                     const payload = await sdk.advanced.preparePayload(user, notifType, title, message, payloadTitle, payloadMsg, cta, null)
-                    console.log(payload)
+                    // console.log(payload)
                     const ipfsHash = await sdk.advanced.uploadToIPFS(payload, logger, null, simulate)
                     const tx = await sdk.advanced.sendNotification(epns.signingContract, user, notifType, storageType, ipfsHash, trxConfirmWait, logger, simulate)
 
