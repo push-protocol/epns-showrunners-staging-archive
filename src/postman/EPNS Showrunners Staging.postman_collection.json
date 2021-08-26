@@ -1,6 +1,7 @@
 {
 	"info": {
 		"_postman_id": "a78f4580-2301-403c-aab5-1f93f6281d34",
+
 		"name": "EPNS Showrunners Staging SDK Copy",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1508,6 +1509,7 @@
 					"response": []
 				}
 			]
+
 		},
 		{
 			"name": "Snapshot",
@@ -1566,6 +1568,7 @@
 					"response": []
 				}
 			]
+
 		}
 	]
 }
