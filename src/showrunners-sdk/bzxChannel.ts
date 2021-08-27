@@ -151,7 +151,7 @@ export default class bzxChannel {
                     const title = `BzX Loan of ${loanTokenName} is approaching liquidation`;
                     const body = `Your loan of ${loanTokenName} is approaching liquidation please fund your account`;
                     const payloadTitle = `BzX Loan of ${loanTokenName} is approaching liquidation`;
-                    const payloadMsg = `Your loan of ${loanTokenName} is approaching liquidation please fund your account.\n\n[d: Current Margin Price]: $${currentMarginPrice}\n\n[s: Maintainance Margin Price]: $${mainatananceMarginPrice} [timestamp: ${Math.floor(+new Date() / 1000)}]`;
+                    const payloadMsg = `Your loan of ${loanTokenName} is approaching liquidation please fund your account.\n\n[d: Current Margin Price]: $${currentMarginPrice.toFixed(2)}\n\n[s: Maintainance Margin Price]: $${mainatananceMarginPrice.toFixed(2)} [timestamp: ${Math.floor(+new Date() / 1000)}]`;
                     const cta = CUSTOMIZABLE_DEFAULTS.tradeCTA;
 
                     const notificationType = 3;
