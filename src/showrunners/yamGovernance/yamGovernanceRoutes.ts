@@ -8,7 +8,7 @@ import YamGovernanceChannel from './yamGovernanceChannel';
 const route = Router();
 
 export default (app: Router) => {
-  app.use('/showrunners/yamgovernance', route);
+  app.use('/showrunners-sdk/yamgovernance', route);
 
   // to add an incoming feed
   route.post(
