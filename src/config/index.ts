@@ -198,6 +198,13 @@ export default {
   yamGovernanceDeployedContractABI: require('./yamGovernance.json'),
 
   /**
+   * Ruler Protocol Related
+   */
+  rulerDeployedcontract: process.env.RULER_DEPLOYED_CONTRACT_MAINNET,
+  rulerDeployedcontractABI: require('./ruler.json'),
+  ERC20ABI: require('./erc20.json'),
+
+  /**
    * WALLET TRACKER related
    */
   erc20DeployedContractABI: require('./erc20.json'),

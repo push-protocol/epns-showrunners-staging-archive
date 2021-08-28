@@ -32,6 +32,7 @@ import AaveChannel from '../showrunners-sdk/aaveChannel';
 import TruefiChannel from '../showrunners-sdk/truefiChannel';
 import YamGovernanceChannel from "../showrunners-sdk/yamGovernanceChannel";
 import UniswapV3Channel from "../showrunners-sdk/uniswapv3Channel";
+import RulerChannel from "../showrunners-sdk/ruler";
 
 export default ({ logger }) => {
   // 1. SHOWRUNNERS SERVICE
@@ -283,6 +284,22 @@ export default ({ logger }) => {
 
     try {
       await uniswapv3.sendMessageToContracts(false);
+      logger.info(`🐣 Cron Task Completed -- ${taskName}`);
+    }
+    catch (err) {
+      logger.error(`❌ Cron Task Failed -- ${taskName}`);
+      logger.error(`Error Object: %o`, err);
+    }
+  });
+
+  // 1.13 UNISWAP-V2 CHANNEL
+  schedule.scheduleJob({ start: startTime, rule: dailyRule}, async function() {
+    logger.info('-- 🛵 Scheduling Showrunner - Ruler Protocol [on 2.5 minutes]');
+    const ruler = Container.get(RulerChannel);
+    const taskName = 'RUler protocol loan expiry check and send notification';
+
+    try {
+      await ruler.sendMessageToContracts(false);
       logger.info(`🐣 Cron Task Completed -- ${taskName}`);
     }
     catch (err) {
