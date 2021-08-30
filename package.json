@@ -35,6 +35,7 @@
   "dependencies": {
     "@epnsproject/backend-sdk": "^1.0.19",
     "@rodrigogs/mysql-events": "0.6.0",
+    "@uniswap/v3-sdk": "^3.3.2",
     "agenda": "^2.0.2",
     "agendash": "^1.0.0",
     "argon2": "^0.21.0",

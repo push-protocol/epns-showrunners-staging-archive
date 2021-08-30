@@ -7,7 +7,7 @@ import { celebrate, Joi } from 'celebrate';
 const route = Router();
 
 export default (app: Router) => {
-    app.use('/showrunners-sdk/tracerdao', route);
+    app.use('/showrunners/tracerdao', route);
     route.post(
         '/send_message',
         celebrate({
@@ -18,7 +18,7 @@ export default (app: Router) => {
         middlewares.onlyLocalhost,
         async (req: Request, res: Response, next: NextFunction) => {
           const Logger = Container.get('logger');
-          Logger.debug('Calling /showrunners-sdk/tracerdao ticker endpoint with body: %o', req.body )
+          Logger.debug('Calling /showrunners/tracerdao ticker endpoint with body: %o', req.body )
           try {
             const tracer = Container.get(TracerDAOChannel);
             const response = await tracer.sendMessageToContract(req.body.simulate);
@@ -41,7 +41,7 @@ export default (app: Router) => {
         middlewares.onlyLocalhost,
         async (req: Request, res: Response, next: NextFunction) => {
           const Logger = Container.get('logger');
-          Logger.debug('Calling /showrunners-sdk/tracerdao ticker endpoint with body: %o', req.body )
+          Logger.debug('Calling /showrunners/tracerdao ticker endpoint with body: %o', req.body )
           try {
             const tracer = Container.get(TracerDAOChannel);
             const response = await tracer.fetchVotesForFinsihedProposal(req.body.simulate);
