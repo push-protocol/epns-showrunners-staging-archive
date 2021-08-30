@@ -1509,6 +1509,71 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Bzx",
+			"item": [
+				{
+					"name": "/get_positions",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"simulate\": {\n\t\t\"payloadMode\": \"Simulated\",\n\t\t\"txMode\": \"Simulated\",\n\t\t\"logicOverride\": {\n            \"mode\": true,\n\t\t\t\"symbol\": \"ETH\"\n\t\t}\n\t}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:5432/apis/showrunners-sdk/bzx/get_price",
+							"host": [
+								"localhost"
+							],
+							"port": "5432",
+							"path": [
+								"apis",
+								"showrunners-sdk",
+								"bzx",
+								"get_price"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/send_message",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"simulate\": {\n\t\t\"payloadMode\": \"Simulated\",\n\t\t\"txMode\": \"Simulated\",\n\t\t\"logicOverride\": {\n            \"mode\": true,\n\t\t\t\"addressesWithLoans\": [\n                \"0x81016b5fa82b628e7653e63f43882009f90dc2b6\"\n            ]\n\t\t}\n\t}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:5432/apis/showrunners-sdk/bzx/send_message",
+							"host": [
+								"localhost"
+							],
+							"port": "5432",
+							"path": [
+								"apis",
+								"showrunners-sdk",
+								"bzx",
+								"send_message"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }
