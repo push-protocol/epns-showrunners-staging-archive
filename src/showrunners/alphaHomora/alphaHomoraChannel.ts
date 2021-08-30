@@ -53,7 +53,6 @@ export default class AlphaHomoraChannel {
     next_pos = Number(next_pos.toString())
     logger.info({ next_pos })
     for (let i = 1; i < next_pos; i++) {
-      console.log(i)
       if (i != 6)
         await this.processDebtRatio(users, i, AlphaHomoraContract.contract, simulate);
     }
