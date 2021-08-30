@@ -214,6 +214,9 @@ export default class TruefiChannel {
     try{
       logger.info(`[${new Date(Date.now())}]-[TrueFi]- Preparing payload...`);
       let title, message, payloadTitle, payloadMsg, notifType;
+      let cta = `https://app.truefi.io/home`
+      let storageType = 1;
+      let trxConfirmWait = 0;
       switch (notificationType) {
         case NOTIFICATION_TYPE.RATE:
           title = "Truefi Rate Change";
@@ -242,8 +245,9 @@ export default class TruefiChannel {
       }
       const walletKey = await this.getWalletKey()
       const sdk = new epnsHelper(NETWORK_TO_MONITOR, walletKey, settings, epnsSettings);
-      const txPromise = await sdk.sendNotification(user, title, message, payloadTitle, payloadMsg, notifType, simulate)
-      const tx = await txPromise;
+      const payload = await sdk.advanced.preparePayload(user, notificationType, title, message, payloadTitle, payloadMsg, cta, null)
+      const ipfsHash = await sdk.advanced.uploadToIPFS(payload, logger, null, simulate)
+      const tx:any = await sdk.advanced.sendNotification(epns.signingContract, user, notificationType, storageType, ipfsHash, trxConfirmWait, logger, simulate)
       logger.info(`[${new Date(Date.now())}]-[TrueFi]- %o`, tx);
       logger.info(`[${new Date(Date.now())}]-[TrueFi]- Transaction successful: %o | Notification Sent`, tx.hash);
     } catch (error) {

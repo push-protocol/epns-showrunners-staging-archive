@@ -10,7 +10,7 @@ import { handleResponse } from '../../helpers/utilsHelper';
 const route = Router();
 
 export default (app: Router) => {
-  app.use('/showrunners-sdk/bprotocol', route);
+  app.use('/showrunners/bprotocol', route);
 
   /**
    * Send Message
@@ -27,7 +27,7 @@ export default (app: Router) => {
     middlewares.onlyLocalhost,
     async (req: Request, res: Response, next: NextFunction) => {
       const Logger: any = Container.get('logger');
-      Logger.debug('Calling /showrunners-sdk/bprotocol/send_message endpoint with body: %o', req.body);
+      Logger.debug('Calling /showrunners/bprotocol/send_message endpoint with body: %o', req.body);
       try {
         const bProtocolLiquidation = Container.get(BProtocol);
         console.log(bProtocolLiquidation);
