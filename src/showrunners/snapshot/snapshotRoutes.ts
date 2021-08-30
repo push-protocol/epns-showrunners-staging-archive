@@ -7,7 +7,7 @@ import { celebrate, Joi } from 'celebrate';
 const route = Router();
 
 export default (app: Router) => {
-    app.use('/showrunners-sdk/snapshot', route);
+    app.use('/showrunners/snapshot', route);
 
     route.post(
         '/send_message',
@@ -19,7 +19,7 @@ export default (app: Router) => {
         middlewares.onlyLocalhost,
         async (req: Request, res: Response, next: NextFunction) => {
           const Logger = Container.get('logger');
-          Logger.debug('Calling /showrunners-sdk/snapshot ticker endpoint with body: %o', req.body )
+          Logger.debug('Calling /showrunners/snapshot ticker endpoint with body: %o', req.body )
           try {
             const snapshot = Container.get(SnapshotChannel);
             const response = await snapshot.sendMessageToContract(req.body.simulate);
@@ -42,7 +42,7 @@ export default (app: Router) => {
         middlewares.onlyLocalhost,
         async (req: Request, res: Response, next: NextFunction) => {
           const Logger = Container.get('logger');
-          Logger.debug('Calling /showrunners-sdk/snapshot ticker endpoint with body: %o', req.body )
+          Logger.debug('Calling /showrunners/snapshot ticker endpoint with body: %o', req.body )
           try {
             const snapshot = Container.get(SnapshotChannel);
             const response = await snapshot.fetchDelegateAndSaveToDB();

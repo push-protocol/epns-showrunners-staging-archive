@@ -244,7 +244,6 @@ export default class snapshotChannel {
     }`
     return request(this.URL_DELEGATE, dquery)
       .then((response) => {
-        console.log(response)
         return {
           success: true,
           data: response.delegations

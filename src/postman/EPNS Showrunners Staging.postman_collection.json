@@ -1819,6 +1819,7 @@
 				}
 			],
 			"description": "Notifies people when a new proposal has been made on their governance contract.\n\n2 function - \n`sendMessageToContract`, `getNewProposals`"
+
 		}
 	]
 }
