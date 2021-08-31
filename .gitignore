@@ -138,3 +138,7 @@ logs/*
 epns-firebase-adminsdk.json
 external
 dump.rdb*
+
+# ChannelKeys
+src/showrunners/*/*Keys.json
+src/showrunners/*/*Settings.json

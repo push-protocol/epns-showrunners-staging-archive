@@ -1,77 +1,66 @@
 import { Router } from 'express';
+import LoggerInstance from '../loaders/logger';
+import config from '../config'
 
-import btcTicker from './routes/showrunners_btcticker';
-import ethTicker from './routes/showrunners_ethticker';
-import ensDomain from './routes/showrunners_ensdomain';
-import compoundTicker from './routes/showrunners_compoundLiquidation';
-import gasPrice from './routes/showrunners_gasprice';
-import wallet_tracker from './routes/showrunners_wallet_tracker';
-import wallet_monitoring from './routes/showrunners_wallet_monitoring';
-import everest from './routes/showrunners_everest';
-import truefi from './routes/showrunners_truefi';
-import alphahomora from './routes/showrunners_alphaHomora';
+import fs from 'fs';
+const utils = require('../helpers/utilsHelper');
+
 import socketWeb3 from './routes/sockets/socketWeb3';
-import helloWorld from './routes/showrunners_helloWorld';
-import uniSwap from './routes/showrunners_uniSwap';
-import aave from './routes/showrunners_aave';
 
-import btcTicker_sdk from './routes/showrunners_sdk/showrunners_btcticker';
-import ethTicker_sdk from './routes/showrunners_sdk/showrunners_ethticker';
-import ensDomain_sdk from './routes/showrunners_sdk/showrunners_ensdomain';
-import compoundTicker_sdk from './routes/showrunners_sdk/showrunners_compoundLiquidation';
-import gasPrice_sdk from './routes/showrunners_sdk/showrunners_gasprice';
-import wallet_tracker_sdk from './routes/showrunners_sdk/showrunners_wallet_tracker';
-import everest_sdk from './routes/showrunners_sdk/showrunners_everest';
-import truefi_sdk from './routes/showrunners_sdk/showrunners_truefi';
-import alphahomora_sdk from './routes/showrunners_sdk/showrunners_alphaHomora';
-import helloWorld_sdk from './routes/showrunners_sdk/showrunners_helloWorld';
-import aave_sdk from './routes/showrunners_sdk/showrunners_aave';
-import yamGovernance_sdk from './routes/showrunners_sdk/showrunners_yamgovernance';
-import uniswap_sdk from './routes/showrunners_sdk/showrunners_uniSwap';
-
-
-import mailing from './routes/mailing';
+//import mailing from './routes/mailing';
 
 // guaranteed to get dependencies
 export default () => {
 	const app = Router();
 
 	// -- SHOWRUNNERS ROUTES
-	ensDomain(app);
-	compoundTicker(app);
+	LoggerInstance.info(`    -- Checking and Loading Dynamic Routes...`);
+	const channelFolderPath = `${__dirname}/../showrunners/`
+	const directories = utils.getDirectories(channelFolderPath)
 
-	gasPrice(app);
-	wallet_tracker(app);
-	//wallet_monitoring(app);
-	everest(app);
-	truefi(app);
-	helloWorld(app);
-	//alphahomora(app);
-	//aave(app);
-	// wallet_monitoring(app);
+  for (const channel of directories) {
+    const absPath = `${channelFolderPath}${channel}/${channel}Routes.ts`
+    const relativePath = `../showrunners/${channel}/${channel}Routes.ts`
 
-	btcTicker_sdk(app);
-	ethTicker_sdk(app);	
-	gasPrice_sdk(app);
-	wallet_tracker_sdk(app);
-	truefi_sdk(app);
-	helloWorld_sdk(app);
-	alphahomora_sdk(app);
-	aave_sdk(app);
-	everest_sdk(app);
-	compoundTicker_sdk(app);
-	//console.log(yamGovernance_sdk);
-	yamGovernance_sdk(app);
-	uniswap_sdk(app);
-	// ensDomain_sdk(app);
+    if (fs.existsSync(absPath)) {
+      const cronning = require(absPath)
+      cronning.default(app);
 
-  
+      LoggerInstance.info(`     ✔️  ${relativePath} Loaded!`)
+    }
+    else {
+      LoggerInstance.info(`     ❌  ${relativePath} Not Found... skipped`)
+    }
+  }
+
+  //WALLET MONITORING ROUTES
+  LoggerInstance.info(`    -- Checking and Loading Wallet Monitoring Routes...`);
+  const absPath = `${__dirname}/routes/walletMonitoringRoutes.ts`
+  const relativePath = `./routes/walletMonitoringRoutes.ts`
+  const FLAG = Number(config.walletMonitoring);
+
+    if (FLAG === 1) {
+      LoggerInstance.info(`     ✔️  Wallet Monitoring is ${FLAG}`)
+      try{
+        const cronning = require(absPath)
+        cronning.default(app);
+
+        LoggerInstance.info(`     ✔️  ${relativePath} Loaded!`)
+      }catch(err){
+        LoggerInstance.info(`     ❌  Aborting - Wallet Monitoring requires Master Wallet private key. Include 'MASTER_WALLET_PRIVATE_KEY' or change 'WALLET_MONITORING' to 0 in the env file`)
+        process.exit(1)
+      }
+    }
+    else if (FLAG === 0){
+      LoggerInstance.info(`     ❌  Wallet Monitoring is ${FLAG}... ${relativePath} skipped`)
+    }
+
 	// SOCKETS
 	socketWeb3(app);
 
 	// -- HELPERS
 	// For mailing route
-	mailing(app);
+	//mailing(app);
 
 	// Finally return app
 	return app;
