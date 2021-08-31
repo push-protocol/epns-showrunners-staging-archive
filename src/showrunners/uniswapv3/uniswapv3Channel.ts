@@ -8,7 +8,7 @@ import showrunnersHelper from '../../helpers/showrunnersHelper';
 import { ethers, logger} from 'ethers';
 import { Pool, tickToPrice } from "@uniswap/v3-sdk";
 import { Token } from '@uniswap/sdk-core';
-import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk'
+import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging'
 import epnsNotify from '../../helpers/epnsNotifyHelper';
 
 const uniswapv3Setting = require("./uniswapv3Settings.json")

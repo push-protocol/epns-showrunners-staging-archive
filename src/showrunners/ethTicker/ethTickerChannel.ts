@@ -9,7 +9,7 @@ import showrunnersHelper from '../../helpers/showrunnersHelper';
 
 // import PQueue from 'p-queue';
 import { ethers, logger } from 'ethers';
-import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk'
+import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging'
 
 const bent = require('bent'); // Download library
 

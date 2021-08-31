@@ -6,7 +6,7 @@ import config from '../../config';
 import showrunnersHelper from '../../helpers/showrunnersHelper';
 import { ethers, logger } from 'ethers';
 import PQueue from 'p-queue';
-import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk'
+import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging'
 const queue = new PQueue();
 
 const infuraSettings: InfuraSettings = {

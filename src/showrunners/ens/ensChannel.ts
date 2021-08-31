@@ -6,7 +6,7 @@ import { Service, Inject } from 'typedi';
 import config from '../../config';
 import showrunnersHelper from '../../helpers/showrunnersHelper';
 import { ethers, logger} from 'ethers';
-import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk'
+import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '@epnsproject/backend-sdk-staging'
 const gr = require('graphql-request')
 const { request, gql } = gr;
 
