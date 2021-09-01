@@ -139,7 +139,7 @@ export default class oasisChannel {
                 message = `Your ${ilk} Vault ${vaultid} has reached a collateralization ratio of ${collateralizationRatio}%.\nThe liquidation ratio for this vault is ${liquidationRatio}%.\nClick here to visit your vault!`
                 payloadTitle = `Vault ${vaultid} is at Risk`;
                 // payloadMsg = `Your Vault [t:${ilk}] [d:${vaultid}] is [s:${percent}]% away from liquidation [timestamp: ${Math.floor(new Date() / 1000)}]`;
-                payloadMsg = `Your [t:${ilk}] Vault [d:${vaultid}] has reached a collateralization ratio of [s:${collateralizationRatio}%].\nThe liquidation ratio for this vault is [b:${liquidationRatio}]%.\n\nClick here to visit your vault!`
+                payloadMsg = `Your [t:${ilk}] Vault [d:${vaultid}] has reached a collateralization ratio of [s:${collateralizationRatio}%].\nThe liquidation ratio for this vault is [b:${liquidationRatio}]%.\n\nClick here to visit your vault! [timestamp: ${Math.floor(new Date() / 1000)}]`
 
                 notifType = 3;
                 storageType = 1;
