@@ -8,7 +8,7 @@ import { logger } from 'ethers';
 import config from '../../config';
 import showrunnersHelper from '../../helpers/showrunnersHelper';
 import epnsHelper, { InfuraSettings, NetWorkSettings, EPNSSettings } from '@epnsproject/backend-sdk-staging';
-import epnsNotify from '../helpers/epnsNotifyHelper';
+import epnsNotify from '../../helpers/epnsNotifyHelper';
 
 const bent = require('bent'); // Download library
 const bzxSettings = require("./bzxSettings.json")
