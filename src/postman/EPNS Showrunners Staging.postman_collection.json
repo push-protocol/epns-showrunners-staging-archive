@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "a78f4580-2301-403c-aab5-1f93f6281d34",
+		"_postman_id": "c4d3ab44-03a3-4c78-b2d7-9a8631c6fae8",
 		"name": "EPNS Showrunners Staging SDK Copy",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1819,7 +1819,41 @@
 				}
 			],
 			"description": "Notifies people when a new proposal has been made on their governance contract.\n\n2 function - \n`sendMessageToContract`, `getNewProposals`"
-
+		},
+		{
+			"name": "Oasis",
+			"item": [
+				{
+					"name": "/oasis/send_message",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"simulate\":  {\n\t\t\"payloadMode\": \"Real\",\n\t\t\"txMode\": \"Real\",\n\t\t\"logicOverride\": {\n            \"mode\": true\n\t\t},\n\t\t\"txOverride\": {\n            \"mode\": true,\n\t\t\t\"recipientAddr\": \"0x25ccED8002Da0934b2FDfb52c98356EdeBBA00B9\",\n\t\t\t\"notificationType\": 3\n\t\t}\n\t}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:5432/apis/showrunners/oasis/send_message",
+							"host": [
+								"localhost"
+							],
+							"port": "5432",
+							"path": [
+								"apis",
+								"showrunners",
+								"oasis",
+								"send_message"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }
