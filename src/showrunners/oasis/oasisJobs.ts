@@ -22,14 +22,14 @@ export default () => {
     const startTime = new Date(new Date().setHours(0, 0, 0, 0));
 
     const twentyMinuteRule = new schedule.RecurrenceRule();
-    twentyMinuteRule.minute = new schedule.Range(0, 59, 10);
+    twentyMinuteRule.minute = new schedule.Range(0, 59, 20);
 
     // OASIS CHANNEL
-    logger.info(`     🛵 Scheduling Showrunner - Bzx Channel [on 24 Hours] [${new Date(Date.now())}]`);
+    logger.info(`     🛵 Scheduling Showrunner - Oasis Channel[20 Minutes] [${new Date(Date.now())}]`);
     schedule.scheduleJob({ start: startTime, rule: twentyMinuteRule }, async function () {
 
         const oasis = Container.get(OasisChannel);
-        const taskName = 'BZX Loan event checks and sendMessageToContract()';
+        const taskName = 'Oasis check vault situation and sendMessageToContract()';
 
         try {
             await oasis.sendMessageToContract(false);
