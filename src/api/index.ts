@@ -19,8 +19,8 @@ export default () => {
 	const directories = utils.getDirectories(channelFolderPath)
 
   for (const channel of directories) {
-    const absPath = `${channelFolderPath}${channel}/${channel}Routes.ts`
-    const relativePath = `../showrunners/${channel}/${channel}Routes.ts`
+    const absPath = `${channelFolderPath}${channel}/${channel}Routes.${config.fileSuffix}`
+    const relativePath = `../showrunners/${channel}/${channel}Routes.${config.fileSuffix}`
 
     if (fs.existsSync(absPath)) {
       const cronning = require(absPath)
@@ -35,8 +35,8 @@ export default () => {
 
   //WALLET MONITORING ROUTES
   LoggerInstance.info(`    -- Checking and Loading Wallet Monitoring Routes...`);
-  const absPath = `${__dirname}/routes/walletMonitoringRoutes.ts`
-  const relativePath = `./routes/walletMonitoringRoutes.ts`
+  const absPath = `${__dirname}/routes/walletMonitoringRoutes.${config.fileSuffix}`
+  const relativePath = `./routes/walletMonitoringRoutes.${config.fileSuffix}`
   const FLAG = Number(config.walletMonitoring);
 
     if (FLAG === 1) {
