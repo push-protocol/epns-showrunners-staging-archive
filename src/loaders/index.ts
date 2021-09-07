@@ -26,8 +26,8 @@ export default async ({ expressApp }) => {
     let channelModels = []
 
     for (const channel of directories) {
-      const absPath = `${channelFolderPath}${channel}/${channel}Model.ts`
-      const relativePath = `../showrunners/${channel}/${channel}Model.ts`
+      const absPath = `${channelFolderPath}${channel}/${channel}Model.${config.fileSuffix}`
+      const relativePath = `../showrunners/${channel}/${channel}Model.${config.fileSuffix}`
 
       if (fs.existsSync(absPath)) {
         const object = require(absPath).default

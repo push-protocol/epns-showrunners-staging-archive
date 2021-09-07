@@ -63,8 +63,8 @@ export default async ({ logger }) => {
   const directories = utils.getDirectories(channelFolderPath)
 
   for (const channel of directories) {
-    const absPath = `${channelFolderPath}${channel}/${channel}Jobs.ts`
-    const relativePath = `../showrunners/${channel}/${channel}Jobs.ts`
+    const absPath = `${channelFolderPath}${channel}/${channel}Jobs.${config.fileSuffix}`
+    const relativePath = `../showrunners/${channel}/${channel}Jobs.${config.fileSuffix}`
 
     if (fs.existsSync(absPath)) {
       const cronning = await import(absPath)
@@ -79,8 +79,8 @@ export default async ({ logger }) => {
 
   // 2. WALLET MONITORING SERVICE
   logger.info(`    -- Checking and Loading Wallet Monitoring Jobs...`);
-  const absPath = `${__dirname}/../services/walletMonitoring.ts`
-  const relativePath = `../services/walletMonitoring.ts`
+  const absPath = `${__dirname}/../services/walletMonitoring.${config.fileSuffix}`
+  const relativePath = `../services/walletMonitoring.${config.fileSuffix}`
   const FLAG = Number(config.walletMonitoring);
 
   if (FLAG === 1) {

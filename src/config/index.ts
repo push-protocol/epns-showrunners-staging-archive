@@ -2,15 +2,15 @@ import dotenv from 'dotenv';
 import loadShowrunnersWallets from './channelsConfig';
 import staticConfig from './staticConfig.json'
 
-// Set the NODE_ENV to 'development' by default
-process.env.NODE_ENV = process.env.NODE_ENV || 'development';
-
 const envFound = dotenv.config();
 if (envFound.error) {
   // This error should crash whole process
 
   throw new Error("⚠️  Couldn't find .env file  ⚠️");
 }
+
+// Set the NODE_ENV to 'development' by default
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
 // const wallets = (await require('./channelsConfig.ts'));
 //console.log(wallets)
@@ -22,6 +22,7 @@ export default {
   showrunnerWallets: loadShowrunnersWallets(),
   masterWallet: process.env.MASTER_WALLET_PRIVATE_KEY,
   walletMonitoring: process.env.WALLET_MONITORING,
+  fileSuffix: (process.env.NODE_ENV  === "production") ? "js" : "ts" ,// use the right file suffix in a development or production environment
 
 
   // Static Config BEGIN
