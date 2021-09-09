@@ -109,15 +109,15 @@ export default {
   alchemyAPI: process.env.ALCHEMY_API,
 
   web3MainnetProvider: process.env.MAINNET_WEB3_PROVIDER,
-  web3MainnetNetwork: process.env.MAINNET_WEB3_NETWORK,
+  web3MainnetNetwork: staticConfig.MAINNET_WEB3_NETWORK,
   web3MainnetSocket: process.env.MAINNET_WEB3_SOCKET,
 
   web3RopstenProvider: process.env.ROPSTEN_WEB3_PROVIDER,
-  web3RopstenNetwork: process.env.ROPSTEN_WEB3_NETWORK,
+  web3RopstenNetwork: staticConfig.ROPSTEN_WEB3_NETWORK,
   web3RopstenSocket: process.env.ROPSTEN_WEB3_SOCKET,
 
   web3KovanProvider: process.env.KOVAN_WEB3_PROVIDER,
-  web3KovanNetwork: process.env.KOVAN_WEB3_NETWORK,
+  web3KovanNetwork: staticConfig.KOVAN_WEB3_NETWORK,
   web3KovanSocket: process.env.KOVAN_WEB3_SOCKET,
 
   web3PolygonMainnetProvider: process.env.POLYGON_MAINNET_WEB3_PROVIDER,
