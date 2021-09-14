@@ -31,15 +31,24 @@ const BLOCK_NUMBER = 'block_number';
 export default class YamGovernanceChannel {
   walletKey: string;
   sdk: epnsHelper;
+  initalized = false;
 
   constructor(@Inject('logger') private logger, @Inject('cached') private cached) {
-    this.initalize();
+    this.initialize();
   }
 
-  async initalize() {
-    this.walletKey = await this.getWalletKey();
-
-    this.sdk = new epnsHelper(config.web3KovanNetwork, this.walletKey, settings, epnsSettings);
+  async initialize() {
+    try {
+      this.walletKey = await this.getWalletKey();
+      this.sdk = new epnsHelper(config.web3KovanNetwork, this.walletKey, settings, epnsSettings);
+      this.initalized = true;
+    } catch (err) {
+      this.initalized = false;
+      this.logger.debug(
+        `[${new Date(Date.now())}]-[Yam Governance]- Error occurred while Initalizing wallet keys and  sdk: %o`,
+        err,
+      );
+    }
   }
 
   public async getWalletKey(): Promise<string> {
@@ -54,8 +63,11 @@ export default class YamGovernanceChannel {
 
   public async sendMessageToContract(simulate) {
     const cache = this.cached;
-    const sdk = this.sdk;
     const logger = this.logger;
+    if (!this.initalized) {
+      await this.initialize();
+    }
+    const sdk = this.sdk;
 
     logger.debug(`[${new Date(Date.now())}]-[Yam Governance]- Checking for new proposals...`);
 
@@ -131,7 +143,6 @@ export default class YamGovernanceChannel {
 
     logger.info('yam send_notficiation from block');
 
-
     // Check for NewProposal Created event
 
     this.getNewProposals(yamGovernanceNetwork, yamGov, fromBlock, toBlock, simulate)
@@ -143,7 +154,7 @@ export default class YamGovernanceChannel {
         if (info.eventCount == 0) {
           logger.info('No new Proposal...');
         }
-
+        
         // Otherwise process those proposals
         for (let i = 0; i < info.eventCount; i++) {
           //console.log(info.log[i]);
