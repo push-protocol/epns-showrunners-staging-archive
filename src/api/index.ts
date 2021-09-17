@@ -6,6 +6,7 @@ import fs from 'fs';
 const utils = require('../helpers/utilsHelper');
 
 import socketWeb3 from './routes/sockets/socketWeb3';
+import delegator from './routes/delegatorRewardsRoutes';
 
 //import mailing from './routes/mailing';
 
@@ -57,6 +58,7 @@ export default () => {
 
 	// SOCKETS
 	socketWeb3(app);
+  delegator(app)
 
 	// -- HELPERS
 	// For mailing route
