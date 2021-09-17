@@ -121,10 +121,10 @@ export default {
   web3KovanSocket: process.env.KOVAN_WEB3_SOCKET,
 
   web3PolygonMainnetProvider: process.env.POLYGON_MAINNET_WEB3_PROVIDER,
-  web3PolygonMainnetRPC: process.env.POLYGON_MAINNET_RPC,
+  web3PolygonMainnetRPC: staticConfig.POLYGON_MAINNET_RPC,
 
   web3PolygonMumbaiProvider: process.env.POLYGON_MUMBAI_WEB3_PROVIDER,
-  web3PolygonMumbaiRPC: process.env.POLYGON_MUMBAI_RPC,
+  web3PolygonMumbaiRPC: staticConfig.POLYGON_MUMBAI_RPC,
 
   /**
    * EPNS Related
