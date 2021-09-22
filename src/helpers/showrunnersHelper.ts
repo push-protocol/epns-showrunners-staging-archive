@@ -3,7 +3,7 @@ import config from '../config';
 
 import { ethers } from 'ethers';
 
-module.exports = {
+export default {
   // Check if Private Key is valid
   getValidWallet: async function(showrunnerName, wallets) {
     const Cache = Container.get('cached');
@@ -19,19 +19,18 @@ module.exports = {
       if (selectedWalletID > numberOfWallets) {
         selectedWalletID = 1; // Round robin back
       }
-    }
-    else {
+    } else {
       selectedWalletID = 1;
     }
 
     const result = await Cache.setCache(cacheKeyName, selectedWalletID);
 
-    return{
+    return {
       numOfWallets: numberOfWallets,
-      currentWalletID: selectedWalletID
-    }
+      currentWalletID: selectedWalletID,
+    };
   },
   getCacheKeyName: function(showrunnerName) {
     return `${showrunnerName}WalletsMetaCacheKey`;
-  }
+  },
 };
