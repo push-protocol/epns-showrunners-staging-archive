@@ -106,16 +106,29 @@ const infuraSettings: InfuraSettings = {
                 } = positionDetails;
                 // -- if the current price is not within the set ticks then trigger a notif
                 if(!withinTicks){
+                    let storageType = 1;
+                    let trxConfirmWait = 0;
                     const title = `UniswapV3 LP position out of range.`;
                     const body = `You have stopped receiving fees for your LP position ${tokenZeroName}-${tokenOneName}`;
                     const payloadTitle = `UniswapV3 LP position out of range`;
                     const payloadMsg = `You have stopped receiving fees for your LP position ${tokenOneName} - ${tokenZeroName}.\n\n[d: Current Price]: $${currentPrice}\n[s: LP Range]: $${upperTickPrice} - $${lowerTickPrice}. [timestamp: ${Math.floor(new Date() / 1000)}]`;
                     const notificationType = 3;
-                    const tx = await this.sendNotification(
-                        subscriber, title, body, payloadTitle,
-                        payloadMsg, notificationType,
-                        ctaLink, simulate
-                    );
+
+                    const payload = await sdk.advanced.preparePayload(subscriber, notificationType, title, body, payloadTitle, payloadMsg, ctaLink, null)
+                    const ipfsHash = await sdk.advanced.uploadToIPFS(payload, logger, null, simulate)
+                    const epns = sdk.advanced.getInteractableContracts(
+                        epnsSettings.network,
+                        {
+                            // API Keys
+                            etherscanAPI: settings.etherscan,
+                            infuraAPI: settings.infura,
+                            alchemyAPI: settings.alchemy,
+                        },
+                        walletKey, // Private Key of the Wallet sending Notification
+                        epnsSettings.contractAddress, // The contract address which is going to be used
+                        epnsSettings.contractABI
+                    )
+                    const tx:any = await sdk.advanced.sendNotification(epns.signingContract, subscriber, notificationType, storageType, ipfsHash, trxConfirmWait, logger, simulate)
                     txns.push(tx);
                     debugLogger(`[UNIV3 LP sendMessageToContracts] - sent notification to ${subscriber}`); 
                 }
