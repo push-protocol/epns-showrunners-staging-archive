@@ -206,7 +206,7 @@ export default class ProofOfHumanityChannel {
   }
 
   public async removalRequestTask(simulate) {
-    await this.fetchContractDetails();
+
     const logger = this.logger;
     logger.info(this.getLog('Removal Request Task'));
     const helpers = await this.getHelpers(simulate);
@@ -560,7 +560,7 @@ export default class ProofOfHumanityChannel {
     const filter = poh.contract.filters.RemoveSubmission();
     try {
       this.logger.info(this.getLog(`Fetching Recent Removal Requests fromBlock : ${fromBlock} toBlock: ${toBlock}`));
-      const events = await poh.contract.queryFilter(filter, 0, toBlock);
+      const events = await poh.contract.queryFilter(filter, fromBlock, toBlock);
       this.logger.info(this.getLog('Events Fetched Successfully'));
       this.cached.setCache(BLOCK_NUMBER, toBlock + 1);
       return {
@@ -591,7 +591,7 @@ export default class ProofOfHumanityChannel {
       console.log(error);
     }
 
-    return result.evidences;
+    return result?.evidences;
   }
 
   // Fetch Evidence from subgraph
