@@ -497,7 +497,7 @@ export default class ProofOfHumanityChannel {
       3,
       1,
       ipfsHash,
-      0,
+      1,
       this.logger,
       simulate,
     );
