@@ -56,7 +56,7 @@ export class IdleGovernanceChannel {
   }
 
   async logError(err: any) {
-    this.logger.error(`[${new Date(Date.now())}]-[ProofOfHumanity]- ` + err);
+    this.logger.error(`[${new Date(Date.now())}]-[IDLE Governanace]- ` + err);
   }
 
   public async getWalletKey() {
@@ -162,7 +162,7 @@ export class IdleGovernanceChannel {
 
   async checkForNewGovernanceProposals(simulate) {
     try {
-      this.log('Removal Request Task');
+      this.log('IDLE Governance Task');
       const helpers = await this.getHelpers(simulate);
       const sdk: epnsHelper = helpers.sdk;
       const epns = helpers.epns;
