@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "6e885b15-ed6f-4627-97db-8bad8e54a0da",
+		"_postman_id": "42bdb6bb-3b1d-43dd-ba88-f6839ac33382",
 		"name": "EPNS Showrunners Staging SDK",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1519,7 +1519,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"simulate\": {\n\t\t\"payloadMode\": \"Real\",\n\t\t\"txMode\": \"Real\",\n\t\t\"logicOverride\": {\n            \"mode\": true\n\t\t},\n\t\t\"txOverride\": {\n            \"mode\": true,\n\t\t\t\"recipientAddr\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n\t\t\t\"notificationType\": 3\n\t\t}\n\t}\n}",
+							"raw": "{\n    \"simulate\": {\n        \"payloadMode\": \"Real\",\n        \"txMode\": \"Real\",\n        \"logicOverride\": {\n            \"mode\": true\n        },\n        \"forceSend\": true,\n        \"users\": [\n            \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\"\n        ],\n        \"submissions\": [\n            {\n                \"submissionTime\": 1632287326,\n                \"creationgTime\": 1632287326,\n                \"name\": \"Vasco\",\n                \"registered\": true,\n                \"status\": \"none\",\n                \"id\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\"\n            }\n        ],\n        \"txOverride\": {\n            \"mode\": true,\n            \"recipientAddr\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n            \"notificationType\": 3\n        }\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1549,7 +1549,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"simulate\": {\n\t\t\"payloadMode\": \"Real\",\n\t\t\"txMode\": \"Real\",\n\t\t\"logicOverride\": {\n            \"mode\": true\n\t\t},\n\t\t\"txOverride\": {\n            \"mode\": true,\n\t\t\t\"recipientAddr\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n\t\t\t\"notificationType\": 3\n\t\t}\n\t}\n}",
+							"raw": "{\n    \"simulate\": {\n        \"payloadMode\": \"Real\",\n        \"txMode\": \"Real\",\n        \"logicOverride\": {\n            \"mode\": true\n        },\n        \"challenges\": [\n            {\n                \"id\": \"jfaooela\",\n                \"reason\":\"Reason for the challenge\",\n                \"creationTime\": \"4567890\",\n                \"challenger\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n                \"requestor\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\"\n            }\n        ],\n        \"txOverride\": {\n            \"mode\": true,\n            \"recipientAddr\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n            \"notificationType\": 3\n        }\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1579,7 +1579,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"simulate\": {\n\t\t\"payloadMode\": \"Real\",\n\t\t\"txMode\": \"Real\",\n\t\t\"logicOverride\": {\n            \"mode\": true\n\t\t},\n\t\t\"txOverride\": {\n            \"mode\": true,\n\t\t\t\"recipientAddr\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n\t\t\t\"notificationType\": 3\n\t\t}\n\t}\n}",
+							"raw": "{\n    \"simulate\": {\n        \"payloadMode\": \"Real\",\n        \"txMode\": \"Real\",\n        \"logicOverride\": {\n            \"mode\": true\n        },\n        \"users\": [\n           \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\"\n        ],\n        \"submissions\":[\n             {\n                \"submissionTime\": 1632287326,\n                \"creationgTime\": 1632287326,\n                \"name\": \"Vasco\",\n                \"registered\": true,\n                \"status\": \"none\",\n                \"id\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\"\n            }\n        ],\n        \"txOverride\": {\n            \"mode\": true,\n            \"recipientAddr\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n            \"notificationType\": 3\n        }\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1609,7 +1609,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"simulate\": {\n\t\t\"payloadMode\": \"Real\",\n\t\t\"txMode\": \"Real\",\n\t\t\"logicOverride\": {\n            \"mode\": true\n\t\t},\n\t\t\"txOverride\": {\n            \"mode\": true,\n\t\t\t\"recipientAddr\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n\t\t\t\"notificationType\": 3\n\t\t}\n\t}\n}",
+							"raw": "{\n    \"simulate\": {\n        \"payloadMode\": \"Real\",\n        \"txMode\": \"Real\",\n        \"logicOverride\": {\n            \"mode\": true\n        },\n        \"removalRequests\": {\n            \"change\": true,\n            \"log\": [\n                {\n                    \"args\": [\n                        \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n                        \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\"\n                    ]\n                }\n            ],\n            \"blockChecker\": \"1274783\",\n            \"toBlock\": \"34567\"\n        },\n        \"txOverride\": {\n            \"mode\": true,\n            \"recipientAddr\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n            \"notificationType\": 3\n        }\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1639,7 +1639,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"simulate\": {\n\t\t\"payloadMode\": \"Real\",\n\t\t\"txMode\": \"Real\",\n\t\t\"logicOverride\": {\n            \"mode\": true\n\t\t},\n\t\t\"txOverride\": {\n            \"mode\": true,\n\t\t\t\"recipientAddr\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n\t\t\t\"notificationType\": 3\n\t\t}\n\t}\n}",
+							"raw": "{\n    \"simulate\": {\n        \"payloadMode\": \"Real\",\n        \"txMode\": \"Real\",\n        \"logicOverride\": {\n            \"mode\": true\n        },\n        \"evidences\": [\n            {\n                \"id\": \"idjlfasjfls\",\n                \"creationgTime\": 1632287326,\n                \"URI\": \"https://proofofhumanity.id\",\n                \"sender\":\"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n                \"request\":{\n                    \"requester\":\"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n                    \"submission\":{\n                        \"id\":\"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\"\n                    }\n                }\n            }\n        ],\n        \"txOverride\": {\n            \"mode\": true,\n            \"recipientAddr\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n            \"notificationType\": 3\n        }\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
