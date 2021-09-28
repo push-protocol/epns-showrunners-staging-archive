@@ -31,7 +31,7 @@ interface PayloadDetails {
 }
 
 interface POHContractState {
-  submissionDuration: any;
+  submissionDuration: number;
 }
 
 interface Evidence {
@@ -193,14 +193,16 @@ export default class ProofOfHumanityChannel {
     challenges.map(async e => {
       try {
         if (users.includes(e.requestor) || simulate?.logicOverride) {
-          const message = `Your profile has been challenged by ${e.challenger}\nReason : ${e.reason} `;
+          const message = `Your profile has been challenged\n\nChallenger : [s:${
+            e.challenger
+          }]\nReason : [d:${e?.reason ?? 'Not mentioned'}]`;
           await this.prepareAndSendNotification(sdk, epns, simulate, {
             recipientAddr: e.requestor,
             title: 'New Challenge',
             payloadTitle: 'New Challenge',
             body: message,
             payloadMsg: message,
-            payloadCTA: 'https://proofofhumanity.id',
+            payloadCTA: `https://app.proofofhumanity.id/profile/${e.requestor}`,
             payloadImg: '',
             payloadType: 3,
           });
@@ -233,7 +235,7 @@ export default class ProofOfHumanityChannel {
         try {
           if (users.includes(e.args[1]) || simulate?.logicOverride) {
             const title = 'Removal Request';
-            const msg = `A removal request has been submitted by ${e.args[0]} for your profile`;
+            const msg = `A [d:removal request] has been submitted by [d:${e.args[0]}] for your profile`;
             await this.prepareAndSendNotification(sdk, epns, simulate, {
               recipientAddr: e.args[1],
               payloadType: 3,
@@ -241,7 +243,7 @@ export default class ProofOfHumanityChannel {
               body: msg,
               payloadTitle: title,
               payloadMsg: msg,
-              payloadCTA: 'https://proofofhumanity.id',
+              payloadCTA: `https://app.proofofhumanity.id/profile/${e.args[1]}`,
               payloadImg: null,
             });
           }
@@ -259,7 +261,7 @@ export default class ProofOfHumanityChannel {
   }
 
   // Checks for profile Expiration and Sends notification to users
-  // Whose Profile is about to be expired
+  // Whose Profile is about to be expired 
   async checkForExpiration(simulate) {
     let meta = await this.getSdks();
 
@@ -273,11 +275,25 @@ export default class ProofOfHumanityChannel {
     this.logger.info('sending out notifications');
     await users.forEach(async u => {
       try {
-        let profile = simulate?.logicOverride ? simulate?.submissions[0] : await this.fetchProfileDataById(u);
-        if (profile && profile.submissionTime + submissionDuration < (Date.now() / 1000 - 86400).toFixed()) {
+        let profile: Submission = simulate?.logicOverride
+          ? simulate?.submissions[0]
+          : await this.fetchProfileDataById(u);
+
+        let timeNow = Date.now() / 1000;
+        let expireStamp: number = ((profile.submissionTime as number) + submissionDuration) as number;
+        console.log(typeof profile.submissionTime, typeof submissionDuration);
+        let expiresInSeconds = expireStamp - timeNow;
+        let expiresInHours = simulate.logicOverride ? simulate.expiresInHours : (expiresInSeconds / 3600).toFixed();
+
+        this.logger.info(
+          this.getLog(
+            `profile.submissionTime = ${profile.submissionTime} submissionDuration=${submissionDuration} timeNow = ${timeNow} expireStamp = ${expireStamp} expiresInSeconds =${expiresInSeconds}`,
+          ),
+        );
+        if (simulate?.logicOverride || (profile && expiresInSeconds > 0 && expiresInSeconds < 2 * 86400)) {
           const title = 'Profile Expiry';
-          const msg = 'Your profile is about to expire in 1 day';
-          this.prepareAndSendNotification(meta.sdk, meta.epns, simulate, {
+          const msg = `Your profile is about to [d:expire] in [d:${expiresInHours}] hours`;
+          const payload = {
             recipientAddr: u,
             payloadType: 3,
             title: title,
@@ -286,7 +302,9 @@ export default class ProofOfHumanityChannel {
             payloadImg: null,
             payloadMsg: msg,
             payloadTitle: title,
-          });
+          };
+          this.logger.info(payload);
+          this.prepareAndSendNotification(meta.sdk, meta.epns, simulate, payload);
         }
       } catch (error) {
         this.logger.error(this.getLog(error));
@@ -322,7 +340,7 @@ export default class ProofOfHumanityChannel {
           let profileFromDb = await SubmissionModel.findOneAndUpdate({ _id: u }, profile, { upsert: true });
           this.logger.info(profileFromDb ?? 'Profile Not In DB');
           const userRegisteredAndInsideSubmissionPeriod =
-            (Date.now() / 1000 - profile.submissionTime).toFixed() < submissionDuration && profile.registered;
+            Date.now() / 1000 - profile.submissionTime < submissionDuration && profile.registered;
           const stateChanged: boolean = profileFromDb && !profileFromDb.registered;
           this.logger.info(
             this.getLog(
@@ -332,26 +350,29 @@ export default class ProofOfHumanityChannel {
           if (simulate?.forceSend || (userRegisteredAndInsideSubmissionPeriod && !stateChanged)) {
             this.logger.info(this.getLog('Sending Notification'));
             const title = 'Profile Accepted';
-            const msg = 'Your profile has been accepted';
-            this.prepareAndSendNotification(meta.sdk, meta.epns, simulate, {
+            const msg = 'Your profile has been [d:accepted]';
+            const payload = {
               recipientAddr: u,
               payloadType: 3,
               title: title,
               body: msg,
-              payloadCTA: 'https://proofofhumanity.id',
+              payloadCTA: 'https://app.proofofhumanity.id/profile/${u}',
               payloadImg: null,
               payloadMsg: msg,
               payloadTitle: title,
-            });
+            };
+            this.logger.info(payload);
+            await this.prepareAndSendNotification(meta.sdk, meta.epns, simulate, payload);
           }
         } else {
           this.logger.info('User dont have a profile Aborting..');
         }
       } catch (error) {
         this.logger.error(this.getLog(error));
+        return error;
       }
     });
-    this.logger.info(this.getLog('Expiration task completed'));
+    this.logger.info(this.getLog('Profile acceptance task completed'));
     return { success: true };
   }
 
@@ -364,7 +385,7 @@ export default class ProofOfHumanityChannel {
       let evidences: Evidence[] = simulate?.logicOverride ? simulate?.evidences : await this.fetchEvidences();
       for (const e of evidences) {
         let title = 'New Evidence Submitted';
-        let msg = 'New evidence has been submitted for a request you are involved';
+        let msg = `New evidence has been submitted for a challenge your are involved\n\nRequest ID : [d:${e.id}]`;
 
         this.logger.info(this.getLog('Sending notification to evidence provider'));
 
@@ -510,7 +531,7 @@ export default class ProofOfHumanityChannel {
     this.logger.info(payload);
     let ipfsHash = await sdk.advanced.uploadToIPFS(payload, this.logger, null, simulate);
     // ipfsHash = 'bafkreihrksuzasvfmozci4pqigwjo3bjbn7aeaolbvuua4uc5vr4p6373u';
-    this.logger.info(this.getLog(`IPFS Hash : ${ipfsHash}`));
+    this.logger.info(this.getLog(`IPFS : https://ipfs.io/ipfs/${ipfsHash}`));
     await sdk.advanced.sendNotification(
       epns.signingContract,
       details.recipientAddr,
@@ -547,8 +568,9 @@ export default class ProofOfHumanityChannel {
     );
 
     this.logger.info(result);
-
-    return result['contracts'][0];
+    let final = result['contracts'][0];
+    final.submissionDuration = parseInt(final.submissionDuration);
+    return final;
   }
 
   // Get data of a submission
