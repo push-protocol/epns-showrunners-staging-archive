@@ -1513,6 +1513,36 @@
 			"name": "Proof Of Humanity",
 			"item": [
 				{
+					"name": "/poh/challenges",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"simulate\": {\n        \"payloadMode\": \"Real\",\n        \"txMode\": \"Real\",\n        \"logicOverride\": {\n            \"mode\": true\n        },\n        \"challenges\": [\n            {\n                \"id\": \"0x0005d109a397aa871460b767f2a681b31aca37477135917d622bc73d87b5fb7c\",\n                \"reason\": null,\n                \"creationTime\": \"4567890\",\n                \"challenger\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n                \"requestor\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\"\n            }\n        ],\n        \"txOverride\": {\n            \"mode\": true,\n            \"recipientAddr\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n            \"notificationType\": 3\n        }\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:5432/apis/showrunners/poh/challenges",
+							"host": [
+								"localhost"
+							],
+							"port": "5432",
+							"path": [
+								"apis",
+								"showrunners",
+								"poh",
+								"challenges"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "/poh/profileAccepted",
 					"request": {
 						"method": "POST",
@@ -1543,43 +1573,13 @@
 					"response": []
 				},
 				{
-					"name": "/poh/challenges",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"simulate\": {\n        \"payloadMode\": \"Real\",\n        \"txMode\": \"Real\",\n        \"logicOverride\": {\n            \"mode\": true\n        },\n        \"challenges\": [\n            {\n                \"id\": \"jfaooela\",\n                \"reason\":\"Reason for the challenge\",\n                \"creationTime\": \"4567890\",\n                \"challenger\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n                \"requestor\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\"\n            }\n        ],\n        \"txOverride\": {\n            \"mode\": true,\n            \"recipientAddr\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n            \"notificationType\": 3\n        }\n    }\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "localhost:5432/apis/showrunners/poh/challenges",
-							"host": [
-								"localhost"
-							],
-							"port": "5432",
-							"path": [
-								"apis",
-								"showrunners",
-								"poh",
-								"challenges"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "/poh/expiration",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"simulate\": {\n        \"payloadMode\": \"Real\",\n        \"txMode\": \"Real\",\n        \"logicOverride\": {\n            \"mode\": true\n        },\n        \"users\": [\n           \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\"\n        ],\n        \"submissions\":[\n             {\n                \"submissionTime\": 1632287326,\n                \"creationgTime\": 1632287326,\n                \"name\": \"Vasco\",\n                \"registered\": true,\n                \"status\": \"none\",\n                \"id\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\"\n            }\n        ],\n        \"txOverride\": {\n            \"mode\": true,\n            \"recipientAddr\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n            \"notificationType\": 3\n        }\n    }\n}",
+							"raw": "{\n    \"simulate\": {\n        \"payloadMode\": \"Real\",\n        \"txMode\": \"Real\",\n        \"logicOverride\": {\n            \"mode\": true\n        },\n        \"users\": [\n            \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\"\n        ],\n        \"expiresInHours\": 28,\n        \"submissions\": [\n            {\n                \"submissionTime\": 1632287326,\n                \"creationgTime\": 1632287326,\n                \"name\": \"Vasco\",\n                \"registered\": true,\n                \"status\": \"none\",\n                \"id\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\"\n            }\n        ],\n        \"txOverride\": {\n            \"mode\": true,\n            \"recipientAddr\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n            \"notificationType\": 3\n        }\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1639,7 +1639,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"simulate\": {\n        \"payloadMode\": \"Real\",\n        \"txMode\": \"Real\",\n        \"logicOverride\": {\n            \"mode\": true\n        },\n        \"evidences\": [\n            {\n                \"id\": \"idjlfasjfls\",\n                \"creationgTime\": 1632287326,\n                \"URI\": \"https://proofofhumanity.id\",\n                \"sender\":\"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n                \"request\":{\n                    \"requester\":\"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n                    \"submission\":{\n                        \"id\":\"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\"\n                    }\n                }\n            }\n        ],\n        \"txOverride\": {\n            \"mode\": true,\n            \"recipientAddr\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n            \"notificationType\": 3\n        }\n    }\n}",
+							"raw": "{\n    \"simulate\": {\n        \"payloadMode\": \"Real\",\n        \"txMode\": \"Real\",\n        \"logicOverride\": {\n            \"mode\": true\n        },\n        \"evidences\": [\n            {\n                \"id\": \"0x000796c7c0786c24945d40e9eeb15062e7029632bbb37c10b4f61a72f076f168\",\n                \"creationgTime\": 1632287326,\n                \"URI\": \"https://proofofhumanity.id\",\n                \"sender\":\"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n                \"request\":{\n                    \"requester\":\"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n                    \"submission\":{\n                        \"id\":\"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\"\n                    }\n                }\n            }\n        ],\n        \"txOverride\": {\n            \"mode\": true,\n            \"recipientAddr\": \"0x94c3016ef3e503774630fC71F59B8Da9f7D470B7\",\n            \"notificationType\": 3\n        }\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
