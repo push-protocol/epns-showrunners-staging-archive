@@ -261,7 +261,7 @@ export default class ProofOfHumanityChannel {
   }
 
   // Checks for profile Expiration and Sends notification to users
-  // Whose Profile is about to be expired 
+  // Whose Profile is about to be expired
   async checkForExpiration(simulate) {
     let meta = await this.getSdks();
 
