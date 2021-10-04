@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
+import { EPNSSettings, InfuraSettings, NetWorkSettings } from '../sdk';
 import loadShowrunnersWallets from './channelsConfig';
-import staticConfig from './staticConfig.json'
+import staticConfig from './staticConfig.json';
 
 const envFound = dotenv.config();
 if (envFound.error) {
@@ -15,15 +16,14 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 // const wallets = (await require('./channelsConfig.ts'));
 //console.log(wallets)
 
-export default {
+const config = {
   /**
    * Load Wallets of Showrunners
    */
   showrunnerWallets: loadShowrunnersWallets(),
   masterWallet: process.env.MASTER_WALLET_PRIVATE_KEY,
   walletMonitoring: process.env.WALLET_MONITORING,
-  fileSuffix: (process.env.NODE_ENV  === "production") ? "js" : "ts" ,// use the right file suffix in a development or production environment
-
+  fileSuffix: process.env.NODE_ENV === 'production' ? 'js' : 'ts', // use the right file suffix in a development or production environment
 
   // Static Config BEGIN
 
@@ -35,7 +35,7 @@ export default {
   /**
    * Your favorite port
    */
-  port: parseInt((staticConfig.PORT || '3000'), 10),
+  port: parseInt(staticConfig.PORT || '3000', 10),
 
   /**
    * Your favorite port
@@ -46,7 +46,7 @@ export default {
    * Used by winston logger
    */
   logs: {
-    level: staticConfig.LOG_LEVEL || "silly",
+    level: staticConfig.LOG_LEVEL || 'silly',
   },
 
   /**
@@ -80,21 +80,19 @@ export default {
   /**
    * IPFS related
    */
-   ipfsMaxAttempts: staticConfig.IPFS_MAX_ATTEMPTS,
-   ipfsGateway: staticConfig.IPFS_GATEWAY,
-   ipfsLocal: staticConfig.IPFS_LOCAL_ENDPOINT,
-   ipfsInfura: staticConfig.IPFS_INFURA_ENDPOINT,
- 
-   /**
+  ipfsMaxAttempts: staticConfig.IPFS_MAX_ATTEMPTS,
+  ipfsGateway: staticConfig.IPFS_GATEWAY,
+  ipfsLocal: staticConfig.IPFS_LOCAL_ENDPOINT,
+  ipfsInfura: staticConfig.IPFS_INFURA_ENDPOINT,
+
+  /**
    * ETH threshold
    */
-   ethThreshold: staticConfig.SHOWRUNNER_WALLET_ETH_THRESHOLD,
-   ethMainThreshold: staticConfig.MASTER_WALLET_ETH_THRESHOLD,
-   etherTransferAmount: staticConfig.ETHER_TRANSFER_AMOUNT,
+  ethThreshold: staticConfig.SHOWRUNNER_WALLET_ETH_THRESHOLD,
+  ethMainThreshold: staticConfig.MASTER_WALLET_ETH_THRESHOLD,
+  etherTransferAmount: staticConfig.ETHER_TRANSFER_AMOUNT,
 
   // Static Config END
-
-
 
   /**
    * Web3 Related
@@ -163,5 +161,30 @@ export default {
    * AWS Config
    */
   accessKeyId: process.env.ACCESS_KEY_ID,
-  secretAccessKey: process.env.SECRET_ACCESS_KEY
+  secretAccessKey: process.env.SECRET_ACCESS_KEY,
 };
+
+const infuraSettings: InfuraSettings = {
+  projectID: config.infuraAPI.projectID,
+  projectSecret: config.infuraAPI.projectSecret,
+};
+
+const epnsSettings: EPNSSettings = {
+  network: config.web3RopstenNetwork,
+  contractAddress: config.deployedContract,
+  contractABI: config.deployedContractABI,
+};
+
+const networksettings: NetWorkSettings = {
+  alchemy: config.alchemyAPI,
+  infura: infuraSettings,
+  etherscan: config.etherscanAPI,
+};
+
+export const settings = {
+  infuraSettings: infuraSettings,
+  epnsSettings: epnsSettings,
+  networksettings: networksettings,
+};
+
+export default config;
