@@ -149,7 +149,7 @@ export class IdleGovernanceChannel {
       details.recipientAddr,
       details.notificationType,
       1,
-      ipfsHash, 
+      ipfsHash,
       1,
       this.logger,
       simulate,
@@ -179,13 +179,17 @@ export class IdleGovernanceChannel {
             this.log(`Sending notification for Proposal ID: ${e[0]}`);
             this.log(`========================== ${e[8]}`);
             const title = 'New Proposal';
-            const msg = `${e[1]} Just proposed ${e[8]}`;
+            // const msg = `${e[1]} Just proposed ${e[8]}`;
+
+            const msg = `[d:Proposer] : ${e[1]}\n\n[d:Proposal] : ${e[8].split('https://')[0]}\n`;
+            console.log(msg);
+            console.log(`https://${e[8].split('https://')[1]}`);
             await this.prepareAndSendNotification(helpers.sdk, helpers.epns, simulate, {
               recipientAddr: '0x6bf1ee9DE5D11Fa558c1FA8D8855E26C38Fa582A',
               payloadType: 3,
               title: title,
               body: msg,
-              payloadCTA: 'https://idle.finance',
+              payloadCTA: `https://${e[8].split('https://')[1]}`,
               payloadImg: null,
               payloadMsg: msg,
               payloadTitle: title,
