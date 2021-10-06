@@ -17,13 +17,13 @@ interface Challenge {
   creationTime: string;
   challenger: string;
   requestor: string;
-}
+} 
 
 interface PayloadDetails {
   recipientAddr: any;
   payloadType: any;
   title: any;
-  body: any;
+  body: any; 
   payloadTitle: any;
   payloadMsg: any;
   payloadCTA: any;
@@ -403,30 +403,30 @@ export default class ProofOfHumanityChannel {
 
         this.logger.info(this.getLog('Sending notification to requestor'));
 
-        // Notificatin to the requestor
-        await this.prepareAndSendNotification(helpers.sdk, helpers.epns, simulate, {
-          recipientAddr: e.request.requestor,
-          title: title,
-          body: msg,
-          payloadTitle: title,
-          payloadMsg: title,
-          payloadType: 3,
-          payloadCTA: 'https://proofofhumanity.id',
-          payloadImg: null,
-        });
+        // // Notificatin to the requestor
+        // await this.prepareAndSendNotification(helpers.sdk, helpers.epns, simulate, {
+        //   recipientAddr: e.request.requestor,
+        //   title: title,
+        //   body: msg,
+        //   payloadTitle: title,
+        //   payloadMsg: title,
+        //   payloadType: 3,
+        //   payloadCTA: 'https://proofofhumanity.id',
+        //   payloadImg: null,
+        // });
 
-        this.logger.info(this.getLog('Sending notification to submission owner'));
-        // Notificatin to the submission owner
-        await this.prepareAndSendNotification(helpers.sdk, helpers.epns, simulate, {
-          recipientAddr: e.request.submission.id,
-          title: title,
-          body: msg,
-          payloadTitle: title,
-          payloadMsg: title,
-          payloadType: 3,
-          payloadCTA: 'https://proofofhumanity.id',
-          payloadImg: null,
-        });
+        // this.logger.info(this.getLog('Sending notification to submission owner'));
+        // // Notificatin to the submission owner
+        // await this.prepareAndSendNotification(helpers.sdk, helpers.epns, simulate, {
+        //   recipientAddr: e.request.submission.id,
+        //   title: title,
+        //   body: msg,
+        //   payloadTitle: title,
+        //   payloadMsg: title,
+        //   payloadType: 3,
+        //   payloadCTA: 'https://proofofhumanity.id',
+        //   payloadImg: null,
+        // });
       }
     } catch (error) {
       this.logger.error(this.getLog(error));
