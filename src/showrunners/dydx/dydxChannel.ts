@@ -204,7 +204,7 @@ export default class DYDXChannel {
       this.logObject(d);
 
       const title = 'New Proposal';
-      const msg = `DIP : ${d.DIP}\n\n[b:${d.title}]\n\n${d.shortDescription}\n`;
+      const msg = `DIP : ${d.DIP}\n\n[b:${d.title}]\n\n${d.shortDescription}\n[timestamp:${ Date.now() / 1000}]`;
 
       await this.prepareAndSendNotification(helpers.sdk, helpers.epns, simulate, {
         recipientAddr: '0x6ed071Ed7aB909eCE15B8eDF3d92dEEED81c0F00',
