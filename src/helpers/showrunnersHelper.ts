@@ -33,5 +33,40 @@ module.exports = {
   },
   getCacheKeyName: function(showrunnerName) {
     return `${showrunnerName}WalletsMetaCacheKey`;
+  },
+  getFormattedSchedule: function(rule) {
+    let string = "[";
+    if (rule.recurs) {
+      string += "Repeated -"
+    }
+
+    string += this.getFormatScheduleRange(rule.year, "Year")
+    string += this.getFormatScheduleRange(rule.month, "Month")
+    string += this.getFormatScheduleRange(rule.date, "Date")
+    string += this.getFormatScheduleRange(rule.dayOfWeek, "Day of Week")
+    string += this.getFormatScheduleRange(rule.hour, "Hour")
+    string += this.getFormatScheduleRange(rule.minute, "Minute")
+    string += this.getFormatScheduleRange(rule.second, "Second")
+
+    string = string.slice(0, -1)
+    string +="]"
+
+    return string;
+  },
+  getFormatScheduleRange: function(obj, suffix) {
+    if (!obj) {
+      return ""
+    }
+
+    var string = "";
+
+    if (obj.hasOwnProperty('step')) {
+      string += ` Every ${obj.step} ${suffix},`
+    }
+    else {
+      string += `| ${obj} ${suffix} |`
+    }
+
+    return string;
   }
 };

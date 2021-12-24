@@ -17,30 +17,32 @@ import logger from '../../loaders/logger';
 
 import { Container } from 'typedi';
 import schedule from 'node-schedule';
+import showrunnersHelper from '../../helpers/showrunnersHelper';
 
-import BtcTickerChannel from './btcTickerChannel';
+import CoindeskChannel from './coindeskChannel';
 
 export default () => {
   const startTime = new Date(new Date().setHours(0, 0, 0, 0));
 
-  const sixHourRule = new schedule.RecurrenceRule();
-  sixHourRule.hour = new schedule.Range(0, 23, 6);
-  sixHourRule.minute = 0;
-  sixHourRule.second = 0;
+  const rule1 = new schedule.RecurrenceRule();
+  rule1.minute = new schedule.Range(0, 59, 10);
 
-  //   1 BTC TICKER CHANNEL
-  logger.info(`     🛵 Scheduling Showrunner - BTC Ticker Channel [on 6 Hours] [${new Date(Date.now())}]`);
-  schedule.scheduleJob({ start: startTime, rule: sixHourRule }, async function () {
-    const btcTicker = Container.get(BtcTickerChannel);
-    const taskName = 'BTC Ticker Fetch and sendMessageToContract()';
+  //   1 COINDESK RSS FEED CHANNEL
+  logger.info(`     🛵 Scheduling Showrunner - Coindesk Channel ${showrunnersHelper.getFormattedSchedule(rule1)} [${new Date(Date.now())}]`);
+  // schedule.scheduleJob({ start: startTime, rule: rule1 }, async function () {
+  //   const btcTicker = Container.get(CoindeskChannel);
+  //   const taskName = 'BTC Ticker Fetch and sendMessageToContract()';
+  //
+  //   try {
+  //     await btcTicker.sendMessageToContract(false);
+  //     logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
+  //   }
+  //   catch (err) {
+  //     logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
+  //     logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
+  //   }
+  // });
 
-    try {
-      await btcTicker.sendMessageToContract(false);
-      logger.info(`[${new Date(Date.now())}] 🐣 Cron Task Completed -- ${taskName}`);
-    }
-    catch (err) {
-      logger.error(`[${new Date(Date.now())}] ❌ Cron Task Failed -- ${taskName}`);
-      logger.error(`[${new Date(Date.now())}] Error Object: %o`, err);
-    }
-  });
+
+
 };
